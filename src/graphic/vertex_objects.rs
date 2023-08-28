@@ -1,5 +1,3 @@
-extern crate gl;
-
 use super::gl_check::gl_check;
 
 pub struct VertexArrayObject {

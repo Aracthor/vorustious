@@ -1,6 +1,3 @@
-extern crate gl;
-extern crate glfw;
-
 use glfw::Context;
 
 pub struct Window {
@@ -25,7 +22,7 @@ impl Window {
         window.make_current();
         window.set_key_polling(true);
         gl::load_with(|ptr| window.get_proc_address(ptr) as *const _);
-        
+
         Self {
             core: core,
             window: window,
