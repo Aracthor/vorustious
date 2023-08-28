@@ -7,9 +7,9 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn create(vertices_data: Vec<f32>, material: Material) -> Mesh {
+    pub fn create(positions: Vec<f32>, tex_coords: Vec<f32>, material: Material) -> Mesh {
         Mesh {
-            vao: VertexArrayObject::create(vertices_data),
+            vao: VertexArrayObject::create(positions, tex_coords),
             material: material,
         }
     }

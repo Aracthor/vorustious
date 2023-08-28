@@ -7,20 +7,29 @@ pub struct VertexArrayObject {
 }
 
 impl VertexArrayObject {
-    pub fn create(vertices_data: Vec<f32>) -> VertexArrayObject {
+    pub fn create(positions: Vec<f32>, texture_coords: Vec<f32>) -> VertexArrayObject {
         let mut vao = 0;
-        let mut vbo = 0;
-        let size_in_bytes = (std::mem::size_of::<f32>() * vertices_data.len()).try_into().unwrap();
+        let mut position_vbo = 0;
+        let mut texture_coords_vbo = 0;
+        let positions_size_in_bytes = (std::mem::size_of::<f32>() * positions.len()).try_into().unwrap();
+        let texture_coords_size_in_bytes = (std::mem::size_of::<f32>() * texture_coords.len()).try_into().unwrap();
+        assert!(positions_size_in_bytes / 3 * 2 == texture_coords_size_in_bytes);
 
         unsafe {
             gl::GenVertexArrays(1, &mut vao);
             gl::BindVertexArray(vao);
-            gl::GenBuffers(1, &mut vbo);
-            gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
 
-            gl::BufferData(gl::ARRAY_BUFFER, size_in_bytes, vertices_data.as_ptr().cast(), gl::STATIC_DRAW);
+            gl::GenBuffers(1, &mut position_vbo);
+            gl::BindBuffer(gl::ARRAY_BUFFER, position_vbo);
+            gl::BufferData(gl::ARRAY_BUFFER, positions_size_in_bytes, positions.as_ptr().cast(), gl::STATIC_DRAW);
             gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
             gl::EnableVertexAttribArray(0);
+
+            gl::GenBuffers(1, &mut texture_coords_vbo);
+            gl::BindBuffer(gl::ARRAY_BUFFER, texture_coords_vbo);
+            gl::BufferData(gl::ARRAY_BUFFER, texture_coords_size_in_bytes, texture_coords.as_ptr().cast(), gl::STATIC_DRAW);
+            gl::VertexAttribPointer(1, 2, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
+            gl::EnableVertexAttribArray(1);
 
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
             gl::BindVertexArray(0);
@@ -28,8 +37,8 @@ impl VertexArrayObject {
 
         VertexArrayObject {
             id: vao,
-            buffer_objects: vec![vbo],
-            element_count: (vertices_data.len() / 3).try_into().unwrap(),
+            buffer_objects: vec![position_vbo, texture_coords_vbo],
+            element_count: (positions.len() / 3).try_into().unwrap(),
         }
     }
 
