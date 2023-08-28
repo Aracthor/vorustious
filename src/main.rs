@@ -17,8 +17,7 @@ fn main() {
         -0.5, -0.5, 0.0,
         0.5, -0.5, 0.0,
     ].to_vec();
-    let mut vao = VertexArrayObject::create();
-    vao.set_vertices(vertices);
+    let vao = VertexArrayObject::create(vertices);
 
     while !window.should_close() {
         window.clear();

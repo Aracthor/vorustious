@@ -7,48 +7,38 @@ pub struct VertexArrayObject {
 }
 
 impl VertexArrayObject {
-    pub fn create() -> VertexArrayObject {
+    pub fn create(vertices_data: Vec<f32>) -> VertexArrayObject {
         let mut vao = 0;
-        unsafe { gl::GenVertexArrays(1, &mut vao) };
-        VertexArrayObject {
-            id: vao,
-            buffer_objects: vec![],
-            element_count: 0,
-        }
-    }
-
-    pub fn set_vertices(&mut self, vertices_data: Vec<f32>) {
+        let mut vbo = 0;
         let size_in_bytes = (std::mem::size_of::<f32>() * vertices_data.len()).try_into().unwrap();
-        self.element_count = (vertices_data.len() / 3).try_into().unwrap();
+
         unsafe {
-            self.bind();
-            let mut vbo = 0;
+            gl::GenVertexArrays(1, &mut vao);
+            gl::BindVertexArray(vao);
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-            gl::BufferData(gl::ARRAY_BUFFER, size_in_bytes, vertices_data.as_ptr().cast(), gl::STATIC_DRAW);
 
+            gl::BufferData(gl::ARRAY_BUFFER, size_in_bytes, vertices_data.as_ptr().cast(), gl::STATIC_DRAW);
             gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
             gl::EnableVertexAttribArray(0);
 
-            self.buffer_objects.push(vbo);
-            self.unbind();
+            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+            gl::BindVertexArray(0);
+        }
+
+        VertexArrayObject {
+            id: vao,
+            buffer_objects: vec![vbo],
+            element_count: (vertices_data.len() / 3).try_into().unwrap(),
         }
     }
 
     pub fn draw(&self) {
         unsafe {
-            self.bind();
+            gl::BindVertexArray(self.id);
             gl::DrawArrays(gl::TRIANGLES, 0, self.element_count);
-            self.unbind();
+            gl::BindVertexArray(0);
         }
-    }
-
-    unsafe fn bind(&self) {
-        gl::BindVertexArray(self.id);
-    }
-
-    unsafe fn unbind(&self) {
-        gl::BindVertexArray(0);
     }
 }
 
