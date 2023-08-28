@@ -1,3 +1,9 @@
+mod window;
+
 fn main() {
-    println!("Hello, world!");
+    let mut window = window::Window::create_window(800, 600, "Vorustious");
+    while !window.should_close() {
+        window.refresh();
+        window.update_events();
+    }
 }
