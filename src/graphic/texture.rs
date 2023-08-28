@@ -29,3 +29,9 @@ impl Texture {
         unsafe { gl::BindTexture(gl::TEXTURE_2D, self.id) };
     }
 }
+
+impl Drop for Texture {
+    fn drop(&mut self) {
+        unsafe { gl::DeleteTextures(1, &self.id) };
+    }
+}
