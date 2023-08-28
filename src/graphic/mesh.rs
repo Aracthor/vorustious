@@ -1,13 +1,13 @@
-use super::shader::Shader;
+use super::material::Material;
 use super::vertex_objects::VertexArrayObject;
 
 pub struct Mesh {
     vao: VertexArrayObject,
-    material: Shader,
+    material: Material,
 }
 
 impl Mesh {
-    pub fn create(vertices_data: Vec<f32>, material: Shader) -> Mesh {
+    pub fn create(vertices_data: Vec<f32>, material: Material) -> Mesh {
         Mesh {
             vao: VertexArrayObject::create(vertices_data),
             material: material,
@@ -15,7 +15,7 @@ impl Mesh {
     }
 
     pub fn draw(&self) {
-        self.material.use_program();
+        self.material.bind();
         self.vao.draw();
     }
 }
