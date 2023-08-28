@@ -3,6 +3,7 @@ extern crate gl;
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
     buffer_objects: Vec<gl::types::GLuint>,
+    element_count: i32,
 }
 
 impl VertexArrayObject {
@@ -12,11 +13,13 @@ impl VertexArrayObject {
         VertexArrayObject {
             id: vao,
             buffer_objects: vec![],
+            element_count: 0,
         }
     }
 
     pub fn set_vertices(&mut self, vertices_data: Vec<f32>) {
         let size_in_bytes = (std::mem::size_of::<f32>() * vertices_data.len()).try_into().unwrap();
+        self.element_count = (vertices_data.len() / 3).try_into().unwrap();
         unsafe {
             self.bind();
             let mut vbo = 0;
@@ -35,7 +38,7 @@ impl VertexArrayObject {
     pub fn draw(&self) {
         unsafe {
             self.bind();
-            gl::DrawArrays(gl::TRIANGLES, 0, 3);
+            gl::DrawArrays(gl::TRIANGLES, 0, self.element_count);
             self.unbind();
         }
     }
