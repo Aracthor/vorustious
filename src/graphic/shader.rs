@@ -1,5 +1,7 @@
 extern crate gl;
 
+use super::gl_check::gl_check;
+
 pub struct Shader {
     vertex_shader: gl::types::GLuint,
     fragment_shader: gl::types::GLuint,
@@ -17,6 +19,7 @@ unsafe fn compile_shader(shader_file: &str, shader_code: &str, shader_type: gl::
     let shader = gl::CreateShader(shader_type);
     gl::ShaderSource(shader, 1, &shader_code.as_bytes().as_ptr().cast(), &shader_code.len().try_into().unwrap());
     gl::CompileShader(shader);
+    gl_check();
 
     let mut success = 0;
     gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
@@ -43,7 +46,8 @@ impl Shader {
             gl::AttachShader(program, vertex_shader);
             gl::AttachShader(program, fragment_shader);
             gl::LinkProgram(program);
-    
+            gl_check();
+
             let mut success = 0;
             gl::GetProgramiv(program, gl::LINK_STATUS, &mut success);
             if success == 0 {
@@ -76,6 +80,6 @@ impl Drop for Shader {
             gl::DeleteProgram(self.program);
             gl::DeleteShader(self.vertex_shader);
             gl::DeleteShader(self.fragment_shader);
-        }            
+        }
     }
 }

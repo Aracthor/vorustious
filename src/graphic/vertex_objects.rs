@@ -1,5 +1,7 @@
 extern crate gl;
 
+use super::gl_check::gl_check;
+
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
     buffer_objects: Vec<gl::types::GLuint>,
@@ -24,12 +26,14 @@ impl VertexArrayObject {
             gl::BufferData(gl::ARRAY_BUFFER, positions_size_in_bytes, positions.as_ptr().cast(), gl::STATIC_DRAW);
             gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
             gl::EnableVertexAttribArray(0);
+            gl_check();
 
             gl::GenBuffers(1, &mut texture_coords_vbo);
             gl::BindBuffer(gl::ARRAY_BUFFER, texture_coords_vbo);
             gl::BufferData(gl::ARRAY_BUFFER, texture_coords_size_in_bytes, texture_coords.as_ptr().cast(), gl::STATIC_DRAW);
             gl::VertexAttribPointer(1, 2, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
             gl::EnableVertexAttribArray(1);
+            gl_check();
 
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
             gl::BindVertexArray(0);
