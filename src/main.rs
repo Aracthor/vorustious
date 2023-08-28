@@ -1,7 +1,7 @@
 mod graphic;
 
 use graphic::shader::Shader;
-use graphic::vertex_objects::VertexArrayObject;
+use graphic::mesh::Mesh;
 
 fn main() {
     let mut window = graphic::window::Window::create_window(800, 600, "Vorustious");
@@ -17,13 +17,12 @@ fn main() {
         -0.5, -0.5, 0.0,
         0.5, -0.5, 0.0,
     ].to_vec();
-    let vao = VertexArrayObject::create(vertices);
+    let mesh = Mesh::create(vertices, shader);
 
     while !window.should_close() {
         window.clear();
 
-        shader.use_program();
-        vao.draw();
+        mesh.draw();
 
         window.refresh();
         window.update_events();
