@@ -1,12 +1,10 @@
-mod shader;
-mod vertex_objects;
-mod window;
+mod graphic;
 
-use shader::Shader;
-use vertex_objects::VertexArrayObject;
+use graphic::shader::Shader;
+use graphic::vertex_objects::VertexArrayObject;
 
 fn main() {
-    let mut window = window::Window::create_window(800, 600, "Vorustious");
+    let mut window = graphic::window::Window::create_window(800, 600, "Vorustious");
 
     let shader = Shader::create_shader_program("shaders/hello_triangle.vert", "shaders/hello_triangle.frag");
 
