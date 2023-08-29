@@ -1,6 +1,8 @@
 use super::material::Material;
 use super::vertex_objects::VertexArrayObject;
 
+use crate::maths::matrix::Mat4f;
+
 pub struct Mesh {
     vao: VertexArrayObject,
     material: Material,
@@ -14,8 +16,9 @@ impl Mesh {
         }
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&self, perspective_matrix: &Mat4f) {
         self.material.bind();
+        self.material.set_transformation_matrices(perspective_matrix);
         self.vao.draw();
     }
 }
