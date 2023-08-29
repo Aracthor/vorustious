@@ -6,9 +6,11 @@ fn equals_with_delta(u: Vect3f, v: Vect3f, delta: f32) -> bool {
 }
 
 fn mat_equals_with_delta(u: Mat4f, v: Mat4f, delta: f32) -> bool {
-    for i in 0..16 {
-        if (u[i] - v[i]).abs() >= delta {
-            return false;
+    for x in 0..4 {
+        for y in 0..4 {
+            if (u[x][y] - v[x][y]).abs() >= delta {
+                return false;
+            }
         }
     }
     true
@@ -56,12 +58,12 @@ fn projection_matrix() {
 
     let expected = {
         let mut expected = Mat4f::identity();
-        expected.set(0, 0, 2.0 / 800.0);
-        expected.set(1, 1, 2.0 / 600.0);
-        expected.set(2, 2, -2.0 / 999.9);
-        expected.set(0, 3, -1.0);
-        expected.set(1, 3, -1.0);
-        expected.set(2, 3, -1.0002);
+        expected[0][0] = 2.0 / 800.0;
+        expected[1][1] = 2.0 / 600.0;
+        expected[2][2] = -2.0 / 999.9;
+        expected[3][0] = -1.0;
+        expected[3][1] = -1.0;
+        expected[3][2] = -1.0002;
         expected
     };
 
@@ -77,11 +79,11 @@ fn view_matrix() {
 
     let expected = {
         let mut expected = Mat4f::identity();
-        expected.set(0, 0, 0.0);
-        expected.set(0, 2, -1.0);
-        expected.set(2, 0, 1.0);
-        expected.set(2, 2, 0.0);
-        expected.set(2, 3, -1.0);
+        expected[0][0] = 0.0;
+        expected[2][0] = -1.0;
+        expected[0][2] = 1.0;
+        expected[2][2] = 0.0;
+        expected[3][2] = -1.0;
         expected
     };
 

@@ -1,4 +1,5 @@
 use core::ops::Index;
+use core::ops::IndexMut;
 
 use super::traits::MathsUsable;
 
@@ -57,6 +58,12 @@ impl<const N: usize, T: MathsUsable> Index<usize> for Vect<N, T> {
     type Output = T;
     fn index(&self, index: usize) -> &Self::Output {
         &self.data[index]
+    }
+}
+
+impl<const N: usize, T: MathsUsable> IndexMut<usize> for Vect<N, T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.data[index]
     }
 }
 
