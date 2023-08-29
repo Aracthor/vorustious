@@ -1,4 +1,5 @@
-use super::vector::{Vect, MathsUsable};
+use super::traits::MathsUsable;
+use super::vector::Vect;
 
 use core::ops::Index;
 pub struct Mat4<T: MathsUsable> {
