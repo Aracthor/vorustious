@@ -1,5 +1,5 @@
 use super::material::Material;
-use super::vertex_objects::VertexArrayObject;
+use super::opengl::vertex_objects::VertexArrayObject;
 
 use crate::maths::matrix::Mat4f;
 

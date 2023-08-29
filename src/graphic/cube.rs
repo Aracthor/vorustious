@@ -1,6 +1,6 @@
 use super::material::Material;
 use super::mesh::Mesh;
-use super::texture::Texture;
+use super::opengl::texture::Texture;
 
 pub fn cube_texture(border_color: [u8; 4], fill_color: [u8; 4]) -> Texture {
     let b_r = border_color[0];

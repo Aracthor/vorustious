@@ -1,5 +1,5 @@
-use super::shader::Shader;
-use super::texture::Texture;
+use super::opengl::shader::Shader;
+use super::opengl::texture::Texture;
 
 use crate::maths::matrix::Mat4f;
 
