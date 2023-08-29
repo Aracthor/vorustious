@@ -30,14 +30,15 @@ impl<T: MathsUsable> Mat4<T> {
         Self::from_data(identity_data)
     }
 
-    pub fn orthographic(left: f32, right: f32, bottom: f32, top: f32, z_near: f32, z_far: f32) -> Self {
+    pub fn orthographic(left: T, right: T, bottom: T, top: T, z_near: T, z_far: T) -> Self {
         let mut result = Self::identity();
-        result[0][0] = (2.0 / (right - left)).into();
-        result[1][1] = (2.0 / (top - bottom)).into();
-        result[2][2] = (-2.0 / (z_far - z_near)).into();
-        result[3][0] = (-(right + left) / (right - left)).into();
-        result[3][1] = (-(top + bottom) / (top - bottom)).into();
-        result[3][2] = (-(z_far + z_near) / (z_far - z_near)).into();
+        let two_as_t: T = 2.0.into();
+        result[0][0] = two_as_t / (right - left);
+        result[1][1] = two_as_t / (top - bottom);
+        result[2][2] = -two_as_t / (z_far - z_near);
+        result[3][0] = -(right + left) / (right - left);
+        result[3][1] = -(top + bottom) / (top - bottom);
+        result[3][2] = -(z_far + z_near) / (z_far - z_near);
         result
     }
 

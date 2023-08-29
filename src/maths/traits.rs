@@ -5,6 +5,7 @@ trait_set::trait_set! {
         Into<f32> +
         std::cmp::PartialEq<Self> +
         std::ops::Neg<Output = Self> +
+        std::ops::Add<Self, Output = Self> +
         std::ops::Sub<Self, Output = Self> +
         std::ops::Mul<Self, Output = Self> +
         std::ops::Div<Self, Output = Self> +
