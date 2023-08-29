@@ -6,9 +6,6 @@ pub struct Window {
     core: glfw::Glfw,
     window: glfw::Window,
     events: std::sync::mpsc::Receiver<(f64, glfw::WindowEvent)>,
-
-    width: u32,
-    height: u32,
 }
 
 impl Window {
@@ -25,19 +22,17 @@ impl Window {
         window.set_key_polling(true);
         gl::load_with(|ptr| window.get_proc_address(ptr) as *const _);
 
-        unsafe { context::start_gl_context() };
+        unsafe { context::start_gl_context(width.try_into().unwrap(), height.try_into().unwrap()) };
 
         Self {
             core: core,
             window: window,
             events: events,
-            width: width,
-            height: height,
         }
     }
 
     pub fn clear(&self) {
-        unsafe { context::clear_gl_context(self.width.try_into().unwrap(), self.height.try_into().unwrap()) };
+        unsafe { context::clear_gl_context() };
     }
 
     pub fn refresh(&mut self) {
