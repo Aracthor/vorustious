@@ -14,7 +14,7 @@ impl<const N: usize, T: MathsUsable> Vect<N, T> {
     }
 
     pub fn dot(u: Self, v: Self) -> T {
-        let mut result: T = 0.0.try_into().unwrap();
+        let mut result: T = 0.0.into();
         for i in 0..N {
             result += u.data[i] * v.data[i];
         }
@@ -22,7 +22,7 @@ impl<const N: usize, T: MathsUsable> Vect<N, T> {
     }
 
     pub fn length_sq(&self) -> T {
-        let mut result: T = 0.0.try_into().unwrap();
+        let mut result: T = 0.0.into();
         for d in self.data {
             result += d * d;
         }
@@ -31,12 +31,12 @@ impl<const N: usize, T: MathsUsable> Vect<N, T> {
 
     pub fn length(&self) -> T {
         // TODO we should avoid casting here...
-        self.length_sq().into().sqrt().try_into().unwrap()
+        self.length_sq().into().sqrt().into()
     }
 
     pub fn normalize(&self) -> Vect<N, T> {
         let length = self.length();
-        assert!(length != 0.0.try_into().unwrap());
+        assert!(length != 0.0.into());
         return *self / length;
     }
 }
