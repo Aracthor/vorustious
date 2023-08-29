@@ -43,23 +43,23 @@ impl<T: MathsUsable> Mat4<T> {
     }
 
     pub fn look_at(eye: Vect<3, T>, target: Vect<3, T>, up: Vect<3, T>) -> Self {
-        let f = (target - eye).normalize();
-        let s = Vect::cross(f, up).normalize();
-        let u = Vect::cross(s, f);
+        let zaxis = (target - eye).normalize();
+        let xaxis = Vect::cross(zaxis, up).normalize();
+        let yaxis = Vect::cross(xaxis, zaxis);
 
         let mut result = Self::identity();
-        result[0][0] = s[0];
-        result[1][0] = s[1];
-        result[2][0] = s[2];
-        result[0][1] = u[0];
-        result[1][1] = u[1];
-        result[2][1] = u[2];
-        result[0][2] = -f[0];
-        result[1][2] = -f[1];
-        result[2][2] = -f[2];
-        result[3][0] = -Vect::dot(s, eye);
-        result[3][1] = -Vect::dot(u, eye);
-        result[3][2] =  Vect::dot(f, eye);
+        result[0][0] = xaxis[0];
+        result[1][0] = xaxis[1];
+        result[2][0] = xaxis[2];
+        result[0][1] = yaxis[0];
+        result[1][1] = yaxis[1];
+        result[2][1] = yaxis[2];
+        result[0][2] = -zaxis[0];
+        result[1][2] = -zaxis[1];
+        result[2][2] = -zaxis[2];
+        result[3][0] = -Vect::dot(xaxis, eye);
+        result[3][1] = -Vect::dot(yaxis, eye);
+        result[3][2] =  Vect::dot(zaxis, eye);
         result
     }
 
