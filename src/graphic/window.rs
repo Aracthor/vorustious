@@ -1,5 +1,7 @@
 use glfw::Context;
 
+use super::opengl::context;
+
 pub struct Window {
     core: glfw::Glfw,
     window: glfw::Window,
@@ -23,9 +25,7 @@ impl Window {
         window.set_key_polling(true);
         gl::load_with(|ptr| window.get_proc_address(ptr) as *const _);
 
-        unsafe {
-            gl::Enable(gl::DEPTH_TEST);
-        }
+        unsafe { context::start_gl_context() };
 
         Self {
             core: core,
@@ -37,11 +37,7 @@ impl Window {
     }
 
     pub fn clear(&self) {
-        unsafe {
-            gl::Viewport(0, 0, self.width.try_into().unwrap(), self.height.try_into().unwrap());
-            gl::ClearColor(0.0, 0.0, 0.0, 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-        }
+        unsafe { context::clear_gl_context(self.width.try_into().unwrap(), self.height.try_into().unwrap()) };
     }
 
     pub fn refresh(&mut self) {

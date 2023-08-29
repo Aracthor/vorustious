@@ -1,3 +1,4 @@
+pub mod context;
 pub mod shader;
 pub mod texture;
 pub mod vertex_objects;
