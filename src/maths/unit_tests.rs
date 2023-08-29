@@ -67,3 +67,23 @@ fn projection_matrix() {
 
     assert!(mat_equals_with_delta(matrix, expected, 0.0001));
 }
+
+#[test]
+fn view_matrix() {
+    let eye = Vect3f::new([1.0, 0.0, 0.0]);
+    let target = Vect3f::new([0.0, 0.0, 0.0]);
+    let up = Vect3f::new([0.0, 1.0, 0.0]);
+    let matrix = Mat4f::look_at(eye, target, up);
+
+    let expected = {
+        let mut expected = Mat4f::identity();
+        expected.set(0, 0, 0.0);
+        expected.set(0, 2, -1.0);
+        expected.set(2, 0, 1.0);
+        expected.set(2, 2, 0.0);
+        expected.set(2, 3, -1.0);
+        expected
+    };
+
+    assert!(mat_equals_with_delta(matrix, expected, 0.0001));
+}

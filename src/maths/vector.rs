@@ -56,9 +56,9 @@ impl<const N: usize, T: MathsUsable> Vect<N, T> {
 impl<T: MathsUsable> Vect<3, T> {
     pub fn cross(u: Self, v: Self) -> Self{
         Self {data: [
-            u[1] * v[2] - u[2] * v[1],
+            u[1] * v[2] - v[1] * u[2],
             u[2] * v[0] - v[2] * u[0],
-            u[0] * v[1] - u[1] * v[0],
+            u[0] * v[1] - v[0] * u[1],
         ]}
     }
 }

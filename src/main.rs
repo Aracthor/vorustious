@@ -3,6 +3,7 @@ mod maths;
 
 use graphic::material::Material;
 use maths::matrix::Mat4f;
+use maths::vector::Vect3f;
 
 fn main() {
     const WINDOW_WIDTH:u32 = 800;
@@ -18,8 +19,8 @@ fn main() {
     let mesh = graphic::cube::cube_mesh(material);
 
     let perspective_matrix = {
-        let half_width:f32 = 0.8;
-        let half_height:f32 = 0.6;
+        let half_width:f32 = 1.6;
+        let half_height:f32 = 1.2;
         let right = half_width;
         let left = -half_width;
         let bottom = -half_height;
@@ -28,11 +29,17 @@ fn main() {
         let z_far = 1000.0;
         Mat4f::orthographic(left, right, bottom, top, z_near, z_far)
     };
+    let view_matrix = {
+        let eye = Vect3f::new([1.0, 1.0, 1.0]);
+        let target = Vect3f::new([0.0, 0.0, 0.0]);
+        let up = Vect3f::new([0.0, 1.0, 0.0]);
+        Mat4f::look_at(eye, target, up)
+    };
 
     while !window.should_close() {
         window.clear();
 
-        mesh.draw(&perspective_matrix);
+        mesh.draw(&perspective_matrix, &view_matrix);
 
         window.refresh();
         window.update_events();

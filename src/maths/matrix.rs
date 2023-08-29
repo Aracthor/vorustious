@@ -1,4 +1,4 @@
-use super::vector::MathsUsable;
+use super::vector::{Vect, MathsUsable};
 
 use core::ops::Index;
 pub struct Mat4<T: MathsUsable> {
@@ -25,6 +25,27 @@ impl<T: MathsUsable> Mat4<T> {
 		result.set(0, 3, (-(right + left) / (right - left)).try_into().unwrap());
 		result.set(1, 3, (-(top + bottom) / (top - bottom)).try_into().unwrap());
 		result.set(2, 3, (-(z_far + z_near) / (z_far - z_near)).try_into().unwrap());
+        result
+    }
+
+    pub fn look_at(eye: Vect<3, T>, target: Vect<3, T>, up: Vect<3, T>) -> Self {
+        let f = (target - eye).normalize();
+        let s = Vect::cross(f, up).normalize();
+        let u = Vect::cross(s, f);
+
+        let mut result = Self::identity();
+        result.set(0, 0, s[0]);
+        result.set(0, 1, s[1]);
+        result.set(0, 2, s[2]);
+        result.set(1, 0, u[0]);
+        result.set(1, 1, u[1]);
+        result.set(1, 2, u[2]);
+        result.set(2, 0, -f[0]);
+        result.set(2, 1, -f[1]);
+        result.set(2, 2, -f[2]);
+        result.set(0, 3, -Vect::dot(s, eye));
+        result.set(1, 3, -Vect::dot(u, eye));
+        result.set(2, 3,  Vect::dot(f, eye));
         result
     }
 
