@@ -28,10 +28,10 @@ impl Renderer {
         }
     }
 
-    pub fn render_frame(&mut self, projection_matrix: &Mat4f, view_matrix: &Mat4f, structure: &Structure) {
+    pub fn render_frame(&mut self, projection_view_matrix: &Mat4f, structure: &Structure) {
         structure.for_each_voxel(|x, y, z| {
             let model_matrix = Mat4f::translation(Vect3f::new([x as f32, y as f32, z as f32]));
-            self.cube_mesh.draw(&projection_matrix, view_matrix, &model_matrix);
+            self.cube_mesh.draw(projection_view_matrix, &model_matrix);
         });
 
         self.frame_limiter.limit();

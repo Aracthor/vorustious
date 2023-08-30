@@ -97,6 +97,30 @@ fn matrix_rotation() {
 }
 
 #[test]
+fn matrix_op() {
+    let mat1 = Mat4f::from_data([
+        1.0, 4.0, -4.2, 3.0,
+        2.0, 0.0, 2.2, 2.1,
+        -2.1, 4.3, 10.0, 0.0,
+        0.0, 42.0, -1.0, 3.2,
+    ]);
+    let mat2 = Mat4f::from_data([
+        4.2, 1.0, -0.1, 2.0,
+        6.2, 5.4, -1.0, 4.1,
+        2.9, 6.2, -3.0, 2.4,
+        -2.4, 0.0, 4.2, -0.5,
+    ]);
+    let result = mat1 * mat2;
+    let expected = Mat4f::from_data([
+        6.41, 100.37, -18.44, 21.1,
+        19.1, 192.7, -28.26, 43.06,
+        21.6, 99.5, -30.94, 29.4,
+        -11.22, -12.54, 52.58, -8.8,
+    ]);
+    assert!(mat_equals_with_delta(result, expected, 0.0001));
+}
+
+#[test]
 fn orthographic_matrix() {
     let left = 0.0;
     let right = 800.0;

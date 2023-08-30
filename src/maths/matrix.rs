@@ -4,6 +4,7 @@ use super::vector::Vect;
 use core::ops::Index;
 use core::ops::IndexMut;
 
+#[derive(Clone, Copy)]
 pub struct Mat4<T: MathsUsable> {
     data: [Vect<4, T>; 4],
 }
@@ -146,6 +147,24 @@ impl<T: MathsUsable> Index<usize> for Mat4<T> {
 impl<T: MathsUsable> IndexMut<usize> for Mat4<T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.data[index]
+    }
+}
+
+impl<T: MathsUsable> std::ops::Mul<Self> for Mat4<T> {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        let mut product = Mat4::identity();
+        for y in 0..4 {
+            for x in 0..4 {
+                let mut result: T = 0.0.into();
+                for i in 0..4 {
+                    result += self[i][y] * rhs[x][i];
+                }
+                product[x][y] = result;
+            }
+        }
+        product
     }
 }
 

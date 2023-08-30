@@ -28,10 +28,10 @@ fn main() {
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
-        let view_matrix = &camera.view_matrix();
+        let projection_view_matrix = projection_matrix * camera.view_matrix();
 
         window.clear();
-        renderer.render_frame(&projection_matrix, view_matrix, &structure);
+        renderer.render_frame(&projection_view_matrix, &structure);
         window.update();
     }
 }
