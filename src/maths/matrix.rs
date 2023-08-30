@@ -176,13 +176,12 @@ impl<const N: usize, const VN: usize, T: MathsUsable> std::ops::Mul<Vect<VN, T>>
     type Output = Vect<VN, T>;
 
     fn mul(self, rhs: Vect<VN, T>) -> Self::Output {
+        assert!(N >= VN);
         let mut result = Self::Output::zero();
-        for y in 0..N {
-            if y < VN {
-                for x in 0..N {
-                    let r_value = if x >= VN { 1.0.into() } else { rhs[x] };
-                    result[y] += self[x][y] * r_value;
-                }
+        for y in 0..VN {
+            for x in 0..N {
+                let r_value = if x >= VN { 1.0.into() } else { rhs[x] };
+                result[y] += self[x][y] * r_value;
             }
         }
         result
