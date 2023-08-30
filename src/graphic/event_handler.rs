@@ -23,13 +23,14 @@ pub struct EventHandler {
     glfw_key_table: HashMap<glfw::Key, Key>,
 
     key_status: HashMap<Key, KeyStatus>,
+    cursor_movement: (f64, f64),
 }
 
 impl EventHandler {
     pub fn new(core: glfw::Glfw, event_receiver: EventReceiver) -> Self {
         Self {
-            core:core,
-            event_receiver:event_receiver,
+            core: core,
+            event_receiver: event_receiver,
 
             glfw_key_table: HashMap::from([
                 (glfw::Key::A, Key::A),
@@ -39,7 +40,8 @@ impl EventHandler {
             ]),
 
             key_status: Default::default(),
-            }
+            cursor_movement: (0.0, 0.0),
+        }
     }
 
     pub fn update(&mut self) {
@@ -65,8 +67,14 @@ impl EventHandler {
         }
     }
 
+    pub fn set_cursor_movement(&mut self, movement: (f64, f64)) {
+        self.cursor_movement = movement;
+    }
+
     pub fn is_key_pressed(&self, key: Key) -> bool {
         let key_status = self.key_status.get(&key);
         key_status.is_some() && *key_status.unwrap() == KeyStatus::Pressed
     }
+
+    pub fn cursor_movement(&self) -> (f64, f64) { self.cursor_movement }
 }

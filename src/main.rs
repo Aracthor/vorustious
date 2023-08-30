@@ -14,6 +14,7 @@ use maths::vector::Vect3f;
 fn update_events(event_handler: &mut event_handler::EventHandler, camera: &mut Camera) {
     event_handler.update();
     const CAMERA_SPEED: f32 = 0.03;
+    const CAMERA_SENSITIVITY: f32 = 0.005;
     let camera_forward = camera.forward();
     let camera_right = Vect3f::cross(camera_forward, camera.up());
 
@@ -21,6 +22,11 @@ fn update_events(event_handler: &mut event_handler::EventHandler, camera: &mut C
     if event_handler.is_key_pressed(event_handler::Key::S) { camera.position -= camera_forward * CAMERA_SPEED }
     if event_handler.is_key_pressed(event_handler::Key::A) { camera.position -= camera_right * CAMERA_SPEED }
     if event_handler.is_key_pressed(event_handler::Key::D) { camera.position += camera_right * CAMERA_SPEED }
+
+    let cursor_movement = event_handler.cursor_movement();
+    camera.angle_x -= cursor_movement.0 as f32 * CAMERA_SENSITIVITY;
+    camera.angle_y -= cursor_movement.1 as f32 * CAMERA_SENSITIVITY;
+    camera.angle_y = camera.angle_y.clamp(-89.0_f32.to_radians(), 89.0_f32.to_radians());
 }
 
 fn main() {
