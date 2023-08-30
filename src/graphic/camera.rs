@@ -38,7 +38,7 @@ impl Camera {
         const CAMERA_SPEED: f32 = 0.1;
         const CAMERA_SENSITIVITY: f32 = 0.005;
         let camera_forward = self.forward();
-        let camera_right = Vect3f::cross(camera_forward, self.up());
+        let camera_right = Vect3f::cross(camera_forward, self.up()).normalize();
 
         if event_handler.is_key_pressed(event_handler::Key::W) { self.position += camera_forward * CAMERA_SPEED }
         if event_handler.is_key_pressed(event_handler::Key::S) { self.position -= camera_forward * CAMERA_SPEED }
