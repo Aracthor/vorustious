@@ -13,6 +13,10 @@ impl<const N: usize, T: MathsUsable> Vect<N, T> {
         Vect::<N, T> { data: data }
     }
 
+    pub fn zero() -> Self {
+        Vect::<N, T> {data: [T::from(0.0); N] }
+    }
+
     pub fn dot(u: Self, v: Self) -> T {
         let mut result: T = 0.0.into();
         for i in 0..N {

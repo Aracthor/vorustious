@@ -168,4 +168,21 @@ impl<T: MathsUsable> std::ops::Mul<Self> for Mat4<T> {
     }
 }
 
+impl<const N: usize, T: MathsUsable> std::ops::Mul<Vect<N, T>> for Mat4<T> {
+    type Output = Vect<N, T>;
+
+    fn mul(self, rhs: Vect<N, T>) -> Self::Output {
+        let mut result = Vect::<N, T>::zero();
+        for y in 0..4 {
+            if y < N {
+                for x in 0..4 {
+                    let r_value = if x >= N { 1.0.into() } else { rhs[x] };
+                    result[y] += self[x][y] * r_value;
+                }
+            }
+        }
+        result
+    }
+}
+
 pub type Mat4f = Mat4<f32>;
