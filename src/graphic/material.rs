@@ -20,9 +20,10 @@ impl Material {
         self.textures.push(texture);
     }
 
-    pub fn set_transformation_matrices(&self, perspective_matrix: &Mat4f, view_matrix: &Mat4f) {
+    pub fn set_transformation_matrices(&self, perspective_matrix: &Mat4f, view_matrix: &Mat4f, model_matrix: &Mat4f) {
         self.shader.set_matrix_uniform("uni_projection_matrix", perspective_matrix);
         self.shader.set_matrix_uniform("uni_view_matrix", view_matrix);
+        self.shader.set_matrix_uniform("uni_model_matrix", model_matrix);
     }
 
     pub fn bind(&self) {

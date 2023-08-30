@@ -16,9 +16,9 @@ impl Mesh {
         }
     }
 
-    pub fn draw(&self, perspective_matrix: &Mat4f, view_matrix: &Mat4f) {
+    pub fn draw(&self, perspective_matrix: &Mat4f, view_matrix: &Mat4f, model_matrix: &Mat4f) {
         self.material.bind();
-        self.material.set_transformation_matrices(perspective_matrix, view_matrix);
+        self.material.set_transformation_matrices(perspective_matrix, view_matrix, model_matrix);
         self.vao.draw();
     }
 }

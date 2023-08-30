@@ -30,6 +30,14 @@ impl<T: MathsUsable> Mat4<T> {
         Self::from_data(identity_data)
     }
 
+    pub fn translation(translate: Vect<3, T>) -> Self {
+        let mut result = Self::identity();
+        result[3][0] = translate[0];
+        result[3][1] = translate[1];
+        result[3][2] = translate[2];
+        result
+    }
+
     #[allow(dead_code)]
     pub fn orthographic(left: T, right: T, bottom: T, top: T, z_near: T, z_far: T) -> Self {
         let mut result = Self::identity();

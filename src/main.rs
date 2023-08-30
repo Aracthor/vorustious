@@ -59,7 +59,8 @@ fn main() {
     while !window.should_close() {
         window.clear();
 
-        mesh.draw(&perspective_matrix, &camera.view_matrix());
+        let matrix = Mat4f::translation(Vect3f::new([0.0, 1.0, 1.0]));
+        mesh.draw(&perspective_matrix, &camera.view_matrix(), &matrix);
 
         window.update();
         let time_to_sleep = MIN_FRAME_TIME_IN_SECS - clock.elapsed().as_secs_f32();

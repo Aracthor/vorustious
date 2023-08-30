@@ -49,6 +49,19 @@ fn vector_funcs() {
 }
 
 #[test]
+fn matrix_base_transformations() {
+    let translation = Vect3f::new([3.0, -3.0, 1.0]);
+    let matrix = Mat4f::translation(translation);
+    let expected = Mat4f::from_data([
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        translation[0], translation[1], translation[2], 1.0,
+    ]);
+    assert!(mat_equals_with_delta(matrix, expected, 0.0001));
+}
+
+#[test]
 fn orthographic_matrix() {
     let left = 0.0;
     let right = 800.0;
