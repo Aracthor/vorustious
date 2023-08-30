@@ -10,7 +10,6 @@ pub struct Mat<const N: usize, T: MathsUsable> {
 }
 
 impl<const N: usize, T: MathsUsable> Mat<N, T> {
-    #[allow(dead_code)]
     pub fn from_data<const N2: usize>(data: [T; N2]) -> Self {
         assert!(N2 == N * N);
         let mut result = Self::identity();
@@ -34,7 +33,44 @@ impl<const N: usize, T: MathsUsable> Mat<N, T> {
     }
 }
 
+impl<T: MathsUsable> Mat<3, T> {
+    pub fn determinant(&self) -> T {
+        self[0][0] * self[1][1] * self[2][2] +
+        self[0][1] * self[1][2] * self[2][0] +
+        self[0][2] * self[1][0] * self[2][1] -
+        self[0][2] * self[1][1] * self[2][0] -
+        self[0][1] * self[1][0] * self[2][2] -
+        self[0][0] * self[1][2] * self[2][1]
+    }
+}
+
 impl<T: MathsUsable> Mat<4, T> {
+    #[allow(dead_code)]
+    pub fn determinant(&self) -> T {
+        let det1 = Mat::<3, T>::from_data([
+            self[1][1], self[1][2], self[1][3],
+            self[2][1], self[2][2], self[2][3],
+            self[3][1], self[3][2], self[3][3],
+        ]).determinant() * self[0][0];
+        let det2 = Mat::<3, T>::from_data([
+            self[0][1], self[0][2], self[0][3],
+            self[2][1], self[2][2], self[2][3],
+            self[3][1], self[3][2], self[3][3],
+        ]).determinant() * self[1][0];
+        let det3 = Mat::<3, T>::from_data([
+            self[0][1], self[0][2], self[0][3],
+            self[1][1], self[1][2], self[1][3],
+            self[3][1], self[3][2], self[3][3],
+        ]).determinant() * self[2][0];
+        let det4 = Mat::<3, T>::from_data([
+            self[0][1], self[0][2], self[0][3],
+            self[1][1], self[1][2], self[1][3],
+            self[2][1], self[2][2], self[2][3],
+        ]).determinant() * self[3][0];
+
+        det1 - det2 + det3 - det4
+    }
+
     #[allow(dead_code)]
     pub fn translation(translate: Vect<3, T>) -> Self {
         let mut result = Self::identity();
@@ -188,4 +224,6 @@ impl<const N: usize, const VN: usize, T: MathsUsable> std::ops::Mul<Vect<VN, T>>
     }
 }
 
+#[allow(dead_code)]
+pub type Mat3f = Mat<3, f32>;
 pub type Mat4f = Mat<4, f32>;

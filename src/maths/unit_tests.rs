@@ -1,10 +1,15 @@
+use super::matrix::Mat3f;
 use super::matrix::Mat4f;
 use super::vector::Vect;
 use super::vector::Vect3f;
 
-fn equals_with_delta<const N: usize>(u: Vect<N, f32>, v: Vect<N, f32>, delta: f32) -> bool {
+fn equals_with_delta(a: f32, b: f32, delta: f32) -> bool {
+    (a - b).abs() < delta
+}
+
+fn vec_equals_with_delta<const N: usize>(u: Vect<N, f32>, v: Vect<N, f32>, delta: f32) -> bool {
     for i in 0..N {
-        if (u[i] - v[i]).abs() >= delta {
+        if !equals_with_delta(u[i], v[i], delta) {
             return false;
         }
     }
@@ -12,11 +17,9 @@ fn equals_with_delta<const N: usize>(u: Vect<N, f32>, v: Vect<N, f32>, delta: f3
 }
 
 fn mat_equals_with_delta(u: Mat4f, v: Mat4f, delta: f32) -> bool {
-    for x in 0..4 {
-        for y in 0..4 {
-            if (u[x][y] - v[x][y]).abs() >= delta {
-                return false;
-            }
+    for y in 0..4 {
+        if !vec_equals_with_delta(u[y], v[y], delta) {
+            return false;
         }
     }
     true
@@ -40,10 +43,10 @@ fn vector_op() {
     let v = Vect3f::new([3.0, -4.2, -2.4]);
 
     assert!(-u == Vect3f::new([-2.0, 1.0, -5.0]));
-    assert!(equals_with_delta(u + v, Vect3f::new([5.0, -5.2, 2.6]), 0.0001));
-    assert!(equals_with_delta(u - v, Vect3f::new([-1.0, 3.2, 7.4]), 0.0001));
-    assert!(equals_with_delta(u * 2.0, Vect3f::new([4.0, -2.0, 10.0]), 0.0001));
-    assert!(equals_with_delta(u / 2.0, Vect3f::new([1.0, -0.5, 2.5]), 0.0001));
+    assert!(vec_equals_with_delta(u + v, Vect3f::new([5.0, -5.2, 2.6]), 0.0001));
+    assert!(vec_equals_with_delta(u - v, Vect3f::new([-1.0, 3.2, 7.4]), 0.0001));
+    assert!(vec_equals_with_delta(u * 2.0, Vect3f::new([4.0, -2.0, 10.0]), 0.0001));
+    assert!(vec_equals_with_delta(u / 2.0, Vect3f::new([1.0, -0.5, 2.5]), 0.0001));
 }
 
 #[test]
@@ -51,7 +54,25 @@ fn vector_funcs() {
     let u = Vect3f::new([3.0, -3.0, 1.0]);
     let v = Vect3f::new([4.0, 9.0, 2.0]);
     assert!(Vect3f::dot(u, v) == -13.0);
-    assert!(equals_with_delta(Vect3f::cross(u, v), Vect3f::new([-15.0, -2.0, 39.0]), 0.0001));
+    assert!(vec_equals_with_delta(Vect3f::cross(u, v), Vect3f::new([-15.0, -2.0, 39.0]), 0.0001));
+}
+
+#[test]
+fn matrix_funcs() {
+    let mat3 = Mat3f::from_data([
+        1.0, 4.0, -4.2,
+        2.0, -1.0, 2.2,
+        -2.1, 4.3, 10.0,
+    ]);
+    assert!(equals_with_delta(mat3.determinant(), -145.24, 0.001));
+
+    let mat4 = Mat4f::from_data([
+        1.0, 4.0, -4.2, 3.0,
+        2.0, -1.0, 2.2, 2.1,
+        -2.1, 4.3, 10.0, 0.0,
+        0.0, 42.0, -1.0, 3.2,
+    ]);
+    assert!(equals_with_delta(mat4.determinant(), 2526.11, 0.01));
 }
 
 #[test]
@@ -119,12 +140,12 @@ fn matrix_op() {
     {
         let result = mat1 * Vect3f::new([42.0, 4.2, -42.0]);
         let expected = Vect3f::new([138.6, 29.4, -588.16]);
-        assert!(equals_with_delta(result, expected, 0.0001));
+        assert!(vec_equals_with_delta(result, expected, 0.0001));
     }
     {
         let result = mat1 * Vect::<4, f32>::new([42.0, 4.2, -42.0, 1.0]);
         let expected = Vect::<4, f32>::new([138.6, 29.4, -588.16, 138.02]);
-        assert!(equals_with_delta(result, expected, 0.0001));
+        assert!(vec_equals_with_delta(result, expected, 0.0001));
     }
     {
         let result = mat1 * mat2;
