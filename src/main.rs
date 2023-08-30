@@ -5,9 +5,9 @@ use std::time::Duration;
 use std::time::Instant;
 
 use graphic::camera::Camera;
-use graphic::event_handler;
 use graphic::material::Material;
-use graphic::window::Window;
+use graphic::windowing::event_handler;
+use graphic::windowing::window::Window;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
 

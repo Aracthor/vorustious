@@ -1,7 +1,7 @@
 use glfw::Context;
 
 use super::event_handler::EventHandler;
-use super::opengl::context;
+use crate::graphic::opengl::context;
 
 pub struct Window {
     window: glfw::Window,
