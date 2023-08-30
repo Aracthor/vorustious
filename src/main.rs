@@ -1,5 +1,6 @@
 mod graphic;
 mod maths;
+mod structure;
 
 use std::time::Duration;
 use std::time::Instant;
@@ -9,6 +10,7 @@ use graphic::material::Material;
 use graphic::windowing::window::Window;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
+use structure::Structure;
 
 fn main() {
     const WINDOW_WIDTH:u32 = 800;
@@ -32,14 +34,18 @@ fn main() {
     };
     let mut camera = Camera::new(Vect3f::new([-1.0, 0.0, 0.0]));
 
+    let structure = Structure::new(-2, 4, -1, 1, -1, 0);
+
     const MIN_FRAME_TIME_IN_SECS: f32 = 1.0 / 60.0;
     let mut clock = Instant::now();
-    let rotate_clock = Instant::now();
     while !window.should_close() {
         window.clear();
 
-        let matrix = Mat4f::rotation_around_z(rotate_clock.elapsed().as_secs_f32());
-        mesh.draw(&perspective_matrix, &camera.view_matrix(), &matrix);
+        let view_matrix = &camera.view_matrix();
+        structure.for_each_voxel(|x, y, z| {
+            let model_matrix = Mat4f::translation(Vect3f::new([x as f32, y as f32, z as f32]));
+            mesh.draw(&perspective_matrix, view_matrix, &model_matrix);
+        });
 
         window.update();
         let time_to_sleep = MIN_FRAME_TIME_IN_SECS - clock.elapsed().as_secs_f32();

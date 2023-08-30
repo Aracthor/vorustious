@@ -35,7 +35,7 @@ impl Camera {
     }
 
     pub fn update_from_events(&mut self, event_handler: &event_handler::EventHandler) {
-        const CAMERA_SPEED: f32 = 0.03;
+        const CAMERA_SPEED: f32 = 0.1;
         const CAMERA_SENSITIVITY: f32 = 0.005;
         let camera_forward = self.forward();
         let camera_right = Vect3f::cross(camera_forward, self.up());
