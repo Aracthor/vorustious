@@ -49,7 +49,7 @@ fn vector_funcs() {
 }
 
 #[test]
-fn matrix_base_transformations() {
+fn matrix_translation() {
     let translation = Vect3f::new([3.0, -3.0, 1.0]);
     let matrix = Mat4f::translation(translation);
     let expected = Mat4f::from_data([
@@ -59,6 +59,41 @@ fn matrix_base_transformations() {
         translation[0], translation[1], translation[2], 1.0,
     ]);
     assert!(mat_equals_with_delta(matrix, expected, 0.0001));
+}
+
+#[test]
+fn matrix_rotation() {
+    let angle = 30.0_f32.to_radians();
+    {
+        let matrix_around_x = Mat4f::rotation_around_x(angle);
+        let expected = Mat4f::from_data([
+            1.0, 0.0, 0.0, 0.0,
+            0.0, angle.cos(), angle.sin(), 0.0,
+            0.0, -angle.sin(), angle.cos(), 0.0,
+            0.0, 0.0, 0.0, 1.0,
+        ]);
+        assert!(mat_equals_with_delta(matrix_around_x, expected, 0.0001));
+    }
+    {
+        let matrix_around_y = Mat4f::rotation_around_y(angle);
+        let expected = Mat4f::from_data([
+            angle.cos(), 0.0, -angle.sin(), 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            angle.sin(), 0.0, angle.cos(), 0.0,
+            0.0, 0.0, 0.0, 1.0,
+        ]);
+        assert!(mat_equals_with_delta(matrix_around_y, expected, 0.0001));
+    }
+    {
+        let matrix_around_z = Mat4f::rotation_around_z(angle);
+        let expected = Mat4f::from_data([
+            angle.cos(), angle.sin(), 0.0, 0.0,
+            -angle.sin(), angle.cos(), 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0,
+        ]);
+        assert!(mat_equals_with_delta(matrix_around_z, expected, 0.0001));
+    }
 }
 
 #[test]

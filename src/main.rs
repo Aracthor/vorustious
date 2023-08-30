@@ -56,10 +56,11 @@ fn main() {
 
     const MIN_FRAME_TIME_IN_SECS: f32 = 1.0 / 60.0;
     let mut clock = Instant::now();
+    let rotate_clock = Instant::now();
     while !window.should_close() {
         window.clear();
 
-        let matrix = Mat4f::translation(Vect3f::new([0.0, 1.0, 1.0]));
+        let matrix = Mat4f::rotation_around_z(rotate_clock.elapsed().as_secs_f32());
         mesh.draw(&perspective_matrix, &camera.view_matrix(), &matrix);
 
         window.update();

@@ -30,6 +30,7 @@ impl<T: MathsUsable> Mat4<T> {
         Self::from_data(identity_data)
     }
 
+    #[allow(dead_code)]
     pub fn translation(translate: Vect<3, T>) -> Self {
         let mut result = Self::identity();
         result[3][0] = translate[0];
@@ -79,8 +80,44 @@ impl<T: MathsUsable> Mat4<T> {
     }
 }
 
-// Specific to f32 type because of tan() function that can be called only from floating types...
+// Specific to f32 type because of cos(), sin() and tan() function that can be called only from floating types...
 impl Mat4<f32> {
+    #[allow(dead_code)]
+    pub fn rotation_around_x(angle: f32) -> Self {
+        let cos = angle.cos();
+        let sin = angle.sin();
+        let mut result = Self::identity();
+        result[1][1] = cos;
+        result[1][2] = sin;
+        result[2][1] = -sin;
+        result[2][2] = cos;
+        result
+    }
+
+    #[allow(dead_code)]
+    pub fn rotation_around_y(angle: f32) -> Self {
+        let cos = angle.cos();
+        let sin = angle.sin();
+        let mut result = Self::identity();
+        result[0][0] = cos;
+        result[0][2] = -sin;
+        result[2][0] = sin;
+        result[2][2] = cos;
+        result
+    }
+
+    #[allow(dead_code)]
+    pub fn rotation_around_z(angle: f32) -> Self {
+        let cos = angle.cos();
+        let sin = angle.sin();
+        let mut result = Self::identity();
+        result[0][0] = cos;
+        result[0][1] = sin;
+        result[1][0] = -sin;
+        result[1][1] = cos;
+        result
+    }
+
     pub fn perspective(fov: f32, aspect: f32, z_near: f32, z_far: f32) -> Self {
         assert!(fov > 0.0);
         assert!(aspect > 0.0);
