@@ -1,8 +1,9 @@
 pub mod camera;
-pub mod cube;
-pub mod frame_limiter;
-pub mod material;
-pub mod mesh;
 pub mod windowing;
+pub mod renderer;
 
+mod cube;
+mod frame_limiter;
+mod material;
+mod mesh;
 mod opengl;
