@@ -115,4 +115,17 @@ impl<const N: usize, T: MathsUsable> std::ops::Div<T> for Vect<N, T> {
     }
 }
 
+impl<const N: usize, T: MathsUsable> std::fmt::Display for Vect<N, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        assert!(N > 0);
+        let mut index = 0;
+        let mut result = write!(f, "{}", self.data[index]);
+        while index + 1 < N && !result.is_err() {
+            index += 1;
+            result = write!(f, ", {}", self.data[index]);
+        }
+        result
+    }
+}
+
 pub type Vect3f = Vect<3, f32>;
