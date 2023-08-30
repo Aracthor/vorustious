@@ -1,6 +1,9 @@
 mod graphic;
 mod maths;
 
+use std::time::Duration;
+use std::time::Instant;
+
 use graphic::material::Material;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
@@ -36,12 +39,19 @@ fn main() {
         Mat4f::look_at(eye, target, up)
     };
 
+    const MIN_FRAME_TIME_IN_SECS: f32 = 1.0 / 60.0;
+    let mut clock = Instant::now();
     while !window.should_close() {
         window.clear();
 
         mesh.draw(&perspective_matrix, &view_matrix);
 
         window.refresh();
+        let time_to_sleep = MIN_FRAME_TIME_IN_SECS - clock.elapsed().as_secs_f32();
+        if time_to_sleep > 0.0 {
+            std::thread::sleep(Duration::from_secs_f32(time_to_sleep));
+        }
+        clock = Instant::now();
         window.update_events();
     }
 }
