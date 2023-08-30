@@ -5,32 +5,36 @@ use core::ops::Index;
 use core::ops::IndexMut;
 
 #[derive(Clone, Copy)]
-pub struct Mat4<T: MathsUsable> {
-    data: [Vect<4, T>; 4],
+pub struct Mat<const N: usize, T: MathsUsable> {
+    data: [Vect<N, T>; N],
 }
 
-impl<T: MathsUsable> Mat4<T> {
-    pub fn from_data(data: [T; 16]) -> Mat4<T> {
-        Self {
-            data: [
-                Vect::new([data[0], data[1], data[2], data[3]]),
-                Vect::new([data[4], data[5], data[6], data[7]]),
-                Vect::new([data[8], data[9], data[10], data[11]]),
-                Vect::new([data[12], data[13], data[14], data[15]]),
-            ],
+impl<const N: usize, T: MathsUsable> Mat<N, T> {
+    #[allow(dead_code)]
+    pub fn from_data<const N2: usize>(data: [T; N2]) -> Self {
+        assert!(N2 == N * N);
+        let mut result = Self::identity();
+        for y in 0..N {
+            result[y] = Vect::<N, T>::from_slice(&data[y * N..(y + 1) * N]);
         }
+        result
     }
 
     pub fn identity() -> Self {
-        let identity_data: [T; 16] = [
-            1.0.into(), 0.0.into(), 0.0.into(), 0.0.into(),
-            0.0.into(), 1.0.into(), 0.0.into(), 0.0.into(),
-            0.0.into(), 0.0.into(), 1.0.into(), 0.0.into(),
-            0.0.into(), 0.0.into(), 0.0.into(), 1.0.into(),
-        ];
-        Self::from_data(identity_data)
+        let mut result = Self { data: [Vect::<N, T>::zero(); N] };
+        for i in 0..N {
+            result[i][i] = 1.0.into();
+        }
+        result
     }
 
+    pub fn data_as_ptr(&self) -> *const T {
+        assert!(std::mem::size_of_val(self) == std::mem::size_of::<f32>() * 16);
+        self.data.as_ptr().cast()
+    }
+}
+
+impl<T: MathsUsable> Mat<4, T> {
     #[allow(dead_code)]
     pub fn translation(translate: Vect<3, T>) -> Self {
         let mut result = Self::identity();
@@ -74,17 +78,13 @@ impl<T: MathsUsable> Mat4<T> {
         result[3][2] =  Vect::dot(zaxis, eye);
         result
     }
-
-    pub fn data_as_ptr(&self) -> *const T {
-        assert!(std::mem::size_of_val(self) == std::mem::size_of::<f32>() * 16);
-        self.data.as_ptr().cast()
-    }
 }
 
 // Specific to f32 type because of cos(), sin() and tan() function that can be called only from floating types...
-impl Mat4<f32> {
+impl<const N: usize> Mat<N, f32> {
     #[allow(dead_code)]
     pub fn rotation_around_x(angle: f32) -> Self {
+        assert!(N >= 3);
         let cos = angle.cos();
         let sin = angle.sin();
         let mut result = Self::identity();
@@ -97,6 +97,7 @@ impl Mat4<f32> {
 
     #[allow(dead_code)]
     pub fn rotation_around_y(angle: f32) -> Self {
+        assert!(N >= 3);
         let cos = angle.cos();
         let sin = angle.sin();
         let mut result = Self::identity();
@@ -109,6 +110,7 @@ impl Mat4<f32> {
 
     #[allow(dead_code)]
     pub fn rotation_around_z(angle: f32) -> Self {
+        assert!(N >= 3);
         let cos = angle.cos();
         let sin = angle.sin();
         let mut result = Self::identity();
@@ -118,7 +120,9 @@ impl Mat4<f32> {
         result[1][1] = cos;
         result
     }
+}
 
+impl Mat<4, f32> {
     pub fn perspective(fov: f32, aspect: f32, z_near: f32, z_far: f32) -> Self {
         assert!(fov > 0.0);
         assert!(aspect > 0.0);
@@ -137,24 +141,24 @@ impl Mat4<f32> {
     }
 }
 
-impl<T: MathsUsable> Index<usize> for Mat4<T> {
-    type Output = Vect<4, T>;
+impl<const N: usize, T: MathsUsable> Index<usize> for Mat<N, T> {
+    type Output = Vect<N, T>;
     fn index(&self, index: usize) -> &Self::Output {
         &self.data[index]
     }
 }
 
-impl<T: MathsUsable> IndexMut<usize> for Mat4<T> {
+impl<const N: usize, T: MathsUsable> IndexMut<usize> for Mat<N, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.data[index]
     }
 }
 
-impl<T: MathsUsable> std::ops::Mul<Self> for Mat4<T> {
+impl<const N: usize, T: MathsUsable> std::ops::Mul<Self> for Mat<N, T> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        let mut product = Mat4::identity();
+        let mut product = Self::identity();
         for y in 0..4 {
             for x in 0..4 {
                 let mut result: T = 0.0.into();
@@ -168,15 +172,15 @@ impl<T: MathsUsable> std::ops::Mul<Self> for Mat4<T> {
     }
 }
 
-impl<const N: usize, T: MathsUsable> std::ops::Mul<Vect<N, T>> for Mat4<T> {
-    type Output = Vect<N, T>;
+impl<const N: usize, const VN: usize, T: MathsUsable> std::ops::Mul<Vect<VN, T>> for Mat<N, T> {
+    type Output = Vect<VN, T>;
 
-    fn mul(self, rhs: Vect<N, T>) -> Self::Output {
-        let mut result = Vect::<N, T>::zero();
-        for y in 0..4 {
-            if y < N {
-                for x in 0..4 {
-                    let r_value = if x >= N { 1.0.into() } else { rhs[x] };
+    fn mul(self, rhs: Vect<VN, T>) -> Self::Output {
+        let mut result = Self::Output::zero();
+        for y in 0..N {
+            if y < VN {
+                for x in 0..N {
+                    let r_value = if x >= VN { 1.0.into() } else { rhs[x] };
                     result[y] += self[x][y] * r_value;
                 }
             }
@@ -185,4 +189,4 @@ impl<const N: usize, T: MathsUsable> std::ops::Mul<Vect<N, T>> for Mat4<T> {
     }
 }
 
-pub type Mat4f = Mat4<f32>;
+pub type Mat4f = Mat<4, f32>;
