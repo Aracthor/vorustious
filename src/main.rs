@@ -11,8 +11,7 @@ use graphic::windowing::window::Window;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
 
-fn update_events(event_handler: &mut event_handler::EventHandler, camera: &mut Camera) {
-    event_handler.update();
+fn update_events(event_handler: &event_handler::EventHandler, camera: &mut Camera) {
     const CAMERA_SPEED: f32 = 0.03;
     const CAMERA_SENSITIVITY: f32 = 0.005;
     let camera_forward = camera.forward();
@@ -62,12 +61,12 @@ fn main() {
 
         mesh.draw(&perspective_matrix, &camera.view_matrix());
 
-        window.refresh();
+        window.update();
         let time_to_sleep = MIN_FRAME_TIME_IN_SECS - clock.elapsed().as_secs_f32();
         if time_to_sleep > 0.0 {
             std::thread::sleep(Duration::from_secs_f32(time_to_sleep));
         }
         clock = Instant::now();
-        update_events(&mut window.event_handler, &mut camera);
+        update_events(&window.event_handler(), &mut camera);
     }
 }
