@@ -4,15 +4,30 @@ mod maths;
 use std::time::Duration;
 use std::time::Instant;
 
+use graphic::camera::Camera;
+use graphic::event_handler;
 use graphic::material::Material;
+use graphic::window::Window;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
+
+fn update_events(event_handler: &mut event_handler::EventHandler, camera: &mut Camera) {
+    event_handler.update();
+    const CAMERA_SPEED: f32 = 0.03;
+    let camera_forward = camera.forward();
+    let camera_right = Vect3f::cross(camera_forward, camera.up());
+
+    if event_handler.is_key_pressed(event_handler::Key::W) { camera.position += camera_forward * CAMERA_SPEED }
+    if event_handler.is_key_pressed(event_handler::Key::S) { camera.position -= camera_forward * CAMERA_SPEED }
+    if event_handler.is_key_pressed(event_handler::Key::A) { camera.position -= camera_right * CAMERA_SPEED }
+    if event_handler.is_key_pressed(event_handler::Key::D) { camera.position += camera_right * CAMERA_SPEED }
+}
 
 fn main() {
     const WINDOW_WIDTH:u32 = 800;
     const WINDOW_HEIGHT:u32 = 600;
 
-    let mut window = graphic::window::Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious");
+    let mut window = Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious");
 
     let mut material = Material::create("shaders/hello_texture.vert", "shaders/hello_texture.frag");
 
@@ -32,11 +47,10 @@ fn main() {
         let z_far = 1000.0;
         Mat4f::orthographic(left, right, bottom, top, z_near, z_far)
     };
-    let view_matrix = {
-        let eye = Vect3f::new([1.0, 1.0, 1.0]);
-        let target = Vect3f::new([0.0, 0.0, 0.0]);
-        let up = Vect3f::new([0.0, 1.0, 0.0]);
-        Mat4f::look_at(eye, target, up)
+    let mut camera = Camera {
+        position: Vect3f::new([-1.0, -0.5, -0.5]),
+        angle_x: 0.0,
+        angle_y: 0.0,
     };
 
     const MIN_FRAME_TIME_IN_SECS: f32 = 1.0 / 60.0;
@@ -44,7 +58,7 @@ fn main() {
     while !window.should_close() {
         window.clear();
 
-        mesh.draw(&perspective_matrix, &view_matrix);
+        mesh.draw(&perspective_matrix, &camera.view_matrix());
 
         window.refresh();
         let time_to_sleep = MIN_FRAME_TIME_IN_SECS - clock.elapsed().as_secs_f32();
@@ -52,6 +66,6 @@ fn main() {
             std::thread::sleep(Duration::from_secs_f32(time_to_sleep));
         }
         clock = Instant::now();
-        window.update_events();
+        update_events(&mut window.event_handler, &mut camera);
     }
 }

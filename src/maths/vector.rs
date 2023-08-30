@@ -91,6 +91,34 @@ impl<const N: usize, T: MathsUsable> std::ops::Neg for Vect<N, T> {
     }
 }
 
+impl<const N: usize, T: MathsUsable> std::ops::AddAssign<Self> for Vect<N, T> {
+    fn add_assign(&mut self, rhs: Self) {
+        for i in 0..N {
+            self.data[i] += rhs.data[i];
+        }
+    }
+}
+
+impl<const N: usize, T: MathsUsable> std::ops::SubAssign<Self> for Vect<N, T> {
+    fn sub_assign(&mut self, rhs: Self) {
+        for i in 0..N {
+            self.data[i] -= rhs.data[i];
+        }
+    }
+}
+
+impl<const N: usize, T: MathsUsable> std::ops::Add<Self> for Vect<N, T> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self::Output {
+        let mut result = self;
+        for i in 0..N {
+            result.data[i] += other.data[i];
+        }
+        result
+    }
+}
+
 impl<const N: usize, T: MathsUsable> std::ops::Sub<Self> for Vect<N, T> {
     type Output = Self;
 
@@ -98,6 +126,18 @@ impl<const N: usize, T: MathsUsable> std::ops::Sub<Self> for Vect<N, T> {
         let mut result = self;
         for i in 0..N {
             result.data[i] -= other.data[i];
+        }
+        result
+    }
+}
+
+impl<const N: usize, T: MathsUsable> std::ops::Mul<T> for Vect<N, T> {
+    type Output = Self;
+
+    fn mul(self, other: T) -> Self::Output {
+        let mut result = self;
+        for d in &mut result.data {
+            *d *= other;
         }
         result
     }

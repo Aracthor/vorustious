@@ -11,6 +11,7 @@ trait_set::trait_set! {
         std::ops::Div<Self, Output = Self> +
         std::ops::AddAssign<Self> +
         std::ops::SubAssign<Self> +
+        std::ops::MulAssign<Self> +
         std::ops::DivAssign<Self> +
         std::fmt::Display
 }

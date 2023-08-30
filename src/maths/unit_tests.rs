@@ -34,7 +34,9 @@ fn vector_op() {
     let v = Vect3f::new([3.0, -4.2, -2.4]);
 
     assert!(-u == Vect3f::new([-2.0, 1.0, -5.0]));
+    assert!(equals_with_delta(u + v, Vect3f::new([5.0, -5.2, 2.6]), 0.0001));
     assert!(equals_with_delta(u - v, Vect3f::new([-1.0, 3.2, 7.4]), 0.0001));
+    assert!(equals_with_delta(u * 2.0, Vect3f::new([4.0, -2.0, 10.0]), 0.0001));
     assert!(equals_with_delta(u / 2.0, Vect3f::new([1.0, -0.5, 2.5]), 0.0001));
 }
 

@@ -1,11 +1,11 @@
 use glfw::Context;
 
+use super::event_handler::EventHandler;
 use super::opengl::context;
 
 pub struct Window {
-    core: glfw::Glfw,
     window: glfw::Window,
-    events: std::sync::mpsc::Receiver<(f64, glfw::WindowEvent)>,
+    pub event_handler: EventHandler,
 }
 
 impl Window {
@@ -25,9 +25,8 @@ impl Window {
         unsafe { context::start_gl_context(width.try_into().unwrap(), height.try_into().unwrap()) };
 
         Self {
-            core: core,
             window: window,
-            events: events,
+            event_handler: EventHandler::new(core, events),
         }
     }
 
@@ -37,18 +36,6 @@ impl Window {
 
     pub fn refresh(&mut self) {
         self.window.swap_buffers();
-    }
-
-    pub fn update_events(&mut self) {
-        self.core.poll_events();
-        for (_, event) in glfw::flush_messages(&self.events) {
-            match event {
-                glfw::WindowEvent::Key(glfw::Key::Escape, _, glfw::Action::Press, _) => {
-                    self.window.set_should_close(true)
-                },
-                _ => {},
-            }
-        }
     }
 
     pub fn should_close(&self) -> bool {
