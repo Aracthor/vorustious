@@ -30,6 +30,7 @@ impl<T: MathsUsable> Mat4<T> {
         Self::from_data(identity_data)
     }
 
+    #[allow(dead_code)]
     pub fn orthographic(left: T, right: T, bottom: T, top: T, z_near: T, z_far: T) -> Self {
         let mut result = Self::identity();
         let two_as_t: T = 2.0.into();
@@ -67,6 +68,26 @@ impl<T: MathsUsable> Mat4<T> {
     pub fn data_as_ptr(&self) -> *const T {
         assert!(std::mem::size_of_val(self) == std::mem::size_of::<f32>() * 16);
         self.data.as_ptr().cast()
+    }
+}
+
+// Specific to f32 type because of tan() function that can be called only from floating types...
+impl Mat4<f32> {
+    pub fn perspective(fov: f32, aspect: f32, z_near: f32, z_far: f32) -> Self {
+        assert!(fov > 0.0);
+        assert!(aspect > 0.0);
+        assert!(z_near > 0.0);
+        assert!(z_near < z_far);
+        let half_fov_tan = (fov / 2.0).tan();
+
+        let mut result = Self::identity();
+        result[0][0] = 1.0 / (aspect * half_fov_tan);
+        result[1][1] = 1.0 / half_fov_tan;
+        result[2][2] = -(z_far + z_near) / (z_far - z_near);
+        result[2][3] = -1.0;
+        result[3][2] = -(2.0 * z_near * z_far) / (z_far - z_near);
+        result[3][3] = 0.0;
+        result
     }
 }
 

@@ -37,18 +37,14 @@ fn main() {
     let mesh = graphic::cube::cube_mesh(material);
 
     let perspective_matrix = {
-        let half_width:f32 = 1.6;
-        let half_height:f32 = 1.2;
-        let right = half_width;
-        let left = -half_width;
-        let bottom = -half_height;
-        let top = half_height;
+        let fov = 80.0_f32.to_radians();
+        let aspect = WINDOW_WIDTH as f32 / WINDOW_HEIGHT as f32;
         let z_near = 0.1;
         let z_far = 1000.0;
-        Mat4f::orthographic(left, right, bottom, top, z_near, z_far)
+        Mat4f::perspective(fov, aspect, z_near, z_far)
     };
     let mut camera = Camera {
-        position: Vect3f::new([-1.0, -0.5, -0.5]),
+        position: Vect3f::new([-1.0, 0.0, 0.0]),
         angle_x: 0.0,
         angle_y: 0.0,
     };

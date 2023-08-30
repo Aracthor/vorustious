@@ -49,7 +49,7 @@ fn vector_funcs() {
 }
 
 #[test]
-fn projection_matrix() {
+fn orthographic_matrix() {
     let left = 0.0;
     let right = 800.0;
     let bottom = 0.0;
@@ -66,6 +66,28 @@ fn projection_matrix() {
         expected[3][0] = -1.0;
         expected[3][1] = -1.0;
         expected[3][2] = -1.0002;
+        expected
+    };
+
+    assert!(mat_equals_with_delta(matrix, expected, 0.0001));
+}
+
+#[test]
+fn perspective_matrix() {
+    let fov = 80.0_f32.to_radians();
+    let aspect_ratio: f32 = 8.0 / 6.0;
+    let z_near = 0.1;
+    let z_far = 1000.0;
+    let matrix = Mat4f::perspective(fov, aspect_ratio, z_near, z_far);
+
+    let expected = {
+        let mut expected = Mat4f::identity();
+        expected[0][0] = 0.893815;
+        expected[1][1] = 1.19175;
+        expected[2][2] = -1.0002;
+        expected[2][3] = -1.0;
+        expected[3][2] = -0.20002;
+        expected[3][3] = 0.0;
         expected
     };
 
