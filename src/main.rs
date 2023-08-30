@@ -6,27 +6,9 @@ use std::time::Instant;
 
 use graphic::camera::Camera;
 use graphic::material::Material;
-use graphic::windowing::event_handler;
 use graphic::windowing::window::Window;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
-
-fn update_events(event_handler: &event_handler::EventHandler, camera: &mut Camera) {
-    const CAMERA_SPEED: f32 = 0.03;
-    const CAMERA_SENSITIVITY: f32 = 0.005;
-    let camera_forward = camera.forward();
-    let camera_right = Vect3f::cross(camera_forward, camera.up());
-
-    if event_handler.is_key_pressed(event_handler::Key::W) { camera.position += camera_forward * CAMERA_SPEED }
-    if event_handler.is_key_pressed(event_handler::Key::S) { camera.position -= camera_forward * CAMERA_SPEED }
-    if event_handler.is_key_pressed(event_handler::Key::A) { camera.position -= camera_right * CAMERA_SPEED }
-    if event_handler.is_key_pressed(event_handler::Key::D) { camera.position += camera_right * CAMERA_SPEED }
-
-    let cursor_movement = event_handler.cursor_movement();
-    camera.angle_x -= cursor_movement.0 as f32 * CAMERA_SENSITIVITY;
-    camera.angle_y -= cursor_movement.1 as f32 * CAMERA_SENSITIVITY;
-    camera.angle_y = camera.angle_y.clamp(-89.0_f32.to_radians(), 89.0_f32.to_radians());
-}
 
 fn main() {
     const WINDOW_WIDTH:u32 = 800;
@@ -48,11 +30,7 @@ fn main() {
         let z_far = 1000.0;
         Mat4f::perspective(fov, aspect, z_near, z_far)
     };
-    let mut camera = Camera {
-        position: Vect3f::new([-1.0, 0.0, 0.0]),
-        angle_x: 0.0,
-        angle_y: 0.0,
-    };
+    let mut camera = Camera::new(Vect3f::new([-1.0, 0.0, 0.0]));
 
     const MIN_FRAME_TIME_IN_SECS: f32 = 1.0 / 60.0;
     let mut clock = Instant::now();
@@ -69,6 +47,6 @@ fn main() {
             std::thread::sleep(Duration::from_secs_f32(time_to_sleep));
         }
         clock = Instant::now();
-        update_events(&window.event_handler(), &mut camera);
+        camera.update_from_events(&window.event_handler());
     }
 }
