@@ -2,10 +2,8 @@ mod graphic;
 mod maths;
 mod structure;
 
-use std::time::Duration;
-use std::time::Instant;
-
 use graphic::camera::Camera;
+use graphic::frame_limiter::FrameLimiter;
 use graphic::material::Material;
 use graphic::windowing::window::Window;
 use maths::matrix::Mat4f;
@@ -36,8 +34,7 @@ fn main() {
 
     let structure = Structure::new(-2, 4, -1, 1, -1, 0);
 
-    const MIN_FRAME_TIME_IN_SECS: f32 = 1.0 / 60.0;
-    let mut clock = Instant::now();
+    let mut frame_limiter = FrameLimiter::new(60.0);
     while !window.should_close() {
         window.clear();
 
@@ -48,11 +45,7 @@ fn main() {
         });
 
         window.update();
-        let time_to_sleep = MIN_FRAME_TIME_IN_SECS - clock.elapsed().as_secs_f32();
-        if time_to_sleep > 0.0 {
-            std::thread::sleep(Duration::from_secs_f32(time_to_sleep));
-        }
-        clock = Instant::now();
+        frame_limiter.limit();
         camera.update_from_events(&window.event_handler());
     }
 }
