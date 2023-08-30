@@ -71,16 +71,12 @@ fn orthographic_matrix() {
     let z_far = 1000.0;
     let matrix = Mat4f::orthographic(left, right, bottom, top, z_near, z_far);
 
-    let expected = {
-        let mut expected = Mat4f::identity();
-        expected[0][0] = 2.0 / 800.0;
-        expected[1][1] = 2.0 / 600.0;
-        expected[2][2] = -2.0 / 999.9;
-        expected[3][0] = -1.0;
-        expected[3][1] = -1.0;
-        expected[3][2] = -1.0002;
-        expected
-    };
+    let expected = Mat4f::from_data([
+        2.0 / 800.0, 0.0, 0.0, 0.0,
+        0.0, 2.0 / 600.0, 0.0, 0.0,
+        0.0, 0.0, -2.0 / 999.9, 0.0,
+        -1.0, -1.0, -1.0002, 1.0,
+    ]);
 
     assert!(mat_equals_with_delta(matrix, expected, 0.0001));
 }
@@ -93,16 +89,12 @@ fn perspective_matrix() {
     let z_far = 1000.0;
     let matrix = Mat4f::perspective(fov, aspect_ratio, z_near, z_far);
 
-    let expected = {
-        let mut expected = Mat4f::identity();
-        expected[0][0] = 0.893815;
-        expected[1][1] = 1.19175;
-        expected[2][2] = -1.0002;
-        expected[2][3] = -1.0;
-        expected[3][2] = -0.20002;
-        expected[3][3] = 0.0;
-        expected
-    };
+    let expected = Mat4f::from_data([
+        0.893815, 0.0, 0.0, 0.0,
+        0.0, 1.19175, 0.0, 0.0,
+        0.0, 0.0, -1.0002, -1.0,
+        0.0, 0.0, -0.20002, 0.0,
+    ]);
 
     assert!(mat_equals_with_delta(matrix, expected, 0.0001));
 }
@@ -114,15 +106,12 @@ fn view_matrix() {
     let up = Vect3f::new([0.0, 1.0, 0.0]);
     let matrix = Mat4f::look_at(eye, target, up);
 
-    let expected = {
-        let mut expected = Mat4f::identity();
-        expected[0][0] = 0.0;
-        expected[2][0] = -1.0;
-        expected[0][2] = 1.0;
-        expected[2][2] = 0.0;
-        expected[3][2] = -1.0;
-        expected
-    };
+    let expected = Mat4f::from_data([
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, -1.0, 1.0,
+    ]);
 
     assert!(mat_equals_with_delta(matrix, expected, 0.0001));
 }
