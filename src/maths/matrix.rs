@@ -19,8 +19,12 @@ impl<const N: usize, T: MathsUsable> Mat<N, T> {
         result
     }
 
+    pub fn zero() -> Self {
+        Self { data: [Vect::<N, T>::zero(); N] }
+    }
+
     pub fn identity() -> Self {
-        let mut result = Self { data: [Vect::<N, T>::zero(); N] };
+        let mut result = Self::zero();
         for i in 0..N {
             result[i][i] = 1.0.into();
         }
@@ -45,7 +49,6 @@ impl<T: MathsUsable> Mat<3, T> {
 }
 
 impl<T: MathsUsable> Mat<4, T> {
-    #[allow(dead_code)]
     pub fn determinant(&self) -> T {
         let det1 = Mat::<3, T>::from_data([
             self[1][1], self[1][2], self[1][3],
@@ -69,6 +72,29 @@ impl<T: MathsUsable> Mat<4, T> {
         ]).determinant() * self[3][0];
 
         det1 - det2 + det3 - det4
+    }
+
+    #[allow(dead_code)]
+    pub fn inverse(&self) -> Self {
+        let oo_det: T = T::from(1.0) / self.determinant();
+        let mut sign: T = 1.0.into();
+        let mut result = Self::zero();
+        for x in 0..4 {
+            for y in 0..4 {
+                let mut submatrix = Mat::<3, T>::zero();
+                for sub_x in 0..3 {
+                    for sub_y in 0..3 {
+                        let x_to_get = if sub_x >= x { sub_x + 1 } else { sub_x };
+                        let y_to_get = if sub_y >= y { sub_y + 1 } else { sub_y };
+                        submatrix[sub_x][sub_y] = self[x_to_get][y_to_get];
+                    }
+                }
+                result[y][x] = oo_det * submatrix.determinant() * sign;
+                sign *= (-1.0).into();
+            }
+            sign *= (-1.0).into();
+        }
+        result
     }
 
     #[allow(dead_code)]

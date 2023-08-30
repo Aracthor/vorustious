@@ -58,7 +58,7 @@ fn vector_funcs() {
 }
 
 #[test]
-fn matrix_funcs() {
+fn matrix_determinant() {
     let mat3 = Mat3f::from_data([
         1.0, 4.0, -4.2,
         2.0, -1.0, 2.2,
@@ -73,6 +73,23 @@ fn matrix_funcs() {
         0.0, 42.0, -1.0, 3.2,
     ]);
     assert!(equals_with_delta(mat4.determinant(), 2526.11, 0.01));
+}
+
+#[test]
+fn matrix_inverse() {
+    let matrix = Mat4f::from_data([
+        1.0, 4.0, -4.2, 3.0,
+        2.0, -1.0, 2.2, 2.1,
+        -2.1, 4.3, 10.0, 0.0,
+        0.0, 42.0, -1.0, 3.2,
+    ]);
+    let expected = Mat4f::from_data([
+        -0.37738, 0.430349, -0.246039, 0.071377,
+        -0.0329337, 0.00398875, -0.0118839, 0.0282577,
+        -0.0650883, 0.0886582, 0.0534419, 0.00283836,
+        0.411915, -0.0246466, 0.172677, -0.0574956,
+    ]);
+    assert!(mat_equals_with_delta(matrix.inverse(), expected, 0.0001));
 }
 
 #[test]
