@@ -43,6 +43,7 @@ impl<T: MathsUsable> Mat4<T> {
     }
 
     pub fn look_at(eye: Vect<3, T>, target: Vect<3, T>, up: Vect<3, T>) -> Self {
+        assert!(eye != target);
         let zaxis = (target - eye).normalize();
         let xaxis = Vect::cross(zaxis, up).normalize();
         let yaxis = Vect::cross(xaxis, zaxis);
