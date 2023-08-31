@@ -23,6 +23,7 @@ impl Window {
 
         window.make_current();
         window.set_key_polling(true);
+        window.set_mouse_button_polling(true);
         let middle_pos = (width as f64 / 2.0, height as f64 / 2.0);
         window.set_cursor_pos(middle_pos.0, middle_pos.1);
         window.set_cursor_mode(glfw::CursorMode::Hidden);
