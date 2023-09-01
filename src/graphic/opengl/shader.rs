@@ -1,6 +1,7 @@
 use super::gl_check::gl_check;
 
 use crate::maths::matrix::Mat4f;
+use crate::maths::vector::Vect4f;
 
 pub struct Shader {
     vertex_shader: gl::types::GLuint,
@@ -64,6 +65,21 @@ impl Shader {
             vertex_shader: vertex_shader,
             fragment_shader: fragment_shader,
             program: program,
+        }
+    }
+
+    pub fn set_vector_uniform(&self, uniform_name: &str, value: &Vect4f) {
+        let mut location_name: Vec<gl::types::GLchar> = Default::default();
+        location_name.reserve(uniform_name.len() + 1);
+        for c in uniform_name.as_bytes() {
+            location_name.push((*c).try_into().unwrap());
+        }
+        location_name.push(0);
+
+        unsafe {
+            let location = gl::GetUniformLocation(self.program, location_name.as_ptr());
+            assert!(location >= 0, "invalid uniform {uniform_name}");
+            gl::Uniform4fv(location, 1, value.data_as_ptr());
         }
     }
 

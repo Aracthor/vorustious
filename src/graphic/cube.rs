@@ -1,6 +1,7 @@
 use super::material::Material;
 use super::mesh::Mesh;
 use super::opengl::texture::Texture;
+use super::opengl::vertex_objects::Primitive;
 
 pub fn cube_texture(border_color: [u8; 4], fill_color: [u8; 4]) -> Texture {
     let b_r = border_color[0];
@@ -114,5 +115,5 @@ pub fn cube_mesh(material: Material) -> Mesh {
         1.0, 0.0,
         ].to_vec();
 
-    Mesh::create(positions, tex_coords, material)
+    Mesh::create(positions, tex_coords, Primitive::Triangles, material)
 }

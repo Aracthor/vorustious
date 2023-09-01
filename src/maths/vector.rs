@@ -51,6 +51,11 @@ impl<const N: usize, T: MathsUsable> Vect<N, T> {
         assert!(length != 0.0.into());
         return *self / length;
     }
+
+    pub fn data_as_ptr(&self) -> *const T {
+        assert!(std::mem::size_of_val(self) == std::mem::size_of::<T>() * N);
+        self.data.as_ptr().cast()
+    }
 }
 
 impl<T: MathsUsable> Vect<3, T> {
@@ -179,3 +184,4 @@ impl<const N: usize, T: MathsUsable> std::fmt::Display for Vect<N, T> {
 }
 
 pub type Vect3f = Vect<3, f32>;
+pub type Vect4f = Vect<4, f32>;
