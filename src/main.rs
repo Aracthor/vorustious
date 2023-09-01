@@ -5,6 +5,7 @@ mod structure;
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
 use graphic::windowing::window::Window;
+use maths::segment::Segm3f;
 use maths::matrix::Mat4f;
 use structure::Structure;
 
@@ -24,11 +25,18 @@ fn main() {
     };
     let mut camera = Camera::new();
 
-    let structure = Structure::new(-2, 4, -1, 1, -1, 0);
+    let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
         let projection_view_matrix = projection_matrix * camera.view_matrix();
+
+        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) {
+            let ray_start = camera.position();
+            let ray_direction = camera.forward();
+            let segment = Segm3f::new(ray_start, ray_start + ray_direction * 100.0);
+            structure.for_voxels_in_segment(segment, |voxel: &mut bool| {*voxel = false });
+        }
 
         window.clear();
         renderer.render_frame(&projection_view_matrix, &structure);

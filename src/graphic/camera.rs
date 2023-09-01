@@ -22,6 +22,10 @@ impl Camera {
         Mat4f::look_at(self.position, target, self.up())
     }
 
+    pub fn position(&self) -> Vect3f {
+        self.position
+    }
+
     pub fn up(&self) -> Vect3f {
         Vect3f::new([0.0, 0.0, 1.0])
     }

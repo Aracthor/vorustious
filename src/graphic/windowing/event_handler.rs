@@ -104,5 +104,10 @@ impl EventHandler {
         key_status.is_some() && *key_status.unwrap() == Status::Pressed
     }
 
+    pub fn is_mouse_button_pressed(&self, button: MouseButton) -> bool {
+        let button_status = self.mouse_button_status.get(&button);
+        button_status.is_some() && *button_status.unwrap() == Status::Pressed
+    }
+
     pub fn cursor_movement(&self) -> (f64, f64) { self.cursor_movement }
 }
