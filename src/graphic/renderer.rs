@@ -52,7 +52,7 @@ impl Renderer {
 
     pub fn render_frame(&mut self, projection_view_matrix: &Mat4f, structure: &Structure) {
         structure.for_each_voxel(|x, y, z| {
-            let model_matrix = Mat4f::translation(Vect3f::new([x as f32, y as f32, z as f32]));
+            let model_matrix = structure.repere().clone() * Mat4f::translation(Vect3f::new([x as f32, y as f32, z as f32]));
             self.cube_mesh.draw(projection_view_matrix, &model_matrix);
         });
 

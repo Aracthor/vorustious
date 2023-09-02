@@ -7,6 +7,7 @@ use graphic::camera::Camera;
 use graphic::windowing::window::Window;
 use maths::segment::Segm3f;
 use maths::matrix::Mat4f;
+use maths::vector::Vect3f;
 use structure::Structure;
 
 fn main() {
@@ -30,6 +31,13 @@ fn main() {
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
         let projection_view_matrix = projection_matrix.clone() * camera.view_matrix();
+
+        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Right) {
+            structure.apply_transformation(Mat4f::translation(Vect3f::new([0.05, 0.0, -0.05])));
+            structure.apply_transformation(Mat4f::rotation_around_x(0.03));
+            structure.apply_transformation(Mat4f::rotation_around_y(0.013));
+            structure.apply_transformation(Mat4f::rotation_around_z(0.02));
+        }
 
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) {
             let ray_start = camera.position();

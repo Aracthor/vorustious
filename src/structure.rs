@@ -1,10 +1,12 @@
 use crate::maths::boxes::Box;
 use crate::maths::segment::Segm3f;
+use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect;
 
 pub struct Structure {
     voxel_box: Box<3, i32>,
     data: Vec<bool>,
+    repere: Mat4f,
 }
 
 fn sign(n: f32) -> i32 {
@@ -34,16 +36,16 @@ impl Structure {
         Self {
             voxel_box: Box::<3, i32>::from_min_max(Vect::<3, i32>::new([min_x, min_y, min_z]), Vect::<3, i32>::new([max_x, max_y, max_z])),
             data: vec![true; vec_size],
+            repere: Mat4f::identity(),
         }
     }
 
-    fn voxel_index(&self, x: i32, y: i32, z: i32) -> usize {
-        assert!(self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])));
-        let extent = self.voxel_box.extent() + Vect::<3, i32>::new([1, 1, 1]);
-        let x_in_data = x - self.voxel_box.min()[0];
-        let y_in_data = y - self.voxel_box.min()[1];
-        let z_in_data = z - self.voxel_box.min()[2];
-        (z_in_data * (extent[0] * extent[1]) + y_in_data * extent[0] + x_in_data).try_into().unwrap()
+    pub fn apply_transformation(&mut self, transformation: Mat4f) {
+        self.repere = self.repere.clone() * transformation;
+    }
+
+    pub fn repere(&self) -> &Mat4f {
+        &self.repere
     }
 
     pub fn for_each_voxel<F: Fn(i32, i32, i32)>(&self, f: F) {
@@ -59,11 +61,12 @@ impl Structure {
     }
 
     pub fn for_voxels_in_segment<F: Fn(&mut bool)>(&mut self, segment: Segm3f, f: F) {
-        let dir = segment.direction();
+        let mut new_segment = segment.transform(self.repere.inverse());
 
-        let mut new_segment = segment;
         new_segment.start += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);
         new_segment.end += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);
+
+        let dir = new_segment.direction();
 
         let mut x = new_segment.start[0] as i32;
         let mut y = new_segment.start[1] as i32;
@@ -112,6 +115,15 @@ impl Structure {
                 }
             }
         }
+    }
+
+    fn voxel_index(&self, x: i32, y: i32, z: i32) -> usize {
+        assert!(self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])));
+        let extent = self.voxel_box.extent() + Vect::<3, i32>::new([1, 1, 1]);
+        let x_in_data = x - self.voxel_box.min()[0];
+        let y_in_data = y - self.voxel_box.min()[1];
+        let z_in_data = z - self.voxel_box.min()[2];
+        (z_in_data * (extent[0] * extent[1]) + y_in_data * extent[0] + x_in_data).try_into().unwrap()
     }
 
     fn has_voxel(&self, x: i32, y: i32, z: i32) -> bool {

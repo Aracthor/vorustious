@@ -1,3 +1,4 @@
+use super::matrix::Mat4f;
 use super::traits::MathsUsable;
 use super::vector::Vect;
 
@@ -17,6 +18,16 @@ impl<const N: usize, T: MathsUsable> Segment<N, T> {
 
     pub fn direction(&self) -> Vect<N, T> {
         self.end - self.start
+    }
+}
+
+impl Segment<3, f32> {
+    pub fn transform(&self, transformation: Mat4f) -> Self {
+        Self {
+            start: transformation.clone() * self.start,
+            end: transformation.clone() * self.end,
+        }
+
     }
 }
 
