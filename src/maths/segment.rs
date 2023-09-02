@@ -1,6 +1,7 @@
 use super::traits::MathsUsable;
 use super::vector::Vect;
 
+#[derive(Clone, Copy)]
 pub struct Segment<const N: usize, T: MathsUsable> {
     pub start: Vect<N, T>,
     pub end: Vect<N, T>,

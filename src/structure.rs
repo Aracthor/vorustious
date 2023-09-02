@@ -72,9 +72,13 @@ impl Structure {
     pub fn for_voxels_in_segment<F: Fn(&mut bool)>(&mut self, segment: Segm3f, f: F) {
         let dir = segment.direction();
 
-        let mut x = segment.start[0] as i32;
-        let mut y = segment.start[1] as i32;
-        let mut z = segment.start[2] as i32;
+        let mut new_segment = segment;
+        new_segment.start += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);
+        new_segment.end += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);
+
+        let mut x = new_segment.start[0] as i32;
+        let mut y = new_segment.start[1] as i32;
+        let mut z = new_segment.start[2] as i32;
 
         let step_x = sign(dir[0]);
         let step_y = sign(dir[1]);
@@ -84,18 +88,18 @@ impl Structure {
         let next_pixel_boundary_y = y + if step_y < 0 {0} else {1};
         let next_pixel_boundary_z = z + if step_z < 0 {0} else {1};
 
-        let mut max_x = if dir[0] != 0.0 { (next_pixel_boundary_x as f32 - segment.start[0]) / dir[0] } else { f32::MAX };
-        let mut max_y = if dir[1] != 0.0 { (next_pixel_boundary_y as f32 - segment.start[1]) / dir[1] } else { f32::MAX };
-        let mut max_z = if dir[2] != 0.0 { (next_pixel_boundary_z as f32 - segment.start[2]) / dir[2] } else { f32::MAX };
+        let mut max_x = if dir[0] != 0.0 { (next_pixel_boundary_x as f32 - new_segment.start[0]) / dir[0] } else { f32::MAX };
+        let mut max_y = if dir[1] != 0.0 { (next_pixel_boundary_y as f32 - new_segment.start[1]) / dir[1] } else { f32::MAX };
+        let mut max_z = if dir[2] != 0.0 { (next_pixel_boundary_z as f32 - new_segment.start[2]) / dir[2] } else { f32::MAX };
 
         let delta_x = step_x as f32 / dir[0];
         let delta_y = step_y as f32 / dir[1];
         let delta_z = step_z as f32 / dir[2];
 
         while
-            less_than(x, step_x, segment.end[0] as i32) &&
-            less_than(y, step_y, segment.end[1] as i32) &&
-            less_than(z, step_z, segment.end[2] as i32)
+            less_than(x, step_x, new_segment.end[0] as i32) &&
+            less_than(y, step_y, new_segment.end[1] as i32) &&
+            less_than(z, step_z, new_segment.end[2] as i32)
         {
             if x >= self.min_x && x <= self.max_x && y >= self.min_y && y <= self.max_y && z >= self.min_z && z <= self.max_z {
                 let index = self.voxel_index(x, y, z);
