@@ -4,7 +4,7 @@ use super::vector::Vect;
 use core::ops::Index;
 use core::ops::IndexMut;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Mat<const N: usize, T: MathsUsable> {
     data: [Vect<N, T>; N],
 }

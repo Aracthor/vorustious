@@ -29,7 +29,7 @@ fn main() {
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
-        let projection_view_matrix = projection_matrix * camera.view_matrix();
+        let projection_view_matrix = projection_matrix.clone() * camera.view_matrix();
 
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) {
             let ray_start = camera.position();

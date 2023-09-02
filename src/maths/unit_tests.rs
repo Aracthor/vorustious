@@ -171,17 +171,17 @@ fn matrix_op() {
         -2.4, 0.0, 4.2, -0.5,
     ]);
     {
-        let result = mat1 * Vect3f::new([42.0, 4.2, -42.0]);
+        let result = mat1.clone() * Vect3f::new([42.0, 4.2, -42.0]);
         let expected = Vect3f::new([138.6, 29.4, -588.16]);
         assert!(vec_equals_with_delta(result, expected, 0.0001));
     }
     {
-        let result = mat1 * Vect::<4, f32>::new([42.0, 4.2, -42.0, 1.0]);
+        let result = mat1.clone() * Vect::<4, f32>::new([42.0, 4.2, -42.0, 1.0]);
         let expected = Vect::<4, f32>::new([138.6, 29.4, -588.16, 138.02]);
         assert!(vec_equals_with_delta(result, expected, 0.0001));
     }
     {
-        let result = mat1 * mat2;
+        let result = mat1.clone() * mat2;
         let expected = Mat4f::from_data([
             6.41, 100.37, -18.44, 21.1,
             19.1, 192.7, -28.26, 43.06,
