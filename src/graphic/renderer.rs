@@ -27,7 +27,7 @@ impl Renderer {
 
         let interface_mesh = {
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
-            material.add_uniform("uni_color", Vect4f::new([1.0, 1.0, 1.0, 1.0]));
+            material.add_uniform("uni_color", Vect4f::new([1.0, 1.0, 1.0, 0.5]));
 
             let positions: Vec<f32> = [
                 -0.07, 0.0, 0.0,
