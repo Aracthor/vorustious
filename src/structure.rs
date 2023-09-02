@@ -1,12 +1,9 @@
+use crate::maths::boxes::Box;
 use crate::maths::segment::Segm3f;
+use crate::maths::vector::Vect;
 
 pub struct Structure {
-    min_x: i32,
-    max_x: i32,
-    min_y: i32,
-    max_y: i32,
-    min_z: i32,
-    max_z: i32,
+    voxel_box: Box<3, i32>,
     data: Vec<bool>,
 }
 
@@ -35,32 +32,24 @@ impl Structure {
         let extent_z = max_z - min_z + 1;
         let vec_size: usize = (extent_x * extent_y * extent_z).try_into().unwrap();
         Self {
-            min_x: min_x,
-            max_x: max_x,
-            min_y: min_y,
-            max_y: max_y,
-            min_z: min_z,
-            max_z: max_z,
+            voxel_box: Box::<3, i32>::from_min_max(Vect::<3, i32>::new([min_x, min_y, min_z]), Vect::<3, i32>::new([max_x, max_y, max_z])),
             data: vec![true; vec_size],
         }
     }
 
     fn voxel_index(&self, x: i32, y: i32, z: i32) -> usize {
-        assert!(x >= self.min_x && x <= self.max_x);
-        assert!(y >= self.min_y && y <= self.max_y);
-        assert!(z >= self.min_z && z <= self.max_z);
-        let extent_x = self.max_x - self.min_x + 1;
-        let extent_y = self.max_y - self.min_y + 1;
-        let z_in_data = z - self.min_z;
-        let y_in_data = y - self.min_y;
-        let x_in_data = x - self.min_x;
-        (z_in_data * (extent_x * extent_y) + y_in_data * extent_x + x_in_data).try_into().unwrap()
+        assert!(self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])));
+        let extent = self.voxel_box.extent() + Vect::<3, i32>::new([1, 1, 1]);
+        let x_in_data = x - self.voxel_box.min()[0];
+        let y_in_data = y - self.voxel_box.min()[1];
+        let z_in_data = z - self.voxel_box.min()[2];
+        (z_in_data * (extent[0] * extent[1]) + y_in_data * extent[0] + x_in_data).try_into().unwrap()
     }
 
     pub fn for_each_voxel<F: Fn(i32, i32, i32)>(&self, f: F) {
-        for z in self.min_z..self.max_z + 1 {
-            for y in self.min_y..self.max_y + 1 {
-                for x in self.min_x..self.max_x + 1 {
+        for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
+            for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
+                for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
                     if self.has_voxel(x, y, z) {
                         f(x, y, z);
                     }
@@ -101,7 +90,7 @@ impl Structure {
             less_than(y, step_y, new_segment.end[1] as i32) &&
             less_than(z, step_z, new_segment.end[2] as i32)
         {
-            if x >= self.min_x && x <= self.max_x && y >= self.min_y && y <= self.max_y && z >= self.min_z && z <= self.max_z {
+            if self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])) {
                 let index = self.voxel_index(x, y, z);
                 f(&mut self.data[index]);
             }
@@ -126,9 +115,7 @@ impl Structure {
     }
 
     fn has_voxel(&self, x: i32, y: i32, z: i32) -> bool {
-        assert!(x >= self.min_x && x <= self.max_x);
-        assert!(y >= self.min_y && y <= self.max_y);
-        assert!(z >= self.min_z && z <= self.max_z);
+        assert!(self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])));
         let index = self.voxel_index(x, y, z);
         self.data[index]
     }

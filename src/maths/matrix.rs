@@ -26,7 +26,7 @@ impl<const N: usize, T: MathsUsable> Mat<N, T> {
     pub fn identity() -> Self {
         let mut result = Self::zero();
         for i in 0..N {
-            result[i][i] = 1.0.into();
+            result[i][i] = T::from(1);
         }
         result
     }
@@ -76,8 +76,8 @@ impl<T: MathsUsable> Mat<4, T> {
 
     #[allow(dead_code)]
     pub fn inverse(&self) -> Self {
-        let oo_det: T = T::from(1.0) / self.determinant();
-        let mut sign: T = 1.0.into();
+        let oo_det: T = T::from(1) / self.determinant();
+        let mut sign: T = T::from(1);
         let mut result = Self::zero();
         for x in 0..4 {
             for y in 0..4 {
@@ -90,9 +90,9 @@ impl<T: MathsUsable> Mat<4, T> {
                     }
                 }
                 result[y][x] = oo_det * submatrix.determinant() * sign;
-                sign *= (-1.0).into();
+                sign *= T::from(-1);
             }
-            sign *= (-1.0).into();
+            sign *= T::from(-1);
         }
         result
     }
@@ -109,35 +109,13 @@ impl<T: MathsUsable> Mat<4, T> {
     #[allow(dead_code)]
     pub fn orthographic(left: T, right: T, bottom: T, top: T, z_near: T, z_far: T) -> Self {
         let mut result = Self::identity();
-        let two_as_t: T = 2.0.into();
+        let two_as_t: T = T::from(2);
         result[0][0] = two_as_t / (right - left);
         result[1][1] = two_as_t / (top - bottom);
         result[2][2] = -two_as_t / (z_far - z_near);
         result[3][0] = -(right + left) / (right - left);
         result[3][1] = -(top + bottom) / (top - bottom);
         result[3][2] = -(z_far + z_near) / (z_far - z_near);
-        result
-    }
-
-    pub fn look_at(eye: Vect<3, T>, target: Vect<3, T>, up: Vect<3, T>) -> Self {
-        assert!(eye != target);
-        let zaxis = (target - eye).normalize();
-        let xaxis = Vect::cross(zaxis, up).normalize();
-        let yaxis = Vect::cross(xaxis, zaxis);
-
-        let mut result = Self::identity();
-        result[0][0] = xaxis[0];
-        result[1][0] = xaxis[1];
-        result[2][0] = xaxis[2];
-        result[0][1] = yaxis[0];
-        result[1][1] = yaxis[1];
-        result[2][1] = yaxis[2];
-        result[0][2] = -zaxis[0];
-        result[1][2] = -zaxis[1];
-        result[2][2] = -zaxis[2];
-        result[3][0] = -Vect::dot(xaxis, eye);
-        result[3][1] = -Vect::dot(yaxis, eye);
-        result[3][2] =  Vect::dot(zaxis, eye);
         result
     }
 }
@@ -182,6 +160,28 @@ impl<const N: usize> Mat<N, f32> {
         result[1][1] = cos;
         result
     }
+
+    pub fn look_at(eye: Vect<3, f32>, target: Vect<3, f32>, up: Vect<3, f32>) -> Self {
+        assert!(eye != target);
+        let zaxis = (target - eye).normalize();
+        let xaxis = Vect::cross(zaxis, up).normalize();
+        let yaxis = Vect::cross(xaxis, zaxis);
+
+        let mut result = Self::identity();
+        result[0][0] = xaxis[0];
+        result[1][0] = xaxis[1];
+        result[2][0] = xaxis[2];
+        result[0][1] = yaxis[0];
+        result[1][1] = yaxis[1];
+        result[2][1] = yaxis[2];
+        result[0][2] = -zaxis[0];
+        result[1][2] = -zaxis[1];
+        result[2][2] = -zaxis[2];
+        result[3][0] = -Vect::dot(xaxis, eye);
+        result[3][1] = -Vect::dot(yaxis, eye);
+        result[3][2] =  Vect::dot(zaxis, eye);
+        result
+    }
 }
 
 impl Mat<4, f32> {
@@ -223,7 +223,7 @@ impl<const N: usize, T: MathsUsable> std::ops::Mul<Self> for Mat<N, T> {
         let mut product = Self::identity();
         for y in 0..4 {
             for x in 0..4 {
-                let mut result: T = 0.0.into();
+                let mut result: T = T::from(0);
                 for i in 0..4 {
                     result += self[i][y] * rhs[x][i];
                 }
@@ -242,7 +242,7 @@ impl<const N: usize, const VN: usize, T: MathsUsable> std::ops::Mul<Vect<VN, T>>
         let mut result = Self::Output::zero();
         for y in 0..VN {
             for x in 0..N {
-                let r_value = if x >= VN { 1.0.into() } else { rhs[x] };
+                let r_value = if x >= VN { T::from(1) } else { rhs[x] };
                 result[y] += self[x][y] * r_value;
             }
         }

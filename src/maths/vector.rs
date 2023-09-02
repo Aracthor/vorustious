@@ -22,11 +22,11 @@ impl<const N: usize, T: MathsUsable> Vect<N, T> {
     }
 
     pub fn zero() -> Self {
-        Self {data: [T::from(0.0); N] }
+        Self {data: [T::from(0); N] }
     }
 
     pub fn dot(u: Self, v: Self) -> T {
-        let mut result: T = 0.0.into();
+        let mut result: T = T::from(0);
         for i in 0..N {
             result += u.data[i] * v.data[i];
         }
@@ -34,27 +34,29 @@ impl<const N: usize, T: MathsUsable> Vect<N, T> {
     }
 
     pub fn length_sq(&self) -> T {
-        let mut result: T = 0.0.into();
+        let mut result = T::from(0);
         for d in self.data {
             result += d * d;
         }
         result
     }
 
-    pub fn length(&self) -> T {
-        // TODO we should avoid casting here...
-        self.length_sq().into().sqrt().into()
-    }
-
-    pub fn normalize(&self) -> Vect<N, T> {
-        let length = self.length();
-        assert!(length != 0.0.into());
-        return *self / length;
-    }
-
     pub fn data_as_ptr(&self) -> *const T {
         assert!(std::mem::size_of_val(self) == std::mem::size_of::<T>() * N);
         self.data.as_ptr().cast()
+    }
+}
+
+impl<const N: usize> Vect<N, f32> {
+
+    pub fn length(&self) -> f32 {
+        self.length_sq().sqrt()
+    }
+
+    pub fn normalize(&self) -> Self {
+        let length = self.length();
+        assert!(length != 0.0);
+        *self / length
     }
 }
 

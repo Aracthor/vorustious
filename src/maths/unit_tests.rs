@@ -1,3 +1,4 @@
+use super::boxes::Box;
 use super::matrix::Mat3f;
 use super::matrix::Mat4f;
 use super::vector::Vect;
@@ -55,6 +56,21 @@ fn vector_funcs() {
     let v = Vect3f::new([4.0, 9.0, 2.0]);
     assert!(Vect3f::dot(u, v) == -13.0);
     assert!(vec_equals_with_delta(Vect3f::cross(u, v), Vect3f::new([-15.0, -2.0, 39.0]), 0.0001));
+}
+
+#[test]
+fn box_funcs() {
+    let mut boxe = Box::<3, f32>::new();
+    boxe.add(Vect3f::new([1.0, -2.0, 3.5]));
+    boxe.add(Vect3f::new([-1.0, 0.0, 1.5]));
+    boxe.add(Vect3f::new([-3.0, 4.2, 4.0]));
+
+    assert!(boxe.min() == Vect3f::new([-3.0, -2.0, 1.5]));
+    assert!(boxe.max() == Vect3f::new([1.0, 4.2, 4.0]));
+    assert!(boxe.extent() == Vect3f::new([4.0, 6.2, 2.5]));
+    assert!(boxe.contains(Vect3f::new([-3.0, -2.0, 1.5])) == true);
+    assert!(boxe.contains(Vect3f::new([0.0, 0.0, 0.0])) == false);
+    assert!(boxe.contains(Vect3f::new([-1.0, 1.0, 2.0])) == true);
 }
 
 #[test]
