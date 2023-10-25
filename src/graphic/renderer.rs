@@ -29,7 +29,7 @@ impl Renderer {
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
             material.add_uniform("uni_color", Vect4f::new([1.0, 1.0, 1.0, 0.5]));
 
-            let positions: Vec<f32> = [
+            let positions = [
                 -0.07, 0.0, 0.0,
                 -0.02, 0.0, 0.0,
                 0.07, 0.0, 0.0,
