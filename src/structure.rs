@@ -9,24 +9,6 @@ pub struct Structure {
     repere: Mat4f,
 }
 
-fn sign(n: f32) -> i32 {
-    if n > 0.0 {
-        return 1;
-    }
-    if n < 0.0 {
-        return -1;
-    }
-    0
-}
-
-fn less_than(n: i32, step: i32, max: i32) -> bool {
-    if step > 0 {
-        n <= max
-    } else {
-        n >= max
-    }
-}
-
 impl Structure {
     pub fn new(min_x: i32, max_x: i32, min_y: i32, max_y: i32, min_z: i32, max_z: i32) -> Self {
         let extent_x = max_x - min_x + 1;
@@ -66,7 +48,37 @@ impl Structure {
         }
     }
 
+    // Using "A Fast Voxel Traversal Algorithm for Ray Tracing" by John Amanatides and Andrew Woo, 1987
+    // http://www.cse.yorku.ca/~amana/research/grid.pdf
+    // Adapted to work in negative space by dogfutom
+    // https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
     pub fn for_voxels_in_segment<F: Fn(&mut bool)>(&mut self, segment: Segm3f, f: F) {
+        fn sign(n: f32) -> i32 {
+            if n > 0.0 {
+                return 1;
+            }
+            if n < 0.0 {
+                return -1;
+            }
+            0
+        }
+
+        fn intbound(s: f32, ds: f32) -> f32 {
+            if ds == 0.0 {
+                return f32::MAX;
+            }
+
+            (if ds > 0.0 { s.ceil() - s } else { s - s.floor()}) / ds.abs()
+        }
+
+        fn less_than(n: i32, step: i32, max: i32) -> bool {
+            if step > 0 {
+                n <= max
+            } else {
+                n >= max
+            }
+        }
+
         let mut new_segment = segment.transform(self.repere.inverse());
 
         new_segment.start += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);
@@ -74,21 +86,17 @@ impl Structure {
 
         let dir = new_segment.direction();
 
-        let mut x = new_segment.start[0] as i32;
-        let mut y = new_segment.start[1] as i32;
-        let mut z = new_segment.start[2] as i32;
+        let mut x = new_segment.start[0].floor() as i32;
+        let mut y = new_segment.start[1].floor() as i32;
+        let mut z = new_segment.start[2].floor() as i32;
 
         let step_x = sign(dir[0]);
         let step_y = sign(dir[1]);
         let step_z = sign(dir[2]);
 
-        let next_pixel_boundary_x = x + if step_x < 0 {0} else {1};
-        let next_pixel_boundary_y = y + if step_y < 0 {0} else {1};
-        let next_pixel_boundary_z = z + if step_z < 0 {0} else {1};
-
-        let mut max_x = if dir[0] != 0.0 { (next_pixel_boundary_x as f32 - new_segment.start[0]) / dir[0] } else { f32::MAX };
-        let mut max_y = if dir[1] != 0.0 { (next_pixel_boundary_y as f32 - new_segment.start[1]) / dir[1] } else { f32::MAX };
-        let mut max_z = if dir[2] != 0.0 { (next_pixel_boundary_z as f32 - new_segment.start[2]) / dir[2] } else { f32::MAX };
+        let mut max_x = intbound(new_segment.start[0], dir[0]);
+        let mut max_y = intbound(new_segment.start[1], dir[1]);
+        let mut max_z = intbound(new_segment.start[2], dir[2]);
 
         let delta_x = step_x as f32 / dir[0];
         let delta_y = step_y as f32 / dir[1];
