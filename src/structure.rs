@@ -48,11 +48,20 @@ impl Structure {
         }
     }
 
+    pub fn for_first_voxel_in_segment<F: Fn(&mut bool)>(&mut self, segment: Segm3f, f: F) {
+        self.apply_on_voxels(segment, |voxel: &mut bool| { let has_voxel = *voxel; f(voxel); has_voxel});
+    }
+
+    #[allow(dead_code)]
+    pub fn for_voxels_in_segment<F: Fn(&mut bool)>(&mut self, segment: Segm3f, f: F) {
+        self.apply_on_voxels(segment, |voxel: &mut bool| {f(voxel); false});
+    }
+
     // Using "A Fast Voxel Traversal Algorithm for Ray Tracing" by John Amanatides and Andrew Woo, 1987
     // http://www.cse.yorku.ca/~amana/research/grid.pdf
     // Adapted to work in negative space by dogfutom
     // https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
-    pub fn for_voxels_in_segment<F: Fn(&mut bool)>(&mut self, segment: Segm3f, f: F) {
+    pub fn apply_on_voxels<F: Fn(&mut bool) -> bool>(&mut self, segment: Segm3f, f: F) {
         fn sign(n: f32) -> i32 {
             if n > 0.0 {
                 return 1;
@@ -112,7 +121,9 @@ impl Structure {
         {
             if self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])) {
                 let index = self.voxel_index(x, y, z);
-                f(&mut self.data[index]);
+                if f(&mut self.data[index]) {
+                    break;
+                }
             }
             if max_x < max_y {
                 if max_x < max_z {

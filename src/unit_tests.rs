@@ -80,3 +80,24 @@ fn structure_segment_intersection() {
         assert!(structure_2 == expected_structure);
     }
 }
+
+#[test]
+fn structure_segment_first_intersection() {
+    let erase_voxels = |voxel: &mut bool| {
+        *voxel = false;
+    };
+
+    {
+        let segment_start = Vect3f::new([-10.0, 0.0, 0.0]);
+        let segment_end = Vect3f::new([10.0, 0.0, 0.0]);
+        let segment = Segm3f::new(segment_start, segment_end);
+        let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
+        structure.for_first_voxel_in_segment(segment, erase_voxels);
+
+        let expected_structure = { let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
+            structure.set_voxel(-2, 0, 0, false);
+            structure
+        };
+        assert!(structure == expected_structure);
+    }
+}

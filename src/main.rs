@@ -46,7 +46,7 @@ fn main() {
             let ray_start = camera.position();
             let ray_direction = camera.forward();
             let segment = Segm3f::new(ray_start, ray_start + ray_direction * 100.0);
-            structure.for_voxels_in_segment(segment, |voxel: &mut bool| {*voxel = false });
+            structure.for_first_voxel_in_segment(segment, |voxel: &mut bool| {*voxel = false });
         }
 
         window.clear();
