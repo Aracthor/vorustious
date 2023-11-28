@@ -72,6 +72,9 @@ impl Structure {
         }
 
         fn less_than(n: i32, step: i32, max: i32) -> bool {
+            if step == 0 {
+                return true
+            }
             if step > 0 {
                 n <= max
             } else {
