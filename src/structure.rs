@@ -48,6 +48,12 @@ impl Structure {
         &self.repere
     }
 
+    #[cfg(test)]
+    pub fn set_voxel(&mut self, x: i32, y: i32, z: i32, voxel: bool) {
+        let index = self.voxel_index(x, y, z);
+        self.data[index] = voxel;
+    }
+
     pub fn for_each_voxel<F: Fn(i32, i32, i32)>(&self, f: F) {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
@@ -132,3 +138,23 @@ impl Structure {
         self.data[index]
     }
 }
+
+impl Eq for Structure {}
+impl PartialEq for Structure {
+    fn eq(&self, other: &Self) -> bool {
+        if self.voxel_box != other.voxel_box {
+            return false;
+        }
+        for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
+            for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
+                for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
+                    if self.has_voxel(x, y, z) != other.has_voxel(x, y, z) {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
+    }
+}
+

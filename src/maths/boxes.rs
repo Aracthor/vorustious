@@ -43,11 +43,18 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         true
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn add(&mut self, point: Vect<N, T>) {
         for i in 0..N {
             self.min[i] = num_traits::clamp_max(self.min[i], point[i]);
             self.max[i] = num_traits::clamp_min(self.max[i], point[i]);
         }
+    }
+}
+
+impl<const N: usize, T: MathsUsable> Eq for Box<N, T> {}
+impl<const N: usize, T: MathsUsable> PartialEq for Box<N, T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.min == other.min && self.max == other.max
     }
 }

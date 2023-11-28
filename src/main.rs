@@ -2,6 +2,9 @@ mod graphic;
 mod maths;
 mod structure;
 
+#[cfg(test)]
+mod unit_tests;
+
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
 use graphic::windowing::window::Window;
