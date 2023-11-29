@@ -59,7 +59,7 @@ impl Structure {
 
     // Using "A Fast Voxel Traversal Algorithm for Ray Tracing" by John Amanatides and Andrew Woo, 1987
     // http://www.cse.yorku.ca/~amana/research/grid.pdf
-    // Adapted to work in negative space by dogfutom
+    // Adapted to work in negative space by dogfuntom
     // https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
     pub fn apply_on_voxels<F: Fn(&mut bool) -> bool>(&mut self, segment: Segm3f, f: F) {
         fn sign(n: f32) -> i32 {
