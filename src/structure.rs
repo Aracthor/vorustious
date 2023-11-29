@@ -102,6 +102,10 @@ impl Structure {
         let mut y = new_segment.start[1].floor() as i32;
         let mut z = new_segment.start[2].floor() as i32;
 
+        let end_x = new_segment.end[0].floor() as i32;
+        let end_y = new_segment.end[1].floor() as i32;
+        let end_z = new_segment.end[2].floor() as i32;
+
         let step_x = sign(dir[0]);
         let step_y = sign(dir[1]);
         let step_z = sign(dir[2]);
@@ -115,9 +119,9 @@ impl Structure {
         let delta_z = step_z as f32 / dir[2];
 
         while
-            less_than(x, step_x, new_segment.end[0] as i32) &&
-            less_than(y, step_y, new_segment.end[1] as i32) &&
-            less_than(z, step_z, new_segment.end[2] as i32)
+            less_than(x, step_x, end_x) &&
+            less_than(y, step_y, end_y) &&
+            less_than(z, step_z, end_z)
         {
             if self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])) {
                 let index = self.voxel_index(x, y, z);

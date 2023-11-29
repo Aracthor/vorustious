@@ -45,7 +45,7 @@ fn main() {
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) {
             let ray_start = camera.position();
             let ray_direction = camera.forward();
-            let segment = Segm3f::new(ray_start, ray_start + ray_direction * 100.0);
+            let segment = Segm3f::new(ray_start, ray_start + ray_direction * 2.0);
             structure.for_first_voxel_in_segment(segment, |voxel: &mut bool| {*voxel = false });
         }
 

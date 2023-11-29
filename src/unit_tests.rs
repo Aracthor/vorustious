@@ -101,3 +101,27 @@ fn structure_segment_first_intersection() {
         assert!(structure == expected_structure);
     }
 }
+
+#[test]
+fn structure_segment_intersection_end() {
+    let erase_voxels = |voxel: &mut bool| {
+        *voxel = false;
+    };
+
+    {
+        let segment_start = Vect3f::new([-1.0, 0.0, 0.0]);
+        let segment_end = Vect3f::new([1.0, -1.0, 0.0]);
+        let segment = Segm3f::new(segment_start, segment_end);
+        let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
+        structure.for_voxels_in_segment(segment, erase_voxels);
+
+        let expected_structure = { let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
+            structure.set_voxel(-1, 0, 0, false);
+            structure.set_voxel(0, 0, 0, false);
+            structure.set_voxel(0, -1, 0, false);
+            structure.set_voxel(1, -1, 0, false);
+            structure
+        };
+        assert!(structure == expected_structure);
+    }
+}
