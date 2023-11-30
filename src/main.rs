@@ -63,7 +63,7 @@ fn main() {
             let mut hit = false;
             if !projectile.is_out_of_max_range() {
                 let segment = Segm3f::new(segment_start, segment_end);
-                hit = structure.for_first_voxel_in_segment(segment, |voxel: &mut bool| {
+                hit = structure.for_first_voxel_in_segment(segment, |voxel: &mut bool, _face| {
                     *voxel = false;
                 });
             }

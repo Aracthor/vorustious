@@ -185,5 +185,6 @@ impl<const N: usize, T: MathsUsable> std::fmt::Display for Vect<N, T> {
     }
 }
 
+pub type Vect3i = Vect<3, i32>;
 pub type Vect3f = Vect<3, f32>;
 pub type Vect4f = Vect<4, f32>;

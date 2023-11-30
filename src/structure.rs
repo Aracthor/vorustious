@@ -1,7 +1,7 @@
 use crate::maths::boxes::Box;
 use crate::maths::segment::Segm3f;
 use crate::maths::matrix::Mat4f;
-use crate::maths::vector::Vect;
+use crate::maths::vector::Vect3i;
 
 pub struct Structure {
     voxel_box: Box<3, i32>,
@@ -16,7 +16,7 @@ impl Structure {
         let extent_z = max_z - min_z + 1;
         let vec_size: usize = (extent_x * extent_y * extent_z).try_into().unwrap();
         Self {
-            voxel_box: Box::<3, i32>::from_min_max(Vect::<3, i32>::new([min_x, min_y, min_z]), Vect::<3, i32>::new([max_x, max_y, max_z])),
+            voxel_box: Box::<3, i32>::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
             data: vec![true; vec_size],
             repere: Mat4f::identity(),
         }
@@ -48,20 +48,20 @@ impl Structure {
         }
     }
 
-    pub fn for_first_voxel_in_segment<F: Fn(&mut bool)>(&mut self, segment: Segm3f, f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut bool| { let has_voxel = *voxel; f(voxel); has_voxel})
+    pub fn for_first_voxel_in_segment<F: Fn(&mut bool, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut bool, face: &Vect3i| { let has_voxel = *voxel; f(voxel, face); has_voxel})
     }
 
     #[allow(dead_code)]
-    pub fn for_voxels_in_segment<F: Fn(&mut bool)>(&mut self, segment: Segm3f, f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut bool| {f(voxel); false})
+    pub fn for_voxels_in_segment<F: Fn(&mut bool, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut bool, face: &Vect3i| {f(voxel, face); false})
     }
 
     // Using "A Fast Voxel Traversal Algorithm for Ray Tracing" by John Amanatides and Andrew Woo, 1987
     // http://www.cse.yorku.ca/~amana/research/grid.pdf
     // Adapted to work in negative space by dogfuntom
     // https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
-    pub fn apply_on_voxels<F: Fn(&mut bool) -> bool>(&mut self, segment: Segm3f, f: F) -> bool {
+    pub fn apply_on_voxels<F: Fn(&mut bool, &Vect3i) -> bool>(&mut self, segment: Segm3f, f: F) -> bool {
         fn sign(n: f32) -> i32 {
             if n > 0.0 {
                 return 1;
@@ -101,6 +101,7 @@ impl Structure {
         let mut x = new_segment.start[0].floor() as i32;
         let mut y = new_segment.start[1].floor() as i32;
         let mut z = new_segment.start[2].floor() as i32;
+        let mut face = Vect3i::zero();
 
         let end_x = new_segment.end[0].floor() as i32;
         let end_y = new_segment.end[1].floor() as i32;
@@ -124,10 +125,10 @@ impl Structure {
             less_than(y, step_y, end_y) &&
             less_than(z, step_z, end_z)
         {
-            if self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])) {
+            if self.voxel_box.contains(Vect3i::new([x, y, z])) {
                 let index = self.voxel_index(x, y, z);
                 hit |= self.data[index];
-                if f(&mut self.data[index]) {
+                if f(&mut self.data[index], &face) {
                     break;
                 }
             }
@@ -135,17 +136,21 @@ impl Structure {
                 if max_x < max_z {
                     x += step_x;
                     max_x += delta_x;
+                    face = Vect3i::new([-step_x, 0, 0]);
                 } else {
                     z += step_z;
                     max_z += delta_z;
+                    face = Vect3i::new([0, 0, -step_z]);
                 }
             } else {
                 if max_y < max_z {
                     y += step_y;
                     max_y += delta_y;
+                    face = Vect3i::new([0, -step_y, 0]);
                 } else {
                     z += step_z;
                     max_z += delta_z;
+                    face = Vect3i::new([0, 0, -step_z]);
                 }
             }
         }
@@ -153,8 +158,8 @@ impl Structure {
     }
 
     fn voxel_index(&self, x: i32, y: i32, z: i32) -> usize {
-        assert!(self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])));
-        let extent = self.voxel_box.extent() + Vect::<3, i32>::new([1, 1, 1]);
+        assert!(self.voxel_box.contains(Vect3i::new([x, y, z])));
+        let extent = self.voxel_box.extent() + Vect3i::new([1, 1, 1]);
         let x_in_data = x - self.voxel_box.min()[0];
         let y_in_data = y - self.voxel_box.min()[1];
         let z_in_data = z - self.voxel_box.min()[2];
@@ -162,7 +167,7 @@ impl Structure {
     }
 
     fn has_voxel(&self, x: i32, y: i32, z: i32) -> bool {
-        assert!(self.voxel_box.contains(Vect::<3, i32>::new([x, y, z])));
+        assert!(self.voxel_box.contains(Vect3i::new([x, y, z])));
         let index = self.voxel_index(x, y, z);
         self.data[index]
     }
