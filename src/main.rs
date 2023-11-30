@@ -1,6 +1,7 @@
 mod graphic;
 mod maths;
 mod structure;
+mod projectile;
 
 #[cfg(test)]
 mod unit_tests;
@@ -12,6 +13,10 @@ use maths::segment::Segm3f;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
 use structure::Structure;
+use projectile::Projectile;
+
+use std::time::Duration;
+use std::time::Instant;
 
 fn main() {
     const WINDOW_WIDTH:u32 = 800;
@@ -30,10 +35,12 @@ fn main() {
     let mut camera = Camera::new();
 
     let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
+    let mut projectiles: Vec<Projectile> = vec![];
+
+    let mut clock = Instant::now();
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
-        let projection_view_matrix = projection_matrix.clone() * camera.view_matrix();
 
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Right) {
             structure.apply_transformation(Mat4f::translation(Vect3f::new([0.05, 0.0, -0.05])));
@@ -42,15 +49,34 @@ fn main() {
             structure.apply_transformation(Mat4f::rotation_around_z(0.02));
         }
 
-        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) {
-            let ray_start = camera.position();
-            let ray_direction = camera.forward();
-            let segment = Segm3f::new(ray_start, ray_start + ray_direction * 2.0);
-            structure.for_first_voxel_in_segment(segment, |voxel: &mut bool| {*voxel = false });
+        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) &&
+            clock.elapsed() > Duration::from_secs_f32(1.0 / 10.0) {
+            clock = Instant::now();
+            let projectile_start = camera.position();
+            let projectile_direction = camera.forward();
+            let max_distance = 20.0;
+            projectiles.push(Projectile::new(projectile_start, projectile_direction, max_distance));
         }
 
+        projectiles.retain_mut(|projectile| {
+            let segment_start = projectile.position();
+            projectile.moove(1.0);
+            let segment_end = projectile.position();
+            let mut hit = false;
+            if !projectile.is_out_of_max_range() {
+                let segment = Segm3f::new(segment_start, segment_end);
+                hit = structure.for_first_voxel_in_segment(segment, |voxel: &mut bool| {
+                    *voxel = false;
+                });
+            }
+            !hit && !projectile.is_out_of_max_range()
+        });
+
         window.clear();
-        renderer.render_frame(&projection_view_matrix, &structure);
+
+        let projection_view_matrix = projection_matrix.clone() * camera.view_matrix();
+        renderer.render_frame(&projection_view_matrix, &structure, &projectiles);
+
         window.update();
     }
 }
