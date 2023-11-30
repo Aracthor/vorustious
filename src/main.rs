@@ -2,6 +2,7 @@ mod graphic;
 mod maths;
 mod structure;
 mod projectile;
+mod weapon;
 
 #[cfg(test)]
 mod unit_tests;
@@ -12,11 +13,9 @@ use graphic::windowing::window::Window;
 use maths::segment::Segm3f;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
-use structure::Structure;
 use projectile::Projectile;
-
-use std::time::Duration;
-use std::time::Instant;
+use structure::Structure;
+use weapon::Weapon;
 
 fn main() {
     const WINDOW_WIDTH:u32 = 800;
@@ -36,8 +35,7 @@ fn main() {
 
     let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
     let mut projectiles: Vec<Projectile> = vec![];
-
-    let mut clock = Instant::now();
+    let mut weapon = Weapon::new(1.0 / 10.0, 20.0);
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
@@ -49,13 +47,13 @@ fn main() {
             structure.apply_transformation(Mat4f::rotation_around_z(0.02));
         }
 
-        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) &&
-            clock.elapsed() > Duration::from_secs_f32(1.0 / 10.0) {
-            clock = Instant::now();
+        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) {
             let projectile_start = camera.position();
             let projectile_direction = camera.forward();
-            let max_distance = 20.0;
-            projectiles.push(Projectile::new(projectile_start, projectile_direction, max_distance));
+            let projectile = weapon.shoot(projectile_start, projectile_direction);
+            if projectile.is_some() {
+                projectiles.push(projectile.unwrap());
+            }
         }
 
         projectiles.retain_mut(|projectile| {
