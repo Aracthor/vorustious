@@ -2,6 +2,7 @@ mod graphic;
 mod maths;
 mod structure;
 mod projectile;
+mod voxel;
 mod weapon;
 
 #[cfg(test)]
@@ -16,6 +17,7 @@ use maths::vector::Vect3f;
 use maths::vector::Vect3i;
 use projectile::Projectile;
 use structure::Structure;
+use voxel::Voxel;
 use weapon::Weapon;
 
 fn main() {
@@ -59,7 +61,7 @@ fn main() {
         }
 
         if ghost_cube_position.is_some() && window.event_handler().is_mouse_button_just_released(graphic::windowing::event_handler::MouseButton::Right) {
-            structure.add_voxel(ghost_cube_position.unwrap(), true);
+            structure.add_voxel(ghost_cube_position.unwrap(), Voxel{});
         }
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Right) {
             let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0);
@@ -75,8 +77,8 @@ fn main() {
             let mut hit = false;
             if !projectile.is_out_of_max_range() {
                 let segment = Segm3f::new(segment_start, segment_end);
-                hit = structure.for_first_voxel_in_segment(segment, |voxel: &mut bool, _face| {
-                    *voxel = false;
+                hit = structure.for_first_voxel_in_segment(segment, |voxel: &mut Option<Voxel>, _face| {
+                    *voxel = None;
                 });
             }
             !hit && !projectile.is_out_of_max_range()

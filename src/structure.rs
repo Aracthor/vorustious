@@ -2,10 +2,11 @@ use crate::maths::boxes::Box;
 use crate::maths::segment::Segm3f;
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3i;
+use super::voxel::Voxel;
 
 pub struct Structure {
     voxel_box: Box<3, i32>,
-    data: Vec<bool>,
+    data: Vec<Option<Voxel>>,
     repere: Mat4f,
 }
 
@@ -15,9 +16,10 @@ impl Structure {
         let extent_y = max_y - min_y + 1;
         let extent_z = max_z - min_z + 1;
         let vec_size: usize = (extent_x * extent_y * extent_z).try_into().unwrap();
+        let voxel = Voxel{};
         Self {
             voxel_box: Box::<3, i32>::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
-            data: vec![true; vec_size],
+            data: vec![Some(voxel); vec_size],
             repere: Mat4f::identity(),
         }
     }
@@ -31,19 +33,19 @@ impl Structure {
     }
 
     #[cfg(test)]
-    pub fn set_voxel(&mut self, x: i32, y: i32, z: i32, voxel: bool) {
+    pub fn set_voxel(&mut self, x: i32, y: i32, z: i32, voxel: Option<Voxel>) {
         let index = self.voxel_index(Vect3i::new([x, y, z]));
         self.data[index] = voxel;
     }
 
-    pub fn add_voxel(&mut self, coords: Vect3i, voxel: bool) {
+    pub fn add_voxel(&mut self, coords: Vect3i, voxel: Voxel) {
         if !self.voxel_box.contains(coords) {
             let mut new_box = self.voxel_box.clone();
             new_box.add(coords);
             self.resize(new_box);
         }
         let index = self.voxel_index(coords);
-        self.data[index] = voxel;
+        self.data[index] = Some(voxel);
     }
 
     pub fn for_each_voxel<F: Fn(i32, i32, i32)>(&self, f: F) {
@@ -61,18 +63,18 @@ impl Structure {
     // TODO this function should not mut self, but it calls apply_on_voxels and... Read its comment.
     pub fn outside_voxel_coords(&mut self, segment: Segm3f) -> Option<Vect3i> {
         let mut result: Option<Vect3i> = None;
-        self.apply_on_voxels(segment, |voxel: &mut bool, coords: &Vect3i, face: &Vect3i| {
-            if *voxel && *face != Vect3i::zero() {
+        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, coords: &Vect3i, face: &Vect3i| {
+            if voxel.is_some() && *face != Vect3i::zero() {
                 result = Some(*coords + *face);
             }
-            *voxel
+            voxel.is_some()
         });
         result
     }
 
-    pub fn for_first_voxel_in_segment<F: FnMut(&mut bool, &Vect3i)>(&mut self, segment: Segm3f, mut f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut bool, _coords, face: &Vect3i| {
-            let has_voxel = *voxel;
+    pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, mut f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, face: &Vect3i| {
+            let has_voxel = voxel.is_some();
             if has_voxel {
                 f(voxel, face);
             }
@@ -81,8 +83,8 @@ impl Structure {
     }
 
     #[allow(dead_code)]
-    pub fn for_voxels_in_segment<F: Fn(&mut bool, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut bool, _coords, face: &Vect3i| {
+    pub fn for_voxels_in_segment<F: Fn(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, face: &Vect3i| {
             f(voxel, face);
             false
         })
@@ -96,7 +98,7 @@ impl Structure {
     // This function should exists in two versions : &mut self with Fn closure, and &self with FnMut closure.
     // But it seems impossible to do such a thing without making a complete duplicate of this already long function...
     // So let's just put a version that is &mut self AND use a FnMut for now.
-    fn apply_on_voxels<F: FnMut(&mut bool, &Vect3i, &Vect3i) -> bool>(&mut self, segment: Segm3f, mut f: F) -> bool {
+    fn apply_on_voxels<F: FnMut(&mut Option<Voxel>, &Vect3i, &Vect3i) -> bool>(&mut self, segment: Segm3f, mut f: F) -> bool {
         fn sign(n: f32) -> i32 {
             if n > 0.0 {
                 return 1;
@@ -163,7 +165,7 @@ impl Structure {
             let coords = Vect3i::new([x, y, z]);
             if self.voxel_box.contains(coords) {
                 let index = self.voxel_index(coords);
-                hit |= self.data[index];
+                hit |= self.data[index].is_some();
                 if f(&mut self.data[index], &coords, &face) {
                     break;
                 }
@@ -195,7 +197,7 @@ impl Structure {
 
     fn resize(&mut self, new_box: Box<3, i32>) {
         let vec_size = (new_box.extent()[0] + 1) * (new_box.extent()[1] + 1) * (new_box.extent()[2] + 1);
-        let mut new_data = vec![false; vec_size.try_into().unwrap()];
+        let mut new_data: Vec<Option<Voxel>> = vec![None; vec_size.try_into().unwrap()];
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
@@ -225,7 +227,7 @@ impl Structure {
         let coords = Vect3i::new([x, y, z]);
         assert!(self.voxel_box.contains(coords));
         let index = self.voxel_index(coords);
-        self.data[index]
+        self.data[index].is_some()
     }
 }
 

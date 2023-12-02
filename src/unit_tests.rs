@@ -2,11 +2,12 @@ use super::maths::segment::Segm3f;
 use super::maths::vector::Vect3f;
 use super::maths::vector::Vect3i;
 use super::structure::Structure;
+use super::voxel::Voxel;
 
 #[test]
 fn structure_segment_intersection() {
-    let erase_voxels = |voxel: &mut bool, _face: &_| {
-        *voxel = false;
+    let erase_voxels = |voxel: &mut Option<Voxel>, _face: &_| {
+        *voxel = None;
     };
 
     {
@@ -17,13 +18,13 @@ fn structure_segment_intersection() {
         structure.for_voxels_in_segment(segment, erase_voxels);
 
         let expected_structure = { let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
-            structure.set_voxel(-2, 0, 0, false);
-            structure.set_voxel(-1, 0, 0, false);
-            structure.set_voxel(0, 0, 0, false);
-            structure.set_voxel(1, 0, 0, false);
-            structure.set_voxel(2, 0, 0, false);
-            structure.set_voxel(3, 0, 0, false);
-            structure.set_voxel(4, 0, 0, false);
+            structure.set_voxel(-2, 0, 0, None);
+            structure.set_voxel(-1, 0, 0, None);
+            structure.set_voxel(0, 0, 0, None);
+            structure.set_voxel(1, 0, 0, None);
+            structure.set_voxel(2, 0, 0, None);
+            structure.set_voxel(3, 0, 0, None);
+            structure.set_voxel(4, 0, 0, None);
             structure
         };
         assert!(structure == expected_structure);
@@ -42,13 +43,13 @@ fn structure_segment_intersection() {
         structure_2.for_voxels_in_segment(segment_2, erase_voxels);
 
         let expected_structure = { let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
-            structure.set_voxel(-2, 1, 0, false);
-            structure.set_voxel(-1, 1, 0, false);
-            structure.set_voxel(0, 1, 0, false);
-            structure.set_voxel(1, 1, 0, false);
-            structure.set_voxel(2, 1, 0, false);
-            structure.set_voxel(3, 1, 0, false);
-            structure.set_voxel(4, 1, 0, false);
+            structure.set_voxel(-2, 1, 0, None);
+            structure.set_voxel(-1, 1, 0, None);
+            structure.set_voxel(0, 1, 0, None);
+            structure.set_voxel(1, 1, 0, None);
+            structure.set_voxel(2, 1, 0, None);
+            structure.set_voxel(3, 1, 0, None);
+            structure.set_voxel(4, 1, 0, None);
             structure
         };
         assert!(structure_1 == expected_structure);
@@ -68,13 +69,13 @@ fn structure_segment_intersection() {
         structure_2.for_voxels_in_segment(segment_2, erase_voxels);
 
         let expected_structure = { let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
-            structure.set_voxel(-2, -1, 0, false);
-            structure.set_voxel(-1, -1, 0, false);
-            structure.set_voxel(0, -1, 0, false);
-            structure.set_voxel(1, -1, 0, false);
-            structure.set_voxel(2, -1, 0, false);
-            structure.set_voxel(3, -1, 0, false);
-            structure.set_voxel(4, -1, 0, false);
+            structure.set_voxel(-2, -1, 0, None);
+            structure.set_voxel(-1, -1, 0, None);
+            structure.set_voxel(0, -1, 0, None);
+            structure.set_voxel(1, -1, 0, None);
+            structure.set_voxel(2, -1, 0, None);
+            structure.set_voxel(3, -1, 0, None);
+            structure.set_voxel(4, -1, 0, None);
             structure
         };
         assert!(structure_1 == expected_structure);
@@ -84,8 +85,8 @@ fn structure_segment_intersection() {
 
 #[test]
 fn structure_segment_first_intersection() {
-    let erase_voxels = |voxel: &mut bool, _face: &_| {
-        *voxel = false;
+    let erase_voxels = |voxel: &mut Option<Voxel>, _face: &_| {
+        *voxel = None;
     };
 
     {
@@ -96,11 +97,11 @@ fn structure_segment_first_intersection() {
         structure.for_first_voxel_in_segment(segment, erase_voxels);
 
         let mut expected_structure = Structure::new(-2, 4, -1, 1, -1, 0);
-        expected_structure.set_voxel(-2, 0, 0, false);
+        expected_structure.set_voxel(-2, 0, 0, None);
         assert!(structure == expected_structure);
 
         structure.for_first_voxel_in_segment(segment, erase_voxels);
-        expected_structure.set_voxel(-1, 0, 0, false);
+        expected_structure.set_voxel(-1, 0, 0, None);
         assert!(structure == expected_structure);
     }
 }
@@ -111,15 +112,15 @@ fn structure_segment_intersection_end() {
     let segment_end = Vect3f::new([1.0, -1.0, 0.0]);
     let segment = Segm3f::new(segment_start, segment_end);
     let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
-    structure.for_voxels_in_segment(segment, |voxel: &mut bool, _face| {
-        *voxel = false;
+    structure.for_voxels_in_segment(segment, |voxel: &mut Option<Voxel>, _face| {
+        *voxel = None;
     });
 
     let expected_structure = { let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
-        structure.set_voxel(-1, 0, 0, false);
-        structure.set_voxel(0, 0, 0, false);
-        structure.set_voxel(0, -1, 0, false);
-        structure.set_voxel(1, -1, 0, false);
+        structure.set_voxel(-1, 0, 0, None);
+        structure.set_voxel(0, 0, 0, None);
+        structure.set_voxel(0, -1, 0, None);
+        structure.set_voxel(1, -1, 0, None);
         structure
     };
     assert!(structure == expected_structure);
@@ -190,7 +191,7 @@ fn structure_segment_intersection_face() {
 #[test]
 fn structure_outside_voxel_coords() {
     let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
-    structure.set_voxel(-2, -1, -1, false);
+    structure.set_voxel(-2, -1, -1, None);
 
     {
         let segment_start = Vect3f::new([-10.0, -10.0, 0.0]);
