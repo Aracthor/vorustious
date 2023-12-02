@@ -48,20 +48,45 @@ impl Structure {
         }
     }
 
-    pub fn for_first_voxel_in_segment<F: Fn(&mut bool, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut bool, face: &Vect3i| { let has_voxel = *voxel; f(voxel, face); has_voxel})
+    // TODO this function should not mut self, but it calls apply_on_voxels and... Read its comment.
+    pub fn outside_voxel_coords(&mut self, segment: Segm3f) -> Option<Vect3i> {
+        let mut result: Option<Vect3i> = None;
+        self.apply_on_voxels(segment, |voxel: &mut bool, coords: &Vect3i, face: &Vect3i| {
+            if *voxel && *face != Vect3i::zero() {
+                result = Some(*coords + *face);
+            }
+            *voxel
+        });
+        result
+    }
+
+    pub fn for_first_voxel_in_segment<F: FnMut(&mut bool, &Vect3i)>(&mut self, segment: Segm3f, mut f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut bool, _coords, face: &Vect3i| {
+            let has_voxel = *voxel;
+            if has_voxel {
+                f(voxel, face);
+            }
+            has_voxel
+        })
     }
 
     #[allow(dead_code)]
     pub fn for_voxels_in_segment<F: Fn(&mut bool, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut bool, face: &Vect3i| {f(voxel, face); false})
+        self.apply_on_voxels(segment, |voxel: &mut bool, _coords, face: &Vect3i| {
+            f(voxel, face);
+            false
+        })
     }
 
     // Using "A Fast Voxel Traversal Algorithm for Ray Tracing" by John Amanatides and Andrew Woo, 1987
     // http://www.cse.yorku.ca/~amana/research/grid.pdf
     // Adapted to work in negative space by dogfuntom
     // https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
-    pub fn apply_on_voxels<F: Fn(&mut bool, &Vect3i) -> bool>(&mut self, segment: Segm3f, f: F) -> bool {
+    //
+    // This function should exists in two versions : &mut self with Fn closure, and &self with FnMut closure.
+    // But it seems impossible to do such a thing without making a complete duplicate of this already long function...
+    // So let's just put a version that is &mut self AND use a FnMut for now.
+    fn apply_on_voxels<F: FnMut(&mut bool, &Vect3i, &Vect3i) -> bool>(&mut self, segment: Segm3f, mut f: F) -> bool {
         fn sign(n: f32) -> i32 {
             if n > 0.0 {
                 return 1;
@@ -125,10 +150,11 @@ impl Structure {
             less_than(y, step_y, end_y) &&
             less_than(z, step_z, end_z)
         {
-            if self.voxel_box.contains(Vect3i::new([x, y, z])) {
+            let coords = Vect3i::new([x, y, z]);
+            if self.voxel_box.contains(coords) {
                 let index = self.voxel_index(x, y, z);
                 hit |= self.data[index];
-                if f(&mut self.data[index], &face) {
+                if f(&mut self.data[index], &coords, &face) {
                     break;
                 }
             }

@@ -186,3 +186,25 @@ fn structure_segment_intersection_face() {
         structure.for_first_voxel_in_segment(segment, |_voxel, face: &Vect3i| { assert!(*face == expected_face) });
     }
 }
+
+#[test]
+fn structure_outside_voxel_coords() {
+    let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
+    structure.set_voxel(-2, -1, -1, false);
+
+    {
+        let segment_start = Vect3f::new([-10.0, -10.0, 0.0]);
+        let segment_end = Vect3f::new([10.0, -10.0, 0.0]);
+        assert!(structure.outside_voxel_coords(Segm3f::new(segment_start, segment_end)) == None);
+    }
+    {
+        let segment_start = Vect3f::new([-10.0, 0.0, 0.0]);
+        let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
+        assert!(structure.outside_voxel_coords(Segm3f::new(segment_start, segment_end)) == Some(Vect3i::new([-3, 0, 0])));
+    }
+    {
+        let segment_start = Vect3f::new([-10.0, -10.0, -10.0]);
+        let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
+        assert!(structure.outside_voxel_coords(Segm3f::new(segment_start, segment_end)) == Some(Vect3i::new([-2, -1, -1])));
+    }
+}

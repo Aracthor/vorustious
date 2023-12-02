@@ -19,7 +19,9 @@ pub enum MouseButton {
 
 #[derive(PartialEq, Eq)]
 pub enum Status {
+    JustPressed,
     Pressed,
+    JustReleased,
     Unpressed,
 }
 
@@ -34,8 +36,8 @@ fn glfw_button_to_mouse_button(button: glfw::MouseButton) -> Option<MouseButton>
 
 fn glfw_action_to_status(action: glfw::Action) -> Option<Status> {
     match action {
-        glfw::Action::Press => Some(Status::Pressed),
-        glfw::Action::Release => Some(Status::Unpressed),
+        glfw::Action::Press => Some(Status::JustPressed),
+        glfw::Action::Release => Some(Status::JustReleased),
         _ => None,
     }
 }
@@ -71,6 +73,23 @@ impl EventHandler {
     }
 
     pub fn update(&mut self) {
+        for key in &mut self.key_status.values_mut() {
+            if *key == Status::JustPressed {
+                *key = Status::Pressed;
+            }
+            if *key == Status::JustReleased {
+                *key = Status::Unpressed;
+            }
+        }
+        for button in &mut self.mouse_button_status.values_mut() {
+            if *button == Status::JustPressed {
+                *button = Status::Pressed;
+            }
+            if *button == Status::JustReleased {
+                *button = Status::Unpressed;
+            }
+        }
+
         self.core.poll_events();
         for (_, event) in glfw::flush_messages(&self.event_receiver) {
             match event {
@@ -101,12 +120,12 @@ impl EventHandler {
 
     pub fn is_key_pressed(&self, key: Key) -> bool {
         let key_status = self.key_status.get(&key);
-        key_status.is_some() && *key_status.unwrap() == Status::Pressed
+        key_status.is_some() && [Status::JustPressed, Status::Pressed].contains(key_status.unwrap())
     }
 
     pub fn is_mouse_button_pressed(&self, button: MouseButton) -> bool {
         let button_status = self.mouse_button_status.get(&button);
-        button_status.is_some() && *button_status.unwrap() == Status::Pressed
+        button_status.is_some() && [Status::JustPressed, Status::Pressed].contains(button_status.unwrap())
     }
 
     pub fn cursor_movement(&self) -> (f64, f64) { self.cursor_movement }
