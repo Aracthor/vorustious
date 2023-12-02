@@ -123,6 +123,11 @@ impl EventHandler {
         key_status.is_some() && [Status::JustPressed, Status::Pressed].contains(key_status.unwrap())
     }
 
+    pub fn is_mouse_button_just_released(&self, button: MouseButton) -> bool {
+        let button_status = self.mouse_button_status.get(&button);
+        button_status.is_some_and(|status| *status == Status::JustReleased)
+    }
+
     pub fn is_mouse_button_pressed(&self, button: MouseButton) -> bool {
         let button_status = self.mouse_button_status.get(&button);
         button_status.is_some() && [Status::JustPressed, Status::Pressed].contains(button_status.unwrap())

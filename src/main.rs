@@ -33,7 +33,7 @@ fn main() {
         Mat4f::perspective(fov, aspect, z_near, z_far)
     };
     let mut camera = Camera::new();
-    let mut ghost_cube_position: Option<Vect3i>;
+    let mut ghost_cube_position: Option<Vect3i> = None;
 
     let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
     let mut projectiles: Vec<Projectile> = vec![];
@@ -58,6 +58,9 @@ fn main() {
             }
         }
 
+        if ghost_cube_position.is_some() && window.event_handler().is_mouse_button_just_released(graphic::windowing::event_handler::MouseButton::Right) {
+            structure.add_voxel(ghost_cube_position.unwrap(), true);
+        }
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Right) {
             let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0);
             ghost_cube_position = structure.outside_voxel_coords(segment);

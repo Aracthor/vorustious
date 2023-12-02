@@ -36,6 +36,16 @@ impl Structure {
         self.data[index] = voxel;
     }
 
+    pub fn add_voxel(&mut self, coords: Vect3i, voxel: bool) {
+        if !self.voxel_box.contains(coords) {
+            let mut new_box = self.voxel_box.clone();
+            new_box.add(coords);
+            self.resize(new_box);
+        }
+        let index = self.voxel_index(coords);
+        self.data[index] = voxel;
+    }
+
     pub fn for_each_voxel<F: Fn(i32, i32, i32)>(&self, f: F) {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
@@ -183,10 +193,31 @@ impl Structure {
         hit
     }
 
+    fn resize(&mut self, new_box: Box<3, i32>) {
+        let vec_size = (new_box.extent()[0] + 1) * (new_box.extent()[1] + 1) * (new_box.extent()[2] + 1);
+        let mut new_data = vec![false; vec_size.try_into().unwrap()];
+        for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
+            for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
+                for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
+                    let coords = Vect3i::new([x, y, z]);
+                    let index = Self::voxel_index_for_box(&self.voxel_box, coords);
+                    let new_index = Self::voxel_index_for_box(&new_box, coords);
+                    new_data[new_index] = self.data[index];
+                }
+            }
+        }
+        self.voxel_box = new_box;
+        self.data = new_data;
+    }
+
     fn voxel_index(&self, coords: Vect3i) -> usize {
-        assert!(self.voxel_box.contains(coords));
-        let extent = self.voxel_box.extent() + Vect3i::new([1, 1, 1]);
-        let coords_in_data = coords - self.voxel_box.min();
+        Self::voxel_index_for_box(&self.voxel_box, coords)
+    }
+
+    fn voxel_index_for_box(voxel_box: &Box<3, i32>, coords: Vect3i) -> usize {
+        assert!(voxel_box.contains(coords));
+        let extent = voxel_box.extent() + Vect3i::new([1, 1, 1]);
+        let coords_in_data = coords - voxel_box.min();
         (coords_in_data[2] * (extent[0] * extent[1]) + coords_in_data[1] * extent[0] + coords_in_data[0]).try_into().unwrap()
     }
 

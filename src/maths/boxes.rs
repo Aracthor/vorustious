@@ -1,6 +1,7 @@
 use super::traits::MathsUsable;
 use super::vector::Vect;
 
+#[derive(Clone)]
 pub struct Box<const N: usize, T: MathsUsable> {
     min: Vect<N, T>,
     max: Vect<N, T>,
@@ -43,7 +44,6 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         true
     }
 
-    #[cfg(test)]
     pub fn add(&mut self, point: Vect<N, T>) {
         for i in 0..N {
             self.min[i] = num_traits::clamp_max(self.min[i], point[i]);
