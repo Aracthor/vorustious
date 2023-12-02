@@ -59,7 +59,7 @@ pub struct VertexArrayObject {
 }
 
 impl VertexArrayObject {
-    pub fn create(positions: Vec<f32>, texture_coords: Vec<f32>) -> VertexArrayObject {
+    pub fn create(positions: Vec<f32>, texture_coords: Option<Vec<f32>>) -> VertexArrayObject {
         let mut vao = 0;
         let mut buffer_objects: Vec<VertexBufferObject> = Default::default();
 
@@ -70,9 +70,9 @@ impl VertexArrayObject {
             let position_vbo = VertexBufferObject::create_static(&positions, 0, 3);
             buffer_objects.push(position_vbo);
 
-            if !texture_coords.is_empty() {
-                assert!(positions.len() / 3 == texture_coords.len() / 2);
-                let texture_coords_vbo = VertexBufferObject::create_static(&texture_coords, 1, 2);
+            if texture_coords.is_some() {
+                assert!(positions.len() / 3 == texture_coords.as_ref().unwrap().len() / 2);
+                let texture_coords_vbo = VertexBufferObject::create_static(&texture_coords.unwrap(), 1, 2);
                 buffer_objects.push(texture_coords_vbo);
             }
 

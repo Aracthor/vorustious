@@ -67,7 +67,7 @@ impl Renderer {
                 0.0, 0.5, 0.0,
             ].to_vec();
 
-            Mesh::create(positions, vec![], Primitive::Triangles, material)
+            Mesh::create(positions, None, Primitive::Triangles, material)
         };
 
         let interface_mesh = {
@@ -85,7 +85,7 @@ impl Renderer {
                 0.0, 0.02, 0.0,
             ].to_vec();
 
-            Mesh::create(positions, vec![], Primitive::Lines, material)
+            Mesh::create(positions, None, Primitive::Lines, material)
         };
 
         Renderer {

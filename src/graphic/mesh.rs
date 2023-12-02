@@ -11,7 +11,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn create(positions: Vec<f32>, tex_coords: Vec<f32>, primitive: Primitive, material: Material) -> Mesh {
+    pub fn create(positions: Vec<f32>, tex_coords: Option<Vec<f32>>, primitive: Primitive, material: Material) -> Mesh {
         Mesh {
             vao: VertexArrayObject::create(positions, tex_coords),
             primitive: primitive,
