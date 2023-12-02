@@ -19,6 +19,10 @@ impl Mesh {
         }
     }
 
+    pub fn set_uniform_f32(&mut self, uniform_name: &str, value: f32) {
+        self.material.set_uniform_f32(uniform_name, value);
+    }
+
     pub fn draw(&self, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
         self.material.bind();
         self.material.set_transformation_matrices(projection_view_matrix, model_matrix);

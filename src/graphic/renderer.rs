@@ -13,7 +13,6 @@ use super::opengl::vertex_objects::Primitive;
 pub struct Renderer {
     frame_limiter: FrameLimiter,
     cube_mesh: Mesh,
-    ghost_cube_mesh: Mesh,
     projectile_mesh: Mesh,
     interface_mesh: Mesh,
 }
@@ -27,15 +26,6 @@ impl Renderer {
             material.set_texture(texture);
 
             material.add_uniform_f32("uni_alpha", 1.0);
-            cube::cube_mesh(material)
-        };
-        let ghost_cube_mesh = {
-            let mut material = Material::create("shaders/hello_texture.vert", "shaders/hello_texture.frag");
-
-            let texture = cube::cube_texture([0x40, 0x40, 0x40, 0xFF], [0x80, 0x80, 0x80, 0xFF]);
-            material.set_texture(texture);
-
-            material.add_uniform_f32("uni_alpha", 0.5);
             cube::cube_mesh(material)
         };
 
@@ -101,7 +91,6 @@ impl Renderer {
         Renderer {
             frame_limiter: FrameLimiter::new(60.0),
             cube_mesh: cube_mesh,
-            ghost_cube_mesh: ghost_cube_mesh,
             projectile_mesh: projectile_mesh,
             interface_mesh: interface_mesh,
         }
@@ -121,7 +110,9 @@ impl Renderer {
         if ghost_position.is_some() {
             let position = ghost_position.unwrap();
             let model_matrix = body.repere().clone() * Mat4f::translation(Vect3f::new([position[0] as f32, position[1] as f32, position[2] as f32]));
-            self.ghost_cube_mesh.draw(projection_view_matrix, &model_matrix);
+            self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
+            self.cube_mesh.draw(projection_view_matrix, &model_matrix);
+            self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);
         }
 
         self.interface_mesh.draw(&Mat4f::identity(), &Mat4f::identity());
