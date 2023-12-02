@@ -24,7 +24,7 @@ impl Renderer {
             let mut material = Material::create("shaders/hello_texture.vert", "shaders/hello_texture.frag");
 
             let texture = cube::cube_texture([0x40, 0x40, 0x40, 0xFF], [0x80, 0x80, 0x80, 0xFF]);
-            material.add_texture(texture);
+            material.set_texture(texture);
 
             material.add_uniform_f32("uni_alpha", 1.0);
             cube::cube_mesh(material)
@@ -33,7 +33,7 @@ impl Renderer {
             let mut material = Material::create("shaders/hello_texture.vert", "shaders/hello_texture.frag");
 
             let texture = cube::cube_texture([0x40, 0x40, 0x40, 0xFF], [0x80, 0x80, 0x80, 0xFF]);
-            material.add_texture(texture);
+            material.set_texture(texture);
 
             material.add_uniform_f32("uni_alpha", 0.5);
             cube::cube_mesh(material)

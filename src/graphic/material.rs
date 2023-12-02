@@ -8,7 +8,7 @@ pub struct Material {
     shader: Shader,
     uniforms_f32: Vec<(String, f32)>,
     uniforms_vect4: Vec<(String, Vect4f)>,
-    textures: Vec<Texture>,
+    texture: Option<Texture>,
 }
 
 impl Material {
@@ -17,12 +17,12 @@ impl Material {
             shader: Shader::create_shader_program(vertex_file_name, fragment_file_name),
             uniforms_f32: vec![],
             uniforms_vect4: vec![],
-            textures: vec![],
+            texture: None,
         }
     }
 
-    pub fn add_texture(&mut self, texture: Texture) {
-        self.textures.push(texture);
+    pub fn set_texture(&mut self, texture: Texture) {
+        self.texture = Some(texture);
     }
 
     pub fn add_uniform_f32(&mut self, uniform_name: &str, value: f32) {
@@ -46,8 +46,8 @@ impl Material {
         for uniform in &self.uniforms_vect4 {
             self.shader.set_vector_uniform(&uniform.0, &uniform.1);
         }
-        for texture in &self.textures {
-            texture.bind();
+        if self.texture.is_some() {
+            self.texture.as_ref().unwrap().bind();
         }
     }
 }
