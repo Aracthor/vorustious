@@ -15,41 +15,64 @@ impl Primitive {
     }
 }
 
+struct VertexBufferObject {
+    id: gl::types::GLuint,
+}
+
+impl VertexBufferObject {
+    pub unsafe fn create_static(data: &Vec<f32>, attrib_index: gl::types::GLuint, component_size: gl::types::GLint) -> Self {
+        let mut id = 0;
+        gl::GenBuffers(1, &mut id);
+        let vbo = Self {id: id };
+        vbo.bind();
+        gl::VertexAttribPointer(attrib_index, component_size, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
+        gl::EnableVertexAttribArray(attrib_index);
+        let size_in_bytes = (std::mem::size_of::<f32>() * data.len()).try_into().unwrap();
+        gl::BufferData(gl::ARRAY_BUFFER, size_in_bytes, data.as_ptr().cast(), gl::STATIC_DRAW);
+        gl_check();
+        vbo.unbind();
+        vbo
+    }
+
+    pub unsafe fn bind(&self) {
+        gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
+    }
+
+    pub unsafe fn unbind(&self) {
+        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+    }
+}
+
+impl Drop for VertexBufferObject {
+    fn drop(&mut self) {
+        unsafe {
+            gl::DeleteBuffers(1, &self.id);
+        }
+    }
+}
+
+#[allow(dead_code)] // For buffer_objects storage, until I'm sure of their life expectancy...
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
-    buffer_objects: Vec<gl::types::GLuint>,
+    buffer_objects: Vec<VertexBufferObject>,
     element_count: i32,
 }
 
 impl VertexArrayObject {
     pub fn create(positions: Vec<f32>, texture_coords: Vec<f32>) -> VertexArrayObject {
         let mut vao = 0;
-        let mut position_vbo = 0;
-        let mut texture_coords_vbo = 0;
-        let mut buffer_objects: Vec<gl::types::GLuint> = Default::default();
+        let mut buffer_objects: Vec<VertexBufferObject> = Default::default();
 
         unsafe {
             gl::GenVertexArrays(1, &mut vao);
             gl::BindVertexArray(vao);
 
-            let positions_size_in_bytes = (std::mem::size_of::<f32>() * positions.len()).try_into().unwrap();
-            gl::GenBuffers(1, &mut position_vbo);
-            gl::BindBuffer(gl::ARRAY_BUFFER, position_vbo);
-            gl::BufferData(gl::ARRAY_BUFFER, positions_size_in_bytes, positions.as_ptr().cast(), gl::STATIC_DRAW);
-            gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
-            gl::EnableVertexAttribArray(0);
-            gl_check();
+            let position_vbo = VertexBufferObject::create_static(&positions, 0, 3);
             buffer_objects.push(position_vbo);
 
             if !texture_coords.is_empty() {
-                let texture_coords_size_in_bytes = (std::mem::size_of::<f32>() * texture_coords.len()).try_into().unwrap();
-                assert!(positions_size_in_bytes / 3 * 2 == texture_coords_size_in_bytes);
-                gl::GenBuffers(1, &mut texture_coords_vbo);
-                gl::BindBuffer(gl::ARRAY_BUFFER, texture_coords_vbo);
-                gl::BufferData(gl::ARRAY_BUFFER, texture_coords_size_in_bytes, texture_coords.as_ptr().cast(), gl::STATIC_DRAW);
-                gl::VertexAttribPointer(1, 2, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
-                gl::EnableVertexAttribArray(1);
-                gl_check();
+                assert!(positions.len() / 3 == texture_coords.len() / 2);
+                let texture_coords_vbo = VertexBufferObject::create_static(&texture_coords, 1, 2);
                 buffer_objects.push(texture_coords_vbo);
             }
 
@@ -77,9 +100,6 @@ impl Drop for VertexArrayObject {
     fn drop(&mut self) {
         unsafe {
             gl::DeleteVertexArrays(1, &self.id);
-            for vbo in &self.buffer_objects {
-                gl::DeleteBuffers(1, vbo);
-            }
         }
     }
 }
