@@ -32,7 +32,7 @@ impl Structure {
 
     #[cfg(test)]
     pub fn set_voxel(&mut self, x: i32, y: i32, z: i32, voxel: bool) {
-        let index = self.voxel_index(x, y, z);
+        let index = self.voxel_index(Vect3i::new([x, y, z]));
         self.data[index] = voxel;
     }
 
@@ -152,7 +152,7 @@ impl Structure {
         {
             let coords = Vect3i::new([x, y, z]);
             if self.voxel_box.contains(coords) {
-                let index = self.voxel_index(x, y, z);
+                let index = self.voxel_index(coords);
                 hit |= self.data[index];
                 if f(&mut self.data[index], &coords, &face) {
                     break;
@@ -183,18 +183,17 @@ impl Structure {
         hit
     }
 
-    fn voxel_index(&self, x: i32, y: i32, z: i32) -> usize {
-        assert!(self.voxel_box.contains(Vect3i::new([x, y, z])));
+    fn voxel_index(&self, coords: Vect3i) -> usize {
+        assert!(self.voxel_box.contains(coords));
         let extent = self.voxel_box.extent() + Vect3i::new([1, 1, 1]);
-        let x_in_data = x - self.voxel_box.min()[0];
-        let y_in_data = y - self.voxel_box.min()[1];
-        let z_in_data = z - self.voxel_box.min()[2];
-        (z_in_data * (extent[0] * extent[1]) + y_in_data * extent[0] + x_in_data).try_into().unwrap()
+        let coords_in_data = coords - self.voxel_box.min();
+        (coords_in_data[2] * (extent[0] * extent[1]) + coords_in_data[1] * extent[0] + coords_in_data[0]).try_into().unwrap()
     }
 
     fn has_voxel(&self, x: i32, y: i32, z: i32) -> bool {
-        assert!(self.voxel_box.contains(Vect3i::new([x, y, z])));
-        let index = self.voxel_index(x, y, z);
+        let coords = Vect3i::new([x, y, z]);
+        assert!(self.voxel_box.contains(coords));
+        let index = self.voxel_index(coords);
         self.data[index]
     }
 }
