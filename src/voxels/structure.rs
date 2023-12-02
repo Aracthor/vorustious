@@ -1,13 +1,11 @@
 use crate::maths::boxes::Box;
 use crate::maths::segment::Segm3f;
-use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3i;
 use super::voxel::Voxel;
 
 pub struct Structure {
     voxel_box: Box<3, i32>,
     data: Vec<Option<Voxel>>,
-    repere: Mat4f,
 }
 
 impl Structure {
@@ -20,16 +18,7 @@ impl Structure {
         Self {
             voxel_box: Box::<3, i32>::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
             data: vec![Some(voxel); vec_size],
-            repere: Mat4f::identity(),
         }
-    }
-
-    pub fn apply_transformation(&mut self, transformation: Mat4f) {
-        self.repere = self.repere.clone() * transformation;
-    }
-
-    pub fn repere(&self) -> &Mat4f {
-        &self.repere
     }
 
     #[cfg(test)]
@@ -128,7 +117,7 @@ impl Structure {
             }
         }
 
-        let mut new_segment = segment.transform(self.repere.inverse());
+        let mut new_segment = segment.clone();
 
         new_segment.start += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);
         new_segment.end += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);

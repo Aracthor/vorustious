@@ -1,3 +1,4 @@
+pub mod body;
 pub mod structure;
 pub mod voxel;
 

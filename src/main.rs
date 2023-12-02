@@ -12,6 +12,7 @@ use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
 use maths::vector::Vect3i;
 use projectile::Projectile;
+use voxels::body::Body;
 use voxels::structure::Structure;
 use voxels::voxel::Voxel;
 use weapon::Weapon;
@@ -33,7 +34,7 @@ fn main() {
     let mut camera = Camera::new();
     let mut ghost_cube_position: Option<Vect3i> = None;
 
-    let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
+    let mut body = Body::new(Structure::new(-2, 4, -1, 1, -1, 0));
     let mut projectiles: Vec<Projectile> = vec![];
     let mut weapon = Weapon::new(1.0 / 10.0, 20.0);
 
@@ -41,10 +42,10 @@ fn main() {
         camera.update_from_events(&window.event_handler());
 
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Middle) {
-            structure.apply_transformation(Mat4f::translation(Vect3f::new([0.05, 0.0, -0.05])));
-            structure.apply_transformation(Mat4f::rotation_around_x(0.03));
-            structure.apply_transformation(Mat4f::rotation_around_y(0.013));
-            structure.apply_transformation(Mat4f::rotation_around_z(0.02));
+            body.apply_transformation(Mat4f::translation(Vect3f::new([0.05, 0.0, -0.05])));
+            body.apply_transformation(Mat4f::rotation_around_x(0.03));
+            body.apply_transformation(Mat4f::rotation_around_y(0.013));
+            body.apply_transformation(Mat4f::rotation_around_z(0.02));
         }
 
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) {
@@ -57,11 +58,11 @@ fn main() {
         }
 
         if ghost_cube_position.is_some() && window.event_handler().is_mouse_button_just_released(graphic::windowing::event_handler::MouseButton::Right) {
-            structure.add_voxel(ghost_cube_position.unwrap(), Voxel{});
+            body.structure_mut().add_voxel(ghost_cube_position.unwrap(), Voxel{});
         }
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Right) {
-            let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0);
-            ghost_cube_position = structure.outside_voxel_coords(segment);
+            let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0).transform(&body.repere().inverse());
+            ghost_cube_position = body.structure_mut().outside_voxel_coords(segment);
         } else {
             ghost_cube_position = None;
         }
@@ -73,7 +74,7 @@ fn main() {
             let mut hit = false;
             if !projectile.is_out_of_max_range() {
                 let segment = Segm3f::new(segment_start, segment_end);
-                hit = structure.for_first_voxel_in_segment(segment, |voxel: &mut Option<Voxel>, _face| {
+                hit = body.for_first_voxel_in_segment(segment, |voxel: &mut Option<Voxel>, _face| {
                     *voxel = None;
                 });
             }
@@ -83,7 +84,7 @@ fn main() {
         window.clear();
 
         let projection_view_matrix = projection_matrix.clone() * camera.view_matrix();
-        renderer.render_frame(&projection_view_matrix, &structure, &projectiles, ghost_cube_position);
+        renderer.render_frame(&projection_view_matrix, &body, &projectiles, ghost_cube_position);
 
         window.update();
     }

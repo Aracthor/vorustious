@@ -22,7 +22,7 @@ impl<const N: usize, T: MathsUsable> Segment<N, T> {
 }
 
 impl Segment<3, f32> {
-    pub fn transform(&self, transformation: Mat4f) -> Self {
+    pub fn transform(&self, transformation: &Mat4f) -> Self {
         Self {
             start: transformation.clone() * self.start,
             end: transformation.clone() * self.end,

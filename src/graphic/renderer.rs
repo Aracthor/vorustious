@@ -3,7 +3,7 @@ use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use crate::maths::vector::Vect4f;
 use crate::projectile::Projectile;
-use crate::voxels::structure::Structure;
+use crate::voxels::body::Body;
 use super::cube;
 use super::frame_limiter::FrameLimiter;
 use super::material::Material;
@@ -107,9 +107,9 @@ impl Renderer {
         }
     }
 
-    pub fn render_frame(&mut self, projection_view_matrix: &Mat4f, structure: &Structure, projectiles: &Vec<Projectile>, ghost_position: Option<Vect3i>) {
-        structure.for_each_voxel(|x, y, z| {
-            let model_matrix = structure.repere().clone() * Mat4f::translation(Vect3f::new([x as f32, y as f32, z as f32]));
+    pub fn render_frame(&mut self, projection_view_matrix: &Mat4f, body: &Body, projectiles: &Vec<Projectile>, ghost_position: Option<Vect3i>) {
+        body.structure().for_each_voxel(|x, y, z| {
+            let model_matrix = body.repere().clone() * Mat4f::translation(Vect3f::new([x as f32, y as f32, z as f32]));
             self.cube_mesh.draw(projection_view_matrix, &model_matrix);
         });
 
@@ -120,7 +120,7 @@ impl Renderer {
 
         if ghost_position.is_some() {
             let position = ghost_position.unwrap();
-            let model_matrix = structure.repere().clone() * Mat4f::translation(Vect3f::new([position[0] as f32, position[1] as f32, position[2] as f32]));
+            let model_matrix = body.repere().clone() * Mat4f::translation(Vect3f::new([position[0] as f32, position[1] as f32, position[2] as f32]));
             self.ghost_cube_mesh.draw(projection_view_matrix, &model_matrix);
         }
 
