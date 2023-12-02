@@ -6,7 +6,7 @@ use super::voxel::Voxel;
 
 #[test]
 fn structure_segment_intersection() {
-    let erase_voxels = |voxel: &mut Option<Voxel>, _face: &_| {
+    let erase_voxels = |voxel: &mut Option<Voxel>| {
         *voxel = None;
     };
 
@@ -85,7 +85,7 @@ fn structure_segment_intersection() {
 
 #[test]
 fn structure_segment_first_intersection() {
-    let erase_voxels = |voxel: &mut Option<Voxel>, _face: &_| {
+    let erase_voxels = |voxel: &mut Option<Voxel>| {
         *voxel = None;
     };
 
@@ -112,7 +112,7 @@ fn structure_segment_intersection_end() {
     let segment_end = Vect3f::new([1.0, -1.0, 0.0]);
     let segment = Segm3f::new(segment_start, segment_end);
     let mut structure = Structure::new(-2, 4, -1, 1, -1, 0);
-    structure.for_voxels_in_segment(segment, |voxel: &mut Option<Voxel>, _face| {
+    structure.for_voxels_in_segment(segment, |voxel: &mut Option<Voxel>| {
         *voxel = None;
     });
 
@@ -136,7 +136,7 @@ fn structure_segment_intersection_face() {
         let segment_end = Vect3f::new([1.0, 0.0, 0.0]);
         let segment = Segm3f::new(segment_start, segment_end);
         let expected_face = Vect3i::zero();
-        structure.for_first_voxel_in_segment(segment, |_voxel, face: &Vect3i| { assert!(*face == expected_face) });
+        assert!(structure.get_face(segment) == expected_face);
     }
     // Front
     {
@@ -144,7 +144,7 @@ fn structure_segment_intersection_face() {
         let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
         let segment = Segm3f::new(segment_start, segment_end);
         let expected_face = Vect3i::new([-1, 0, 0]);
-        structure.for_first_voxel_in_segment(segment, |_voxel, face: &Vect3i| { assert!(*face == expected_face) });
+        assert!(structure.get_face(segment) == expected_face);
     }
     // Back
     {
@@ -152,7 +152,7 @@ fn structure_segment_intersection_face() {
         let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
         let segment = Segm3f::new(segment_start, segment_end);
         let expected_face = Vect3i::new([1, 0, 0]);
-        structure.for_first_voxel_in_segment(segment, |_voxel, face: &Vect3i| { assert!(*face == expected_face) });
+        assert!(structure.get_face(segment) == expected_face);
     }
     // Left
     {
@@ -160,7 +160,7 @@ fn structure_segment_intersection_face() {
         let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
         let segment = Segm3f::new(segment_start, segment_end);
         let expected_face = Vect3i::new([0, -1, 0]);
-        structure.for_first_voxel_in_segment(segment, |_voxel, face: &Vect3i| { assert!(*face == expected_face) });
+        assert!(structure.get_face(segment) == expected_face);
     }
     // Right
     {
@@ -168,7 +168,7 @@ fn structure_segment_intersection_face() {
         let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
         let segment = Segm3f::new(segment_start, segment_end);
         let expected_face = Vect3i::new([0, 1, 0]);
-        structure.for_first_voxel_in_segment(segment, |_voxel, face: &Vect3i| { assert!(*face == expected_face) });
+        assert!(structure.get_face(segment) == expected_face);
     }
     // Down
     {
@@ -176,7 +176,7 @@ fn structure_segment_intersection_face() {
         let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
         let segment = Segm3f::new(segment_start, segment_end);
         let expected_face = Vect3i::new([0, 0, -1]);
-        structure.for_first_voxel_in_segment(segment, |_voxel, face: &Vect3i| { assert!(*face == expected_face) });
+        assert!(structure.get_face(segment) == expected_face);
     }
     // Up
     {
@@ -184,7 +184,7 @@ fn structure_segment_intersection_face() {
         let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
         let segment = Segm3f::new(segment_start, segment_end);
         let expected_face = Vect3i::new([0, 0, 1]);
-        structure.for_first_voxel_in_segment(segment, |_voxel, face: &Vect3i| { assert!(*face == expected_face) });
+        assert!(structure.get_face(segment) == expected_face);
     }
 }
 

@@ -61,20 +61,33 @@ impl Structure {
         result
     }
 
-    pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, mut f: F) -> bool {
+    #[cfg(test)]
+    pub fn get_face(&mut self, segment: Segm3f) -> Vect3i {
+        let mut result = Vect3i::zero();
         self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, face: &Vect3i| {
             let has_voxel = voxel.is_some();
             if has_voxel {
-                f(voxel, face);
+                result = *face;
+            }
+            has_voxel
+        });
+        result
+    }
+
+    pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>)>(&mut self, segment: Segm3f, mut f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, _face| {
+            let has_voxel = voxel.is_some();
+            if has_voxel {
+                f(voxel);
             }
             has_voxel
         })
     }
 
     #[allow(dead_code)]
-    pub fn for_voxels_in_segment<F: Fn(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, face: &Vect3i| {
-            f(voxel, face);
+    pub fn for_voxels_in_segment<F: Fn(&mut Option<Voxel>)>(&mut self, segment: Segm3f, f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, _face| {
+            f(voxel);
             false
         })
     }
