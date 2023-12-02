@@ -1,6 +1,6 @@
-use super::maths::segment::Segm3f;
-use super::maths::vector::Vect3f;
-use super::maths::vector::Vect3i;
+use crate::maths::segment::Segm3f;
+use crate::maths::vector::Vect3f;
+use crate::maths::vector::Vect3i;
 use super::structure::Structure;
 use super::voxel::Voxel;
 

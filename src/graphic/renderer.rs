@@ -3,7 +3,7 @@ use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use crate::maths::vector::Vect4f;
 use crate::projectile::Projectile;
-use crate::structure::Structure;
+use crate::voxels::structure::Structure;
 use super::cube;
 use super::frame_limiter::FrameLimiter;
 use super::material::Material;

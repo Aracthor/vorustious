@@ -1,12 +1,8 @@
 mod graphic;
 mod maths;
-mod structure;
+mod voxels;
 mod projectile;
-mod voxel;
 mod weapon;
-
-#[cfg(test)]
-mod unit_tests;
 
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
@@ -16,8 +12,8 @@ use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
 use maths::vector::Vect3i;
 use projectile::Projectile;
-use structure::Structure;
-use voxel::Voxel;
+use voxels::structure::Structure;
+use voxels::voxel::Voxel;
 use weapon::Weapon;
 
 fn main() {
