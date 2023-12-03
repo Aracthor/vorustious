@@ -18,6 +18,14 @@ impl Color {
             alpha: alpha,
         }
     }
+
+    pub fn black() -> Self {
+        Self::new(0x00, 0x00, 0x00, 0xFF)
+    }
+
+    pub fn transparent() -> Self {
+        Self::new(0x00, 0x00, 0x00, 0x00)
+    }
 }
 
 impl Into<Vect4f> for Color {

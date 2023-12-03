@@ -68,6 +68,16 @@ impl Shader {
         }
     }
 
+    pub fn set_int_uniform(&self, uniform_name: &str, value: i32) {
+        let location_name = Self::location_name_from_string(uniform_name);
+
+        unsafe {
+            let location = gl::GetUniformLocation(self.program, location_name.as_ptr());
+            assert!(location >= 0, "invalid uniform {uniform_name}");
+            gl::Uniform1iv(location, 1, &value);
+        }
+    }
+
     pub fn set_float_uniform(&self, uniform_name: &str, value: f32) {
         let location_name = Self::location_name_from_string(uniform_name);
 

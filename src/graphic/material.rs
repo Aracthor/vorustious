@@ -10,7 +10,7 @@ pub struct Material {
     shader: Shader,
     uniforms_f32: HashMap<String, f32>,
     uniforms_vect4: HashMap<String, Vect4f>,
-    texture: Option<Texture>,
+    textures: HashMap<String, Texture>,
 }
 
 impl Material {
@@ -19,12 +19,12 @@ impl Material {
             shader: Shader::create_shader_program(vertex_file_name, fragment_file_name),
             uniforms_f32: Default::default(),
             uniforms_vect4: Default::default(),
-            texture: None,
+            textures: Default::default(),
         }
     }
 
-    pub fn set_texture(&mut self, texture: Texture) {
-        self.texture = Some(texture);
+    pub fn add_texture(&mut self, name: &str, texture: Texture) {
+        self.textures.insert(String::from(name), texture);
     }
 
     pub fn add_uniform_f32(&mut self, uniform_name: &str, value: f32) {
@@ -53,8 +53,11 @@ impl Material {
         for uniform in &self.uniforms_vect4 {
             self.shader.set_vector_uniform(uniform.0, uniform.1);
         }
-        if self.texture.is_some() {
-            self.texture.as_ref().unwrap().bind();
+        let mut texture_index = 0;
+        for texture in &self.textures {
+            self.shader.set_int_uniform(texture.0, texture_index);
+            texture.1.bind(texture_index.try_into().unwrap());
+            texture_index += 1;
         }
     }
 }

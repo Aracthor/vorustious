@@ -25,8 +25,16 @@ impl Texture {
         Texture { id: id }
     }
 
-    pub fn bind(&self) {
-        unsafe { gl::BindTexture(gl::TEXTURE_2D, self.id) };
+    pub fn bind(&self, texture_index: usize) {
+        let texture_id = match texture_index {
+            0 => gl::TEXTURE0,
+            1 => gl::TEXTURE1,
+            _ => unimplemented!(),
+        };
+        unsafe {
+            gl::ActiveTexture(texture_id);
+            gl::BindTexture(gl::TEXTURE_2D, self.id)
+        };
     }
 }
 

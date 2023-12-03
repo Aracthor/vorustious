@@ -8,6 +8,7 @@ use super::frame_limiter::FrameLimiter;
 use super::material::Material;
 use super::mesh::Mesh;
 use super::opengl::vertex_objects::Primitive;
+use super::opengl::texture::Texture;
 
 pub struct Renderer {
     frame_limiter: FrameLimiter,
@@ -19,10 +20,27 @@ pub struct Renderer {
 impl Renderer {
     pub fn new() -> Self {
         let cube_mesh = {
-            let mut material = Material::create("shaders/hello_texture_instanced.vert", "shaders/hello_texture.frag");
+            let mut material = Material::create("shaders/hello_texture_instanced.vert", "shaders/voxel.frag");
 
             let texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
-            material.set_texture(texture);
+            material.add_texture("diffuse_texture", texture);
+
+            let damage_texture = {
+                let b = Color::black();
+                let t = Color::transparent();
+                let texture_pixels: Vec<Color> = [
+                    t,  b,  t,  t,  t,  t,  t,  b,
+                    t,  b,  t,  t,  t,  b,  b,  t,
+                    t,  b,  t,  t,  b,  t,  t,  b,
+                    t,  t,  b,  t,  b,  b,  b,  b,
+                    t,  t,  b,  b,  b,  t,  t,  t,
+                    t,  b,  t,  b,  t,  b,  t,  b,
+                    b,  t,  t,  t,  t,  b,  t,  b,
+                    t,  t,  t,  t,  t,  t,  b,  b,
+                ].to_vec();
+                Texture::create(8, 8, texture_pixels)
+            };
+            material.add_texture("damage_texture", damage_texture);
 
             material.add_uniform_f32("uni_alpha", 1.0);
             cube::cube_mesh(material)
