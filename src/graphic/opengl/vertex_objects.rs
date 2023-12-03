@@ -20,18 +20,25 @@ struct VertexBufferObject {
 }
 
 impl VertexBufferObject {
-    pub unsafe fn create_static(data: &Vec<f32>, attrib_index: gl::types::GLuint, component_size: gl::types::GLint) -> Self {
+    pub unsafe fn new(attrib_index: gl::types::GLuint, component_size: gl::types::GLint) -> Self {
         let mut id = 0;
         gl::GenBuffers(1, &mut id);
-        let vbo = Self {id: id };
+        let vbo = Self {
+            id: id,
+        };
         vbo.bind();
         gl::VertexAttribPointer(attrib_index, component_size, gl::FLOAT, gl::FALSE, 0, std::ptr::null::<_>());
         gl::EnableVertexAttribArray(attrib_index);
-        let size_in_bytes = (std::mem::size_of::<f32>() * data.len()).try_into().unwrap();
-        gl::BufferData(gl::ARRAY_BUFFER, size_in_bytes, data.as_ptr().cast(), gl::STATIC_DRAW);
         gl_check();
         vbo.unbind();
         vbo
+    }
+
+    pub unsafe fn set_data(&self, data: &Vec<f32>, usage: gl::types::GLenum) {
+        self.bind();
+        let size_in_bytes = (std::mem::size_of::<f32>() * data.len()).try_into().unwrap();
+        gl::BufferData(gl::ARRAY_BUFFER, size_in_bytes, data.as_ptr().cast(), usage);
+        self.unbind();
     }
 
     pub unsafe fn bind(&self) {
@@ -55,25 +62,34 @@ impl Drop for VertexBufferObject {
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
     buffer_objects: Vec<VertexBufferObject>,
+    instance_vbo: Option<VertexBufferObject>,
     element_count: i32,
 }
 
 impl VertexArrayObject {
-    pub fn create(positions: Vec<f32>, texture_coords: Option<Vec<f32>>) -> VertexArrayObject {
+    pub fn create(positions: Vec<f32>, texture_coords: Option<Vec<f32>>, instanced: bool) -> VertexArrayObject {
         let mut vao = 0;
         let mut buffer_objects: Vec<VertexBufferObject> = Default::default();
+        let mut instance_vbo: Option<VertexBufferObject> = None;
 
         unsafe {
             gl::GenVertexArrays(1, &mut vao);
             gl::BindVertexArray(vao);
 
-            let position_vbo = VertexBufferObject::create_static(&positions, 0, 3);
+            let position_vbo = VertexBufferObject::new(0, 3);
+            position_vbo.set_data(&positions, gl::STATIC_DRAW);
             buffer_objects.push(position_vbo);
 
             if texture_coords.is_some() {
                 assert!(positions.len() / 3 == texture_coords.as_ref().unwrap().len() / 2);
-                let texture_coords_vbo = VertexBufferObject::create_static(&texture_coords.unwrap(), 1, 2);
+                let texture_coords_vbo = VertexBufferObject::new(1, 2);
+                texture_coords_vbo.set_data(&texture_coords.unwrap(), gl::STATIC_DRAW);
                 buffer_objects.push(texture_coords_vbo);
+            }
+
+            if instanced {
+                instance_vbo = Some(VertexBufferObject::new(2, 3));
+                gl::VertexAttribDivisor(2, 1);
             }
 
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
@@ -83,16 +99,33 @@ impl VertexArrayObject {
         VertexArrayObject {
             id: vao,
             buffer_objects: buffer_objects,
+            instance_vbo: instance_vbo,
             element_count: (positions.len() / 3).try_into().unwrap(),
         }
     }
 
     pub fn draw(&self, primitive: Primitive) {
+        assert!(!self.instanced());
         unsafe {
             gl::BindVertexArray(self.id);
             gl::DrawArrays(primitive.to_gl_primitive(), 0, self.element_count);
             gl::BindVertexArray(0);
         }
+    }
+
+    pub fn draw_instanced(&self, primitive: Primitive, instance_positions: &Vec<f32>) {
+        assert!(self.instanced());
+        let instance_count = instance_positions.len() / 3;
+        unsafe {
+            gl::BindVertexArray(self.id);
+            self.instance_vbo.as_ref().unwrap().set_data(instance_positions, gl::DYNAMIC_DRAW);
+            gl::DrawArraysInstanced(primitive.to_gl_primitive(), 0, self.element_count, instance_count.try_into().unwrap());
+            gl::BindVertexArray(0);
+        }
+    }
+
+    fn instanced(&self) -> bool {
+        self.instance_vbo.is_some()
     }
 }
 

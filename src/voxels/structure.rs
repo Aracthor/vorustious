@@ -37,7 +37,7 @@ impl Structure {
         self.data[index] = Some(voxel);
     }
 
-    pub fn for_each_voxel<F: Fn(i32, i32, i32)>(&self, f: F) {
+    pub fn for_each_voxel<F: FnMut(i32, i32, i32)>(&self, mut f: F) {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {

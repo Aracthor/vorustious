@@ -115,5 +115,5 @@ pub fn cube_mesh(material: Material) -> Mesh {
         1.0, 0.0,
         ].to_vec();
 
-    Mesh::create(positions, Some(tex_coords), Primitive::Triangles, material)
+    Mesh::create(positions, Some(tex_coords), Primitive::Triangles, material, true)
 }

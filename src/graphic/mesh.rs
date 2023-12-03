@@ -11,9 +11,9 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn create(positions: Vec<f32>, tex_coords: Option<Vec<f32>>, primitive: Primitive, material: Material) -> Mesh {
+    pub fn create(positions: Vec<f32>, tex_coords: Option<Vec<f32>>, primitive: Primitive, material: Material, instanced: bool) -> Mesh {
         Mesh {
-            vao: VertexArrayObject::create(positions, tex_coords),
+            vao: VertexArrayObject::create(positions, tex_coords, instanced),
             primitive: primitive,
             material: material,
         }
@@ -27,5 +27,11 @@ impl Mesh {
         self.material.bind();
         self.material.set_transformation_matrices(projection_view_matrix, model_matrix);
         self.vao.draw(self.primitive);
+    }
+
+    pub fn draw_instanced(&self, instance_positions: &Vec<f32>, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
+        self.material.bind();
+        self.material.set_transformation_matrices(projection_view_matrix, model_matrix);
+        self.vao.draw_instanced(self.primitive, instance_positions);
     }
 }

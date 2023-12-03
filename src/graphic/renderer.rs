@@ -1,5 +1,4 @@
 use crate::maths::matrix::Mat4f;
-use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use crate::maths::vector::Vect4f;
 use crate::projectile::Projectile;
@@ -20,7 +19,7 @@ pub struct Renderer {
 impl Renderer {
     pub fn new() -> Self {
         let cube_mesh = {
-            let mut material = Material::create("shaders/hello_texture.vert", "shaders/hello_texture.frag");
+            let mut material = Material::create("shaders/hello_texture_instanced.vert", "shaders/hello_texture.frag");
 
             let texture = cube::cube_texture([0x40, 0x40, 0x40, 0xFF], [0x80, 0x80, 0x80, 0xFF]);
             material.set_texture(texture);
@@ -67,7 +66,7 @@ impl Renderer {
                 0.0, 0.5, 0.0,
             ].to_vec();
 
-            Mesh::create(positions, None, Primitive::Triangles, material)
+            Mesh::create(positions, None, Primitive::Triangles, material, false)
         };
 
         let interface_mesh = {
@@ -85,7 +84,7 @@ impl Renderer {
                 0.0, 0.02, 0.0,
             ].to_vec();
 
-            Mesh::create(positions, None, Primitive::Lines, material)
+            Mesh::create(positions, None, Primitive::Lines, material, false)
         };
 
         Renderer {
@@ -97,10 +96,13 @@ impl Renderer {
     }
 
     pub fn render_frame(&mut self, projection_view_matrix: &Mat4f, body: &Body, projectiles: &Vec<Projectile>, ghost_position: Option<Vect3i>) {
+        let mut instance_positions: Vec<f32> = Default::default();
         body.structure().for_each_voxel(|x, y, z| {
-            let model_matrix = body.repere().clone() * Mat4f::translation(Vect3f::new([x as f32, y as f32, z as f32]));
-            self.cube_mesh.draw(projection_view_matrix, &model_matrix);
+            instance_positions.push(x as f32);
+            instance_positions.push(y as f32);
+            instance_positions.push(z as f32);
         });
+        self.cube_mesh.draw_instanced(&instance_positions, projection_view_matrix, body.repere());
 
         for projectile in projectiles {
             let model_matrix = Mat4f::translation(projectile.position());
@@ -109,9 +111,9 @@ impl Renderer {
 
         if ghost_position.is_some() {
             let position = ghost_position.unwrap();
-            let model_matrix = body.repere().clone() * Mat4f::translation(Vect3f::new([position[0] as f32, position[1] as f32, position[2] as f32]));
+            let instance_position = vec![position[0] as f32, position[1] as f32, position[2] as f32];
             self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
-            self.cube_mesh.draw(projection_view_matrix, &model_matrix);
+            self.cube_mesh.draw_instanced(&instance_position, projection_view_matrix, body.repere());
             self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);
         }
 
