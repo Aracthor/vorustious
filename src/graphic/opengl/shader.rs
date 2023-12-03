@@ -68,6 +68,13 @@ impl Shader {
         }
     }
 
+    pub fn get_attrib_location(&self, attrib_name: &str) -> u32 {
+        unsafe {
+            let name = Self::location_name_from_string(attrib_name);
+            gl::GetAttribLocation(self.program, name.as_ptr()).try_into().unwrap()
+        }
+    }
+
     pub fn set_int_uniform(&self, uniform_name: &str, value: i32) {
         let location_name = Self::location_name_from_string(uniform_name);
 

@@ -11,6 +11,7 @@ pub struct Material {
     uniforms_f32: HashMap<String, f32>,
     uniforms_vect4: HashMap<String, Vect4f>,
     textures: HashMap<String, Texture>,
+    instance_data_buffers: Vec<(String, i32)>,
 }
 
 impl Material {
@@ -20,11 +21,16 @@ impl Material {
             uniforms_f32: Default::default(),
             uniforms_vect4: Default::default(),
             textures: Default::default(),
+            instance_data_buffers: Default::default(),
         }
     }
 
     pub fn add_texture(&mut self, name: &str, texture: Texture) {
         self.textures.insert(String::from(name), texture);
+    }
+
+    pub fn add_instance_data_buffer(&mut self, name: &str, component_size: i32) {
+        self.instance_data_buffers.push((String::from(name), component_size));
     }
 
     pub fn add_uniform_f32(&mut self, uniform_name: &str, value: f32) {
@@ -38,6 +44,10 @@ impl Material {
     pub fn set_uniform_f32(&mut self, uniform_name: &str, value: f32) {
         assert!(self.uniforms_f32.contains_key(uniform_name));
         *self.uniforms_f32.get_mut(uniform_name).unwrap() = value;
+    }
+
+    pub fn get_instanced_buffer_locations(&self) -> Vec<(u32, i32)> {
+        self.instance_data_buffers.iter().map(|buffer| (self.shader.get_attrib_location(&buffer.0), buffer.1)).collect()
     }
 
     pub fn set_transformation_matrices(&self, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {

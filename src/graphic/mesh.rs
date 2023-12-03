@@ -11,9 +11,13 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn create(positions: Vec<f32>, tex_coords: Option<Vec<f32>>, primitive: Primitive, material: Material, instanced: bool) -> Mesh {
+    pub fn create(positions: Vec<f32>, tex_coords: Option<Vec<f32>>, primitive: Primitive, material: Material) -> Mesh {
+        let mut vao = VertexArrayObject::create(positions, tex_coords);
+        for instanced_buffer in material.get_instanced_buffer_locations() {
+            vao.add_instanced_buffer(instanced_buffer.0, instanced_buffer.1);
+        }
         Mesh {
-            vao: VertexArrayObject::create(positions, tex_coords, instanced),
+            vao: vao,
             primitive: primitive,
             material: material,
         }
@@ -23,15 +27,19 @@ impl Mesh {
         self.material.set_uniform_f32(uniform_name, value);
     }
 
+    pub fn set_instanced_data(&self, buffer_index: usize, data: &Vec<f32>) {
+        self.vao.fill_instanced_buffer(buffer_index, data);
+    }
+
     pub fn draw(&self, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
         self.material.bind();
         self.material.set_transformation_matrices(projection_view_matrix, model_matrix);
         self.vao.draw(self.primitive);
     }
 
-    pub fn draw_instanced(&self, instance_positions: &Vec<f32>, instance_damages: &Vec<f32>, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
+    pub fn draw_instanced(&self, instance_count: i32, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
         self.material.bind();
         self.material.set_transformation_matrices(projection_view_matrix, model_matrix);
-        self.vao.draw_instanced(self.primitive, instance_positions, instance_damages);
+        self.vao.draw_instanced(self.primitive, instance_count);
     }
 }

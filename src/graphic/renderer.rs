@@ -22,6 +22,9 @@ impl Renderer {
         let cube_mesh = {
             let mut material = Material::create("shaders/voxel.vert", "shaders/voxel.frag");
 
+            material.add_instance_data_buffer("instance_position", 3);
+            material.add_instance_data_buffer("instance_damage", 1);
+
             let texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
             material.add_texture("diffuse_texture", texture);
 
@@ -84,7 +87,7 @@ impl Renderer {
                 0.0, 0.5, 0.0,
             ].to_vec();
 
-            Mesh::create(positions, None, Primitive::Triangles, material, false)
+            Mesh::create(positions, None, Primitive::Triangles, material)
         };
 
         let interface_mesh = {
@@ -102,7 +105,7 @@ impl Renderer {
                 0.0, 0.02, 0.0,
             ].to_vec();
 
-            Mesh::create(positions, None, Primitive::Lines, material, false)
+            Mesh::create(positions, None, Primitive::Lines, material)
         };
 
         Renderer {
@@ -122,7 +125,10 @@ impl Renderer {
             instance_positions.push(z as f32);
             instance_damages.push(1.0 - voxel.life / voxel.max_life);
         });
-        self.cube_mesh.draw_instanced(&instance_positions, &instance_damages, projection_view_matrix, body.repere());
+        let instance_count = instance_damages.len().try_into().unwrap();
+        self.cube_mesh.set_instanced_data(0, &instance_positions);
+        self.cube_mesh.set_instanced_data(1, &instance_damages);
+        self.cube_mesh.draw_instanced(instance_count, projection_view_matrix, body.repere());
 
         for projectile in projectiles {
             let model_matrix = Mat4f::translation(projectile.position());
@@ -133,8 +139,10 @@ impl Renderer {
             let position = ghost_position.unwrap();
             let instance_position = vec![position[0] as f32, position[1] as f32, position[2] as f32];
             let instance_damage = vec![0.0];
+            self.cube_mesh.set_instanced_data(0, &instance_position);
+            self.cube_mesh.set_instanced_data(1, &instance_damage);
             self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
-            self.cube_mesh.draw_instanced(&instance_position, &instance_damage, projection_view_matrix, body.repere());
+            self.cube_mesh.draw_instanced(1, projection_view_matrix, body.repere());
             self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);
         }
 
