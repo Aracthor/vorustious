@@ -28,9 +28,9 @@ impl Renderer {
             material.add_instance_data_buffer("instance_damage", 1);
 
             let hull_texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
-            material.add_texture(&format!("voxel_texture[{}]", <TextureType as Into<i32>>::into(TextureType::Hull)), hull_texture);
+            material.add_texture(&format!("voxel_texture[{}]", TextureType::Hull as i32), hull_texture);
             let core_texture = cube::cube_texture(Color::new(0x80, 0x80, 0x80, 0xFF), Color::new(0x80, 0x80, 0xFF, 0xFF));
-            material.add_texture(&format!("voxel_texture[{}]", <TextureType as Into<i32>>::into(TextureType::Core)), core_texture);
+            material.add_texture(&format!("voxel_texture[{}]", TextureType::Core as i32), core_texture);
 
             let damage_texture = {
                 let b = Color::black();
@@ -128,7 +128,7 @@ impl Renderer {
             instance_positions.push(x as f32);
             instance_positions.push(y as f32);
             instance_positions.push(z as f32);
-            instance_texture_indices.push(voxel.texture_type.into());
+            instance_texture_indices.push(voxel.texture_type as i32);
             instance_damages.push(1.0 - voxel.life / voxel.max_life);
         });
         let instance_count = instance_damages.len().try_into().unwrap();

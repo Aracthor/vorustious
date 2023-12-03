@@ -1,16 +1,7 @@
 #[derive(Clone, Copy)]
 pub enum TextureType {
-    Hull,
-    Core,
-}
-
-impl Into<i32> for TextureType {
-    fn into(self) -> i32 {
-        match self {
-            Self::Hull => 0,
-            Self::Core => 1,
-        }
-    }
+    Hull = 0,
+    Core = 1,
 }
 
 #[derive(Clone, Copy)]
