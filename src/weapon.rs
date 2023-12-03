@@ -6,14 +6,16 @@ use super::projectile::Projectile;
 
 pub struct Weapon {
     firerate: Duration,
+    damage: f32,
     max_range: f32,
     last_shot_time: Instant,
 }
 
 impl Weapon {
-    pub fn new(firerate: f32, max_range: f32) -> Self {
+    pub fn new(firerate: f32, damage: f32, max_range: f32) -> Self {
         Self {
             firerate: Duration::from_secs_f32(firerate),
+            damage: damage,
             max_range: max_range,
             last_shot_time: Instant::now(),
         }
@@ -22,7 +24,7 @@ impl Weapon {
     pub fn shoot(&mut self, position: Vect3f, direction: Vect3f) -> Option<Projectile> {
         if self.last_shot_time.elapsed() > self.firerate {
             self.last_shot_time = Instant::now();
-            return Some(Projectile::new(position, direction, self.max_range));
+            return Some(Projectile::new(position, direction, self.damage, self.max_range));
         }
         None
     }

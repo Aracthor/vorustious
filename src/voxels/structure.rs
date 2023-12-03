@@ -9,12 +9,11 @@ pub struct Structure {
 }
 
 impl Structure {
-    pub fn new(min_x: i32, max_x: i32, min_y: i32, max_y: i32, min_z: i32, max_z: i32) -> Self {
+    pub fn new(min_x: i32, max_x: i32, min_y: i32, max_y: i32, min_z: i32, max_z: i32, voxel: Voxel) -> Self {
         let extent_x = max_x - min_x + 1;
         let extent_y = max_y - min_y + 1;
         let extent_z = max_z - min_z + 1;
         let vec_size: usize = (extent_x * extent_y * extent_z).try_into().unwrap();
-        let voxel = Voxel{};
         Self {
             voxel_box: Box::<3, i32>::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
             data: vec![Some(voxel); vec_size],
@@ -43,6 +42,20 @@ impl Structure {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
                     if self.has_voxel(x, y, z) {
                         f(x, y, z);
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn for_each_voxel_mut<F: Fn(i32, i32, i32, &mut Option<Voxel>)>(&mut self, f: F) {
+        for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
+            for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
+                for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
+                    if self.has_voxel(x, y, z) {
+                        let index = self.voxel_index(Vect3i::new([x, y, z]));
+                        let voxel = &mut self.data[index];
+                        f(x, y, z, voxel);
                     }
                 }
             }

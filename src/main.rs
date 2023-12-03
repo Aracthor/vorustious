@@ -34,9 +34,10 @@ fn main() {
     let mut camera = Camera::new();
     let mut ghost_cube_position: Option<Vect3i> = None;
 
-    let mut body = Body::new(Structure::new(-2, 4, -1, 1, -1, 0));
+    let voxel = Voxel{life: 2.0};
+    let mut body = Body::new(Structure::new(-2, 4, -1, 1, -1, 0, voxel));
     let mut projectiles: Vec<Projectile> = vec![];
-    let mut weapon = Weapon::new(1.0 / 10.0, 20.0);
+    let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 20.0);
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
@@ -58,7 +59,7 @@ fn main() {
         }
 
         if ghost_cube_position.is_some() && window.event_handler().is_mouse_button_just_released(graphic::windowing::event_handler::MouseButton::Right) {
-            body.structure_mut().add_voxel(ghost_cube_position.unwrap(), Voxel{});
+            body.structure_mut().add_voxel(ghost_cube_position.unwrap(), voxel);
         }
         if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Right) {
             let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0).transform(&body.repere().inverse());
@@ -75,10 +76,16 @@ fn main() {
             if !projectile.is_out_of_max_range() {
                 let segment = Segm3f::new(segment_start, segment_end);
                 hit = body.for_first_voxel_in_segment(segment, |voxel: &mut Option<Voxel>| {
-                    *voxel = None;
+                    voxel.as_mut().unwrap().life -= projectile.damage();
                 });
             }
             !hit && !projectile.is_out_of_max_range()
+        });
+
+        body.structure_mut().for_each_voxel_mut(|_x, _y, _z, voxel: &mut Option<Voxel>| {
+            if voxel.unwrap().life <= 0.0 {
+                *voxel = None;
+            }
         });
 
         window.clear();
