@@ -7,6 +7,8 @@ mod weapon;
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
 use graphic::windowing::window::Window;
+use graphic::windowing::event_handler::Key;
+use graphic::windowing::event_handler::MouseButton;
 use maths::segment::Segm3f;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
@@ -46,18 +48,30 @@ fn main() {
     let mut body = Body::new(structure);
     let mut projectiles: Vec<Projectile> = vec![];
     let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 20.0);
+    let save_filename = "save.vors";
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
 
-        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Middle) {
+        if window.event_handler().is_key_just_pressed(Key::F5) {
+            let str = body.structure().serialize();
+            std::fs::write(save_filename, str).expect(&format!("Unable to save {save_filename}"));
+            println!("Saved file '{save_filename}'");
+        }
+        if window.event_handler().is_key_just_pressed(Key::F9) {
+            let str = std::fs::read_to_string(save_filename).expect(&format!("Unable to read {save_filename}"));
+            body = Body::new(Structure::deserialize(&voxel_catalog, &str));
+            println!("Loaded file '{save_filename}'");
+        }
+
+        if window.event_handler().is_mouse_button_pressed(MouseButton::Middle) {
             body.apply_transformation(Mat4f::translation(Vect3f::new([0.05, 0.0, -0.05])));
             body.apply_transformation(Mat4f::rotation_around_x(0.03));
             body.apply_transformation(Mat4f::rotation_around_y(0.013));
             body.apply_transformation(Mat4f::rotation_around_z(0.02));
         }
 
-        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Left) {
+        if window.event_handler().is_mouse_button_pressed(MouseButton::Left) {
             let projectile_start = camera.position();
             let projectile_direction = camera.forward();
             let projectile = weapon.shoot(projectile_start, projectile_direction);
@@ -66,10 +80,10 @@ fn main() {
             }
         }
 
-        if ghost_cube_position.is_some() && window.event_handler().is_mouse_button_just_released(graphic::windowing::event_handler::MouseButton::Right) {
+        if ghost_cube_position.is_some() && window.event_handler().is_mouse_button_just_released(MouseButton::Right) {
             body.structure_mut().add_voxel(ghost_cube_position.unwrap(), voxel);
         }
-        if window.event_handler().is_mouse_button_pressed(graphic::windowing::event_handler::MouseButton::Right) {
+        if window.event_handler().is_mouse_button_pressed(MouseButton::Right) {
             let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0).transform(&body.repere().inverse());
             ghost_cube_position = body.structure_mut().outside_voxel_coords(segment);
         } else {

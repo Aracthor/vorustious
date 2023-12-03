@@ -8,6 +8,8 @@ pub enum Key {
     D,
     S,
     W,
+    F5,
+    F9,
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -64,6 +66,8 @@ impl EventHandler {
                 (glfw::Key::D, Key::D),
                 (glfw::Key::S, Key::S),
                 (glfw::Key::W, Key::W),
+                (glfw::Key::F5, Key::F5),
+                (glfw::Key::F9, Key::F9),
             ]),
 
             key_status: Default::default(),
@@ -121,6 +125,11 @@ impl EventHandler {
     pub fn is_key_pressed(&self, key: Key) -> bool {
         let key_status = self.key_status.get(&key);
         key_status.is_some() && [Status::JustPressed, Status::Pressed].contains(key_status.unwrap())
+    }
+
+    pub fn is_key_just_pressed(&self, key: Key) -> bool {
+        let key_status = self.key_status.get(&key);
+        key_status.is_some_and(|status| *status == Status::JustPressed)
     }
 
     pub fn is_mouse_button_just_released(&self, button: MouseButton) -> bool {

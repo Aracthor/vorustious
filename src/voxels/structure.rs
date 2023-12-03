@@ -37,7 +37,6 @@ impl Structure {
     const SEPARATOR_Y: &str = "|";
     const SEPARATOR_Z: &str = "\n";
 
-    #[allow(dead_code)]
     pub fn serialize(&self) -> String {
         let mut result =
         self.voxel_box.min()[0].to_string() + Self::SEPARATOR_EXTENT +
@@ -66,7 +65,6 @@ impl Structure {
         result
     }
 
-    #[allow(dead_code)]
     pub fn deserialize(catalog: &VoxelCatalog, str: &str) -> Self {
         let mut lines = str.split(Self::SEPARATOR_Z);
         let first_line = lines.next();
