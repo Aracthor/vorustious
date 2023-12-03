@@ -34,7 +34,7 @@ fn main() {
     let mut camera = Camera::new();
     let mut ghost_cube_position: Option<Vect3i> = None;
 
-    let voxel = Voxel{life: 2.0};
+    let voxel = Voxel{life: 2.0, max_life: 2.0};
     let mut body = Body::new(Structure::new(-2, 4, -1, 1, -1, 0, voxel));
     let mut projectiles: Vec<Projectile> = vec![];
     let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 20.0);

@@ -4,7 +4,7 @@ use crate::maths::vector::Vect3i;
 use super::structure::Structure;
 use super::voxel::Voxel;
 
-const TEST_VOXEL: Voxel = Voxel{life: 1.0};
+const TEST_VOXEL: Voxel = Voxel{life: 1.0, max_life: 1.0};
 
 #[test]
 fn structure_segment_intersection() {

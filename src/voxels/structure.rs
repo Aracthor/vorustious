@@ -36,12 +36,14 @@ impl Structure {
         self.data[index] = Some(voxel);
     }
 
-    pub fn for_each_voxel<F: FnMut(i32, i32, i32)>(&self, mut f: F) {
+    pub fn for_each_voxel<F: FnMut(i32, i32, i32, &Voxel)>(&self, mut f: F) {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
                     if self.has_voxel(x, y, z) {
-                        f(x, y, z);
+                        let index = self.voxel_index(Vect3i::new([x, y, z]));
+                        let voxel = &mut self.data[index].unwrap();
+                        f(x, y, z, voxel);
                     }
                 }
             }

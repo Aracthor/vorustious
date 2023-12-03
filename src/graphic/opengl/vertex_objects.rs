@@ -62,7 +62,7 @@ impl Drop for VertexBufferObject {
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
     buffer_objects: Vec<VertexBufferObject>,
-    instance_vbo: Option<VertexBufferObject>,
+    instance_buffer_objects: Vec<VertexBufferObject>,
     element_count: i32,
 }
 
@@ -70,7 +70,7 @@ impl VertexArrayObject {
     pub fn create(positions: Vec<f32>, texture_coords: Option<Vec<f32>>, instanced: bool) -> VertexArrayObject {
         let mut vao = 0;
         let mut buffer_objects: Vec<VertexBufferObject> = Default::default();
-        let mut instance_vbo: Option<VertexBufferObject> = None;
+        let mut instance_buffer_objects: Vec<VertexBufferObject> = Default::default();
 
         unsafe {
             gl::GenVertexArrays(1, &mut vao);
@@ -88,8 +88,10 @@ impl VertexArrayObject {
             }
 
             if instanced {
-                instance_vbo = Some(VertexBufferObject::new(2, 3));
+                instance_buffer_objects.push(VertexBufferObject::new(2, 3));
                 gl::VertexAttribDivisor(2, 1);
+                instance_buffer_objects.push(VertexBufferObject::new(3, 1));
+                gl::VertexAttribDivisor(3, 1);
             }
 
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
@@ -99,7 +101,7 @@ impl VertexArrayObject {
         VertexArrayObject {
             id: vao,
             buffer_objects: buffer_objects,
-            instance_vbo: instance_vbo,
+            instance_buffer_objects: instance_buffer_objects,
             element_count: (positions.len() / 3).try_into().unwrap(),
         }
     }
@@ -113,19 +115,21 @@ impl VertexArrayObject {
         }
     }
 
-    pub fn draw_instanced(&self, primitive: Primitive, instance_positions: &Vec<f32>) {
+    // TODO this function is quite specific to voxel.vert, maybe find a way to use more generic parameters for shaders with instancing ?
+    pub fn draw_instanced(&self, primitive: Primitive, instance_positions: &Vec<f32>, instance_damages: &Vec<f32>) {
         assert!(self.instanced());
         let instance_count = instance_positions.len() / 3;
         unsafe {
             gl::BindVertexArray(self.id);
-            self.instance_vbo.as_ref().unwrap().set_data(instance_positions, gl::DYNAMIC_DRAW);
+            self.instance_buffer_objects[0].set_data(instance_positions, gl::DYNAMIC_DRAW);
+            self.instance_buffer_objects[1].set_data(instance_damages, gl::DYNAMIC_DRAW);
             gl::DrawArraysInstanced(primitive.to_gl_primitive(), 0, self.element_count, instance_count.try_into().unwrap());
             gl::BindVertexArray(0);
         }
     }
 
     fn instanced(&self) -> bool {
-        self.instance_vbo.is_some()
+        !self.instance_buffer_objects.is_empty()
     }
 }
 

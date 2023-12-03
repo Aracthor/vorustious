@@ -29,9 +29,9 @@ impl Mesh {
         self.vao.draw(self.primitive);
     }
 
-    pub fn draw_instanced(&self, instance_positions: &Vec<f32>, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
+    pub fn draw_instanced(&self, instance_positions: &Vec<f32>, instance_damages: &Vec<f32>, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
         self.material.bind();
         self.material.set_transformation_matrices(projection_view_matrix, model_matrix);
-        self.vao.draw_instanced(self.primitive, instance_positions);
+        self.vao.draw_instanced(self.primitive, instance_positions, instance_damages);
     }
 }

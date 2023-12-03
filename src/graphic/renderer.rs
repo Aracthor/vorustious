@@ -20,7 +20,7 @@ pub struct Renderer {
 impl Renderer {
     pub fn new() -> Self {
         let cube_mesh = {
-            let mut material = Material::create("shaders/hello_texture_instanced.vert", "shaders/voxel.frag");
+            let mut material = Material::create("shaders/voxel.vert", "shaders/voxel.frag");
 
             let texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
             material.add_texture("diffuse_texture", texture);
@@ -115,12 +115,14 @@ impl Renderer {
 
     pub fn render_frame(&mut self, projection_view_matrix: &Mat4f, body: &Body, projectiles: &Vec<Projectile>, ghost_position: Option<Vect3i>) {
         let mut instance_positions: Vec<f32> = Default::default();
-        body.structure().for_each_voxel(|x, y, z| {
+        let mut instance_damages: Vec<f32> = Default::default();
+        body.structure().for_each_voxel(|x, y, z, voxel| {
             instance_positions.push(x as f32);
             instance_positions.push(y as f32);
             instance_positions.push(z as f32);
+            instance_damages.push(1.0 - voxel.life / voxel.max_life);
         });
-        self.cube_mesh.draw_instanced(&instance_positions, projection_view_matrix, body.repere());
+        self.cube_mesh.draw_instanced(&instance_positions, &instance_damages, projection_view_matrix, body.repere());
 
         for projectile in projectiles {
             let model_matrix = Mat4f::translation(projectile.position());
@@ -130,8 +132,9 @@ impl Renderer {
         if ghost_position.is_some() {
             let position = ghost_position.unwrap();
             let instance_position = vec![position[0] as f32, position[1] as f32, position[2] as f32];
+            let instance_damage = vec![0.0];
             self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
-            self.cube_mesh.draw_instanced(&instance_position, projection_view_matrix, body.repere());
+            self.cube_mesh.draw_instanced(&instance_position, &instance_damage, projection_view_matrix, body.repere());
             self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);
         }
 
