@@ -2,6 +2,7 @@ use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3i;
 use crate::projectile::Projectile;
 use crate::voxels::body::Body;
+use crate::voxels::voxel::TextureType;
 use super::core::color::Color;
 use super::cube;
 use super::frame_limiter::FrameLimiter;
@@ -27,9 +28,9 @@ impl Renderer {
             material.add_instance_data_buffer("instance_damage", 1);
 
             let hull_texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
-            material.add_texture("voxel_texture[0]", hull_texture);
+            material.add_texture(&format!("voxel_texture[{}]", <TextureType as Into<i32>>::into(TextureType::Hull)), hull_texture);
             let core_texture = cube::cube_texture(Color::new(0x80, 0x80, 0x80, 0xFF), Color::new(0x80, 0x80, 0xFF, 0xFF));
-            material.add_texture("voxel_texture[1]", core_texture);
+            material.add_texture(&format!("voxel_texture[{}]", <TextureType as Into<i32>>::into(TextureType::Core)), core_texture);
 
             let damage_texture = {
                 let b = Color::black();
