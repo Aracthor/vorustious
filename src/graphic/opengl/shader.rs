@@ -69,12 +69,7 @@ impl Shader {
     }
 
     pub fn set_float_uniform(&self, uniform_name: &str, value: f32) {
-        let mut location_name: Vec<gl::types::GLchar> = Default::default();
-        location_name.reserve(uniform_name.len() + 1);
-        for c in uniform_name.as_bytes() {
-            location_name.push((*c).try_into().unwrap());
-        }
-        location_name.push(0);
+        let location_name = Self::location_name_from_string(uniform_name);
 
         unsafe {
             let location = gl::GetUniformLocation(self.program, location_name.as_ptr());
@@ -84,12 +79,7 @@ impl Shader {
     }
 
     pub fn set_vector_uniform(&self, uniform_name: &str, value: &Vect4f) {
-        let mut location_name: Vec<gl::types::GLchar> = Default::default();
-        location_name.reserve(uniform_name.len() + 1);
-        for c in uniform_name.as_bytes() {
-            location_name.push((*c).try_into().unwrap());
-        }
-        location_name.push(0);
+        let location_name = Self::location_name_from_string(uniform_name);
 
         unsafe {
             let location = gl::GetUniformLocation(self.program, location_name.as_ptr());
@@ -99,12 +89,7 @@ impl Shader {
     }
 
     pub fn set_matrix_uniform(&self, uniform_name: &str, matrix: &Mat4f) {
-        let mut location_name: Vec<gl::types::GLchar> = Default::default();
-        location_name.reserve(uniform_name.len() + 1);
-        for c in uniform_name.as_bytes() {
-            location_name.push((*c).try_into().unwrap());
-        }
-        location_name.push(0);
+        let location_name = Self::location_name_from_string(uniform_name);
 
         unsafe {
             let location = gl::GetUniformLocation(self.program, location_name.as_ptr());
@@ -112,6 +97,17 @@ impl Shader {
             gl::UniformMatrix4fv(location, 1, gl::FALSE, matrix.data_as_ptr());
         }
     }
+
+    fn location_name_from_string(uniform_name: &str) -> Vec<gl::types::GLchar> {
+        let mut result: Vec<gl::types::GLchar> = Default::default();
+        result.reserve(uniform_name.len() + 1);
+        for c in uniform_name.as_bytes() {
+            result.push((*c).try_into().unwrap());
+        }
+        result.push(0);
+        result
+    }
+
 
     pub fn use_program(&self) {
         unsafe {
