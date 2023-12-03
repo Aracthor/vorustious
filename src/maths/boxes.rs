@@ -58,3 +58,5 @@ impl<const N: usize, T: MathsUsable> PartialEq for Box<N, T> {
         self.min == other.min && self.max == other.max
     }
 }
+
+pub type Box3i = Box<3, i32>;

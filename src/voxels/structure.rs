@@ -1,10 +1,10 @@
-use crate::maths::boxes::Box;
+use crate::maths::boxes::Box3i;
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3i;
 use super::voxel::Voxel;
 
 pub struct Structure {
-    voxel_box: Box<3, i32>,
+    voxel_box: Box3i,
     data: Vec<Option<Voxel>>,
 }
 
@@ -15,7 +15,7 @@ impl Structure {
         let extent_z = max_z - min_z + 1;
         let vec_size: usize = (extent_x * extent_y * extent_z).try_into().unwrap();
         Self {
-            voxel_box: Box::<3, i32>::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
+            voxel_box: Box3i::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
             data: vec![Some(voxel); vec_size],
         }
     }
@@ -212,7 +212,7 @@ impl Structure {
         hit
     }
 
-    fn resize(&mut self, new_box: Box<3, i32>) {
+    fn resize(&mut self, new_box: Box3i) {
         let vec_size = (new_box.extent()[0] + 1) * (new_box.extent()[1] + 1) * (new_box.extent()[2] + 1);
         let mut new_data: Vec<Option<Voxel>> = vec![None; vec_size.try_into().unwrap()];
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
@@ -233,7 +233,7 @@ impl Structure {
         Self::voxel_index_for_box(&self.voxel_box, coords)
     }
 
-    fn voxel_index_for_box(voxel_box: &Box<3, i32>, coords: Vect3i) -> usize {
+    fn voxel_index_for_box(voxel_box: &Box3i, coords: Vect3i) -> usize {
         assert!(voxel_box.contains(coords));
         let extent = voxel_box.extent() + Vect3i::new([1, 1, 1]);
         let coords_in_data = coords - voxel_box.min();
