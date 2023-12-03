@@ -1,8 +1,8 @@
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3i;
-use crate::maths::vector::Vect4f;
 use crate::projectile::Projectile;
 use crate::voxels::body::Body;
+use super::core::color::Color;
 use super::cube;
 use super::frame_limiter::FrameLimiter;
 use super::material::Material;
@@ -21,7 +21,7 @@ impl Renderer {
         let cube_mesh = {
             let mut material = Material::create("shaders/hello_texture_instanced.vert", "shaders/hello_texture.frag");
 
-            let texture = cube::cube_texture([0x40, 0x40, 0x40, 0xFF], [0x80, 0x80, 0x80, 0xFF]);
+            let texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
             material.set_texture(texture);
 
             material.add_uniform_f32("uni_alpha", 1.0);
@@ -30,7 +30,7 @@ impl Renderer {
 
         let projectile_mesh = {
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
-            material.add_uniform_vect4("uni_color", Vect4f::new([0.8, 0.2, 0.2, 1.0]));
+            material.add_uniform_vect4("uni_color", Color::new(0xB0, 0x30, 0x30, 0xFF).into());
 
             let positions = [
                 0.5, 0.0, 0.0,
@@ -71,7 +71,7 @@ impl Renderer {
 
         let interface_mesh = {
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
-            material.add_uniform_vect4("uni_color", Vect4f::new([1.0, 1.0, 1.0, 0.5]));
+            material.add_uniform_vect4("uni_color", Color::new(0xFF, 0xFF, 0xFF, 0x80).into());
 
             let positions = [
                 -0.07, 0.0, 0.0,
