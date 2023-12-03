@@ -27,7 +27,7 @@ impl Mesh {
         self.material.set_uniform_f32(uniform_name, value);
     }
 
-    pub fn set_instanced_data(&self, buffer_index: usize, data: &Vec<f32>) {
+    pub fn set_instanced_data<T>(&self, buffer_index: usize, data: &Vec<T>) {
         self.vao.fill_instanced_buffer(buffer_index, data);
     }
 

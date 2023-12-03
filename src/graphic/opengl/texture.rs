@@ -29,6 +29,7 @@ impl Texture {
         let texture_id = match texture_index {
             0 => gl::TEXTURE0,
             1 => gl::TEXTURE1,
+            2 => gl::TEXTURE2,
             _ => unimplemented!(),
         };
         unsafe {

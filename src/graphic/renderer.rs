@@ -23,10 +23,13 @@ impl Renderer {
             let mut material = Material::create("shaders/voxel.vert", "shaders/voxel.frag");
 
             material.add_instance_data_buffer("instance_position", 3);
+            material.add_instance_data_buffer("instance_texture_index", 1);
             material.add_instance_data_buffer("instance_damage", 1);
 
-            let texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
-            material.add_texture("diffuse_texture", texture);
+            let hull_texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
+            material.add_texture("voxel_texture[0]", hull_texture);
+            let core_texture = cube::cube_texture(Color::new(0x80, 0x80, 0x80, 0xFF), Color::new(0x80, 0x80, 0xFF, 0xFF));
+            material.add_texture("voxel_texture[1]", core_texture);
 
             let damage_texture = {
                 let b = Color::black();
@@ -118,16 +121,19 @@ impl Renderer {
 
     pub fn render_frame(&mut self, projection_view_matrix: &Mat4f, body: &Body, projectiles: &Vec<Projectile>, ghost_position: Option<Vect3i>) {
         let mut instance_positions: Vec<f32> = Default::default();
+        let mut instance_texture_indices: Vec<i32> = Default::default();
         let mut instance_damages: Vec<f32> = Default::default();
         body.structure().for_each_voxel(|x, y, z, voxel| {
             instance_positions.push(x as f32);
             instance_positions.push(y as f32);
             instance_positions.push(z as f32);
+            instance_texture_indices.push(voxel.texture_type.into());
             instance_damages.push(1.0 - voxel.life / voxel.max_life);
         });
         let instance_count = instance_damages.len().try_into().unwrap();
         self.cube_mesh.set_instanced_data(0, &instance_positions);
-        self.cube_mesh.set_instanced_data(1, &instance_damages);
+        self.cube_mesh.set_instanced_data(1, &instance_texture_indices);
+        self.cube_mesh.set_instanced_data(2, &instance_damages);
         self.cube_mesh.draw_instanced(instance_count, projection_view_matrix, body.repere());
 
         for projectile in projectiles {
@@ -138,9 +144,11 @@ impl Renderer {
         if ghost_position.is_some() {
             let position = ghost_position.unwrap();
             let instance_position = vec![position[0] as f32, position[1] as f32, position[2] as f32];
+            let instance_texture_index = vec![0];
             let instance_damage = vec![0.0];
             self.cube_mesh.set_instanced_data(0, &instance_position);
-            self.cube_mesh.set_instanced_data(1, &instance_damage);
+            self.cube_mesh.set_instanced_data(1, &instance_texture_index);
+            self.cube_mesh.set_instanced_data(2, &instance_damage);
             self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
             self.cube_mesh.draw_instanced(1, projection_view_matrix, body.repere());
             self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);

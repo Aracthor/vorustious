@@ -34,9 +34,9 @@ impl VertexBufferObject {
         vbo
     }
 
-    pub unsafe fn set_data(&self, data: &Vec<f32>, usage: gl::types::GLenum) {
+    pub unsafe fn set_data<T>(&self, data: &Vec<T>, usage: gl::types::GLenum) {
         self.bind();
-        let size_in_bytes = (std::mem::size_of::<f32>() * data.len()).try_into().unwrap();
+        let size_in_bytes = (std::mem::size_of::<T>() * data.len()).try_into().unwrap();
         gl::BufferData(gl::ARRAY_BUFFER, size_in_bytes, data.as_ptr().cast(), usage);
         self.unbind();
     }
@@ -109,7 +109,7 @@ impl VertexArrayObject {
         }
     }
 
-    pub fn fill_instanced_buffer(&self, buffer_index: usize, data: &Vec<f32>) {
+    pub fn fill_instanced_buffer<T>(&self, buffer_index: usize, data: &Vec<T>) {
         unsafe {
             self.instance_buffer_objects[buffer_index].set_data(data, gl::DYNAMIC_DRAW);
         }

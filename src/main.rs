@@ -14,6 +14,7 @@ use maths::vector::Vect3i;
 use projectile::Projectile;
 use voxels::body::Body;
 use voxels::structure::Structure;
+use voxels::voxel::TextureType;
 use voxels::voxel::Voxel;
 use weapon::Weapon;
 
@@ -34,8 +35,13 @@ fn main() {
     let mut camera = Camera::new();
     let mut ghost_cube_position: Option<Vect3i> = None;
 
-    let voxel = Voxel{life: 2.0, max_life: 2.0};
-    let mut body = Body::new(Structure::new(-2, 4, -1, 1, -1, 0, voxel));
+    let voxel = Voxel{life: 2.0, max_life: 2.0, texture_type: TextureType::Hull};
+    let structure = {
+        let mut structure = Structure::new(-2, 4, -1, 1, -1, 0, voxel);
+        structure.add_voxel(Vect3i::new([0, 0, 0]), Voxel{life: 5.0, max_life: 5.0, texture_type: TextureType::Core});
+        structure
+    };
+    let mut body = Body::new(structure);
     let mut projectiles: Vec<Projectile> = vec![];
     let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 20.0);
 
