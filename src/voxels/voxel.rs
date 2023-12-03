@@ -11,6 +11,16 @@ pub enum VoxelID {
     COUNT = 2,
 }
 
+impl From<i32> for VoxelID {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => Self::ShipCore,
+            1 => Self::LightHull,
+            _ => todo!(),
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct Voxel {
     pub id: VoxelID,

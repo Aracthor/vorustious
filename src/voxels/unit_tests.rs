@@ -2,6 +2,7 @@ use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use super::structure::Structure;
+use super::catalog::VoxelCatalog;
 use super::voxel::Voxel;
 use super::voxel::VoxelID;
 
@@ -214,4 +215,19 @@ fn structure_outside_voxel_coords() {
         let segment_end = Vect3f::new([0.0, 0.0, 0.0]);
         assert!(structure.outside_voxel_coords(Segm3f::new(segment_start, segment_end)) == Some(Vect3i::new([-2, -1, -1])));
     }
+}
+
+#[test]
+fn structure_serialization() {
+    let catalog = VoxelCatalog::create();
+    let structure = {
+        let mut structure = Structure::new(-2, 4, -1, 1, -1, 0, catalog.create_voxel(VoxelID::LightHull));
+        structure.set_voxel(0, 0, 0, Some(catalog.create_voxel(VoxelID::ShipCore)));
+        structure.set_voxel(2, 1, -1, Some(catalog.create_voxel(VoxelID::ShipCore)));
+        structure.set_voxel(-1, 1, -1, None);
+        structure.set_voxel(0, 1, -1, None);
+        structure
+    };
+    let serialization = structure.serialize();
+    assert!(Structure::deserialize(&catalog, &serialization) == structure);
 }

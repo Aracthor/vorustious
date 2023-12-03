@@ -1,6 +1,7 @@
 use crate::maths::boxes::Box3i;
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3i;
+use super::catalog::VoxelCatalog;
 use super::voxel::Voxel;
 
 pub struct Structure {
@@ -18,6 +19,80 @@ impl Structure {
             voxel_box: Box3i::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
             data: vec![Some(voxel); vec_size],
         }
+    }
+
+    pub fn empty(min_x: i32, max_x: i32, min_y: i32, max_y: i32, min_z: i32, max_z: i32) -> Self {
+        let extent_x = max_x - min_x + 1;
+        let extent_y = max_y - min_y + 1;
+        let extent_z = max_z - min_z + 1;
+        let vec_size: usize = (extent_x * extent_y * extent_z).try_into().unwrap();
+        Self {
+            voxel_box: Box3i::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
+            data: vec![None; vec_size],
+        }
+    }
+
+    const SEPARATOR_EXTENT: &str = ";";
+    const SEPARATOR_X: &str = " ";
+    const SEPARATOR_Y: &str = "|";
+    const SEPARATOR_Z: &str = "\n";
+
+    #[allow(dead_code)]
+    pub fn serialize(&self) -> String {
+        let mut result =
+        self.voxel_box.min()[0].to_string() + Self::SEPARATOR_EXTENT +
+        &self.voxel_box.max()[0].to_string() + Self::SEPARATOR_EXTENT +
+        &self.voxel_box.min()[1].to_string() + Self::SEPARATOR_EXTENT +
+        &self.voxel_box.max()[1].to_string() + Self::SEPARATOR_EXTENT +
+        &self.voxel_box.min()[2].to_string() + Self::SEPARATOR_EXTENT +
+        &self.voxel_box.max()[2].to_string();
+        for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
+            result += Self::SEPARATOR_Z;
+            for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
+                if y > self.voxel_box.min()[1] {
+                    result += Self::SEPARATOR_Y;
+                }
+                for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
+                    if x > self.voxel_box.min()[0] {
+                        result += Self::SEPARATOR_X;
+                    }
+                    let voxel = self.data[self.voxel_index(Vect3i::new([x, y, z]))];
+                    if voxel.is_some() {
+                        result += &(voxel.unwrap().id as i32).to_string();
+                    }
+                }
+            }
+        }
+        result
+    }
+
+    #[allow(dead_code)]
+    pub fn deserialize(catalog: &VoxelCatalog, str: &str) -> Self {
+        let mut lines = str.split(Self::SEPARATOR_Z);
+        let first_line = lines.next();
+        let mut extent_lines = first_line.unwrap().split(Self::SEPARATOR_EXTENT);
+        let box_min_x: i32 = extent_lines.next().unwrap().parse().unwrap();
+        let box_max_x: i32 = extent_lines.next().unwrap().parse().unwrap();
+        let box_min_y: i32 = extent_lines.next().unwrap().parse().unwrap();
+        let box_max_y: i32 = extent_lines.next().unwrap().parse().unwrap();
+        let box_min_z: i32 = extent_lines.next().unwrap().parse().unwrap();
+        let box_max_z: i32 = extent_lines.next().unwrap().parse().unwrap();
+        assert!(extent_lines.next().is_none());
+        let mut result = Self::empty(box_min_x, box_max_x, box_min_y, box_max_y, box_min_z, box_max_z);
+        for z in box_min_z..box_max_z + 1 {
+            let mut next_column = lines.next().unwrap().split(Self::SEPARATOR_Y);
+            for y in box_min_y..box_max_y + 1 {
+                let mut next_line = next_column.next().unwrap().split(Self::SEPARATOR_X);
+                for x in box_min_x..box_max_x + 1 {
+                    let voxel_str = next_line.next().unwrap();
+                    if !voxel_str.is_empty() {
+                        let voxel_id: i32 = voxel_str.parse().unwrap();
+                        result.add_voxel(Vect3i::new([x, y, z]), catalog.create_voxel(voxel_id.try_into().unwrap()));
+                    }
+                }
+            }
+        }
+        result
     }
 
     #[cfg(test)]
@@ -266,4 +341,3 @@ impl PartialEq for Structure {
         true
     }
 }
-
