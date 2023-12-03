@@ -1,4 +1,5 @@
 pub mod body;
+pub mod catalog;
 pub mod structure;
 pub mod voxel;
 

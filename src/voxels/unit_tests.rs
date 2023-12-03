@@ -2,13 +2,12 @@ use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use super::structure::Structure;
-use super::voxel::TextureType;
 use super::voxel::Voxel;
+use super::voxel::VoxelID;
 
 const TEST_VOXEL: Voxel = Voxel{
     life: 1.0,
-    max_life: 1.0,
-    texture_type: TextureType::Hull,
+    id: VoxelID::ShipCore,
 };
 
 #[test]

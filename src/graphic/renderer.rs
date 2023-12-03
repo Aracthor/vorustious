@@ -2,6 +2,7 @@ use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3i;
 use crate::projectile::Projectile;
 use crate::voxels::body::Body;
+use crate::voxels::catalog::VoxelCatalog;
 use crate::voxels::voxel::TextureType;
 use super::core::color::Color;
 use super::cube;
@@ -16,6 +17,7 @@ pub struct Renderer {
     cube_mesh: Mesh,
     projectile_mesh: Mesh,
     interface_mesh: Mesh,
+    voxel_catalog: VoxelCatalog,
 }
 
 impl Renderer {
@@ -117,6 +119,7 @@ impl Renderer {
             cube_mesh: cube_mesh,
             projectile_mesh: projectile_mesh,
             interface_mesh: interface_mesh,
+            voxel_catalog: VoxelCatalog::create(),
         }
     }
 
@@ -125,11 +128,12 @@ impl Renderer {
         let mut instance_texture_indices: Vec<i32> = Default::default();
         let mut instance_damages: Vec<f32> = Default::default();
         body.structure().for_each_voxel(|x, y, z, voxel| {
+            let descriptor = self.voxel_catalog.get_descriptor(voxel.id);
             instance_positions.push(x as f32);
             instance_positions.push(y as f32);
             instance_positions.push(z as f32);
-            instance_texture_indices.push(voxel.texture_type as i32);
-            instance_damages.push(1.0 - voxel.life / voxel.max_life);
+            instance_texture_indices.push(descriptor.texture_type as i32);
+            instance_damages.push(1.0 - voxel.life / descriptor.max_life);
         });
         let instance_count = instance_damages.len().try_into().unwrap();
         self.cube_mesh.set_instanced_data(0, &instance_positions);
