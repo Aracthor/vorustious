@@ -29,15 +29,8 @@ fn main() {
     const WINDOW_HEIGHT:u32 = 600;
 
     let mut window = Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious");
-    let mut renderer = Renderer::new();
+    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32);
 
-    let projection_matrix = {
-        let fov = 80.0_f32.to_radians();
-        let aspect = WINDOW_WIDTH as f32 / WINDOW_HEIGHT as f32;
-        let z_near = 0.1;
-        let z_far = 1000.0;
-        Mat4f::perspective(fov, aspect, z_near, z_far)
-    };
     let mut camera = Camera::new();
     let mut editor = Editor::new();
 
@@ -147,8 +140,7 @@ fn main() {
 
         window.clear();
 
-        let projection_view_matrix = projection_matrix.clone() * camera.view_matrix();
-        renderer.render_frame(&projection_view_matrix, &body, &projectiles, &editor);
+        renderer.render_frame(camera.view_matrix(), &body, &projectiles, &editor);
 
         window.update();
     }

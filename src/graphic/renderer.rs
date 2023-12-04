@@ -13,6 +13,7 @@ use super::opengl::vertex_objects::Primitive;
 use super::opengl::texture::Texture;
 
 pub struct Renderer {
+    projection_matrix: Mat4f,
     frame_limiter: FrameLimiter,
     cube_mesh: Mesh,
     projectile_mesh: Mesh,
@@ -24,7 +25,14 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub fn new() -> Self {
+    pub fn new(window_width: f32, window_height: f32) -> Self {
+        let projection_matrix = {
+            let fov = 80.0_f32.to_radians();
+            let aspect = window_width / window_height;
+            let z_near = 0.1;
+            let z_far = 1000.0;
+            Mat4f::perspective(fov, aspect, z_near, z_far)
+        };
         let cube_mesh = {
             let mut material = Material::create("shaders/voxel.vert", "shaders/voxel.frag");
 
@@ -160,6 +168,7 @@ impl Renderer {
         };
 
         Renderer {
+            projection_matrix: projection_matrix,
             frame_limiter: FrameLimiter::new(60.0),
             cube_mesh: cube_mesh,
             projectile_mesh: projectile_mesh,
@@ -171,7 +180,8 @@ impl Renderer {
         }
     }
 
-    pub fn render_frame(&mut self, projection_view_matrix: &Mat4f, body: &Body, projectiles: &Vec<Projectile>, editor: &Editor) {
+    pub fn render_frame(&mut self, view_matrix: Mat4f, body: &Body, projectiles: &Vec<Projectile>, editor: &Editor) {
+        let projection_view_matrix = self.projection_matrix.clone() * view_matrix;
         let mut instance_positions: Vec<f32> = Default::default();
         let mut instance_texture_indices: Vec<i32> = Default::default();
         let mut instance_damages: Vec<f32> = Default::default();
@@ -187,11 +197,11 @@ impl Renderer {
         self.cube_mesh.set_instanced_data(0, &instance_positions);
         self.cube_mesh.set_instanced_data(1, &instance_texture_indices);
         self.cube_mesh.set_instanced_data(2, &instance_damages);
-        self.cube_mesh.draw_instanced(instance_count, projection_view_matrix, body.repere());
+        self.cube_mesh.draw_instanced(instance_count, &projection_view_matrix, body.repere());
 
         for projectile in projectiles {
             let model_matrix = Mat4f::translation(projectile.position());
-            self.projectile_mesh.draw(projection_view_matrix, &model_matrix);
+            self.projectile_mesh.draw(&projection_view_matrix, &model_matrix);
         }
 
         if editor.voxel_position.is_some() {
@@ -203,17 +213,17 @@ impl Renderer {
             self.cube_mesh.set_instanced_data(1, &instance_texture_index);
             self.cube_mesh.set_instanced_data(2, &instance_damage);
             self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
-            self.cube_mesh.draw_instanced(1, projection_view_matrix, body.repere());
+            self.cube_mesh.draw_instanced(1, &projection_view_matrix, body.repere());
             self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);
         }
         if editor.symetry_x {
-            self.plane_x.draw(projection_view_matrix, &Mat4f::identity());
+            self.plane_x.draw(&projection_view_matrix, &Mat4f::identity());
         }
         if editor.symetry_y {
-            self.plane_y.draw(projection_view_matrix, &Mat4f::identity());
+            self.plane_y.draw(&projection_view_matrix, &Mat4f::identity());
         }
         if editor.symetry_z {
-            self.plane_z.draw(projection_view_matrix, &Mat4f::identity());
+            self.plane_z.draw(&projection_view_matrix, &Mat4f::identity());
         }
 
         self.interface_mesh.draw(&Mat4f::identity(), &Mat4f::identity());
