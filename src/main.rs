@@ -10,16 +10,11 @@ use editor::Editor;
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
 use graphic::windowing::window::Window;
-use graphic::windowing::event_handler::Key;
 use graphic::windowing::event_handler::MouseButton;
 use maths::segment::Segm3f;
-use maths::vector::Vect3i;
 use projectile::Projectile;
 use voxels::body::Body;
-use voxels::structure::Structure;
-use voxels::catalog::VoxelCatalog;
 use voxels::voxel::Voxel;
-use voxels::voxel::VoxelID;
 use weapon::Weapon;
 
 fn main() {
@@ -32,35 +27,12 @@ fn main() {
     let mut camera = Camera::new();
     let mut editor = Editor::new();
 
-    let voxel_catalog = VoxelCatalog::create();
-    let voxel = voxel_catalog.create_voxel(VoxelID::LightHull);
     let mut projectiles: Vec<Projectile> = vec![];
     let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 20.0);
-    let save_filename = "save.vors";
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
-
-        if window.event_handler().is_ctrl_pressed() && window.event_handler().is_key_just_pressed(Key::X) {
-            editor.symetry_x = !editor.symetry_x;
-        }
-        if window.event_handler().is_ctrl_pressed() && window.event_handler().is_key_just_pressed(Key::Y) {
-            editor.symetry_y = !editor.symetry_y;
-        }
-        if window.event_handler().is_ctrl_pressed() && window.event_handler().is_key_just_pressed(Key::Z) {
-            editor.symetry_z = !editor.symetry_z;
-        }
-
-        if window.event_handler().is_key_just_pressed(Key::F5) {
-            let str = editor.structure.serialize();
-            std::fs::write(save_filename, str).expect(&format!("Unable to save {save_filename}"));
-            println!("Saved file '{save_filename}'");
-        }
-        if window.event_handler().is_key_just_pressed(Key::F9) {
-            let str = std::fs::read_to_string(save_filename).expect(&format!("Unable to read {save_filename}"));
-            editor.structure = Structure::deserialize(&voxel_catalog, &str);
-            println!("Loaded file '{save_filename}'");
-        }
+        editor.update_from_events(&camera, &window.event_handler());
 
         if window.event_handler().is_mouse_button_pressed(MouseButton::Left) {
             let projectile_start = camera.position();
@@ -69,38 +41,6 @@ fn main() {
             if projectile.is_some() {
                 projectiles.push(projectile.unwrap());
             }
-        }
-
-        if editor.voxel_position.is_some() && window.event_handler().is_mouse_button_just_released(MouseButton::Right) {
-            let position = editor.voxel_position.unwrap();
-            editor.structure.add_voxel(position, voxel);
-            if editor.symetry_x {
-                editor.structure.add_voxel(Vect3i::new([-position[0], position[1], position[2]]), voxel);
-            }
-            if editor.symetry_y {
-                editor.structure.add_voxel(Vect3i::new([position[0], -position[1], position[2]]), voxel);
-            }
-            if editor.symetry_z {
-                editor.structure.add_voxel(Vect3i::new([position[0], position[1], -position[2]]), voxel);
-            }
-            if editor.symetry_x && editor.symetry_y {
-                editor.structure.add_voxel(Vect3i::new([-position[0], -position[1], position[2]]), voxel);
-            }
-            if editor.symetry_x && editor.symetry_z {
-                editor.structure.add_voxel(Vect3i::new([-position[0], position[1], -position[2]]), voxel);
-            }
-            if editor.symetry_y && editor.symetry_z {
-                editor.structure.add_voxel(Vect3i::new([position[0], -position[1], -position[2]]), voxel);
-            }
-            if editor.symetry_x && editor.symetry_y && editor.symetry_z {
-                editor.structure.add_voxel(Vect3i::new([-position[0], -position[1], -position[2]]), voxel);
-            }
-        }
-        if window.event_handler().is_mouse_button_pressed(MouseButton::Right) {
-            let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0);
-            editor.voxel_position = editor.structure.outside_voxel_coords(segment);
-        } else {
-            editor.voxel_position = None;
         }
 
         projectiles.retain_mut(|projectile| {
