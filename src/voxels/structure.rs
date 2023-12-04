@@ -45,22 +45,19 @@ impl Structure {
         &self.voxel_box.max()[1].to_string() + Self::SEPARATOR_EXTENT +
         &self.voxel_box.min()[2].to_string() + Self::SEPARATOR_EXTENT +
         &self.voxel_box.max()[2].to_string();
+        result += Self::SEPARATOR_Z;
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
-            result += Self::SEPARATOR_Z;
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
-                if y > self.voxel_box.min()[1] {
-                    result += Self::SEPARATOR_Y;
-                }
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
-                    if x > self.voxel_box.min()[0] {
-                        result += Self::SEPARATOR_X;
-                    }
                     let voxel = self.data[self.voxel_index(Vect3i::new([x, y, z]))];
                     if voxel.is_some() {
                         result += &(voxel.unwrap().id as i32).to_string();
                     }
+                    result += Self::SEPARATOR_X;
                 }
+                result += Self::SEPARATOR_Y;
             }
+            result += Self::SEPARATOR_Z;
         }
         result
     }
