@@ -6,6 +6,7 @@ use crate::voxels::catalog::VoxelCatalog;
 use crate::voxels::voxel::TextureType;
 use super::core::color::Color;
 use super::cube;
+use super::editor_renderer::EditorRenderer;
 use super::frame_limiter::FrameLimiter;
 use super::material::Material;
 use super::mesh::Mesh;
@@ -19,9 +20,7 @@ pub struct Renderer {
     projectile_mesh: Mesh,
     interface_mesh: Mesh,
     voxel_catalog: VoxelCatalog,
-    plane_x: Mesh,
-    plane_y: Mesh,
-    plane_z: Mesh,
+    editor_renderer: EditorRenderer,
 }
 
 impl Renderer {
@@ -125,48 +124,6 @@ impl Renderer {
             Mesh::create(positions, None, Primitive::Lines, material)
         };
 
-        let plane_x = {
-            let positions = [
-                0.0, -1000.0, -1000.0,
-                0.0, -1000.0,  1000.0,
-                0.0,  1000.0,  1000.0,
-                0.0,  1000.0,  1000.0,
-                0.0, -1000.0, -1000.0,
-                0.0,  1000.0, -1000.0,
-            ].to_vec();
-            let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
-            material.add_uniform_vect4("uni_color", Color::new(0xFF, 0x00, 0x00, 0x40).into());
-            Mesh::create(positions, None, Primitive::Triangles, material)
-        };
-
-        let plane_y = {
-            let positions = [
-                -1000.0, 0.0, -1000.0,
-                -1000.0, 0.0,  1000.0,
-                 1000.0, 0.0,  1000.0,
-                 1000.0, 0.0,  1000.0,
-                 -1000.0, 0.0, -1000.0,
-                 1000.0, 0.0, -1000.0,
-            ].to_vec();
-            let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
-            material.add_uniform_vect4("uni_color", Color::new(0x00, 0xFF, 0x00, 0x40).into());
-            Mesh::create(positions, None, Primitive::Triangles, material)
-        };
-
-        let plane_z = {
-            let positions = [
-                -1000.0, -1000.0, 0.0,
-                -1000.0,  1000.0, 0.0,
-                 1000.0,  1000.0, 0.0,
-                 1000.0,  1000.0, 0.0,
-                 -1000.0, -1000.0, 0.0,
-                 1000.0, -1000.0, 0.0,
-            ].to_vec();
-            let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
-            material.add_uniform_vect4("uni_color", Color::new(0x00, 0x00, 0xFF, 0x40).into());
-            Mesh::create(positions, None, Primitive::Triangles, material)
-        };
-
         Renderer {
             projection_matrix: projection_matrix,
             frame_limiter: FrameLimiter::new(60.0),
@@ -174,9 +131,7 @@ impl Renderer {
             projectile_mesh: projectile_mesh,
             interface_mesh: interface_mesh,
             voxel_catalog: VoxelCatalog::create(),
-            plane_x: plane_x,
-            plane_y: plane_y,
-            plane_z: plane_z,
+            editor_renderer: EditorRenderer::new(),
         }
     }
 
@@ -204,27 +159,7 @@ impl Renderer {
             self.projectile_mesh.draw(&projection_view_matrix, &model_matrix);
         }
 
-        if editor.voxel_position.is_some() {
-            let position = editor.voxel_position.unwrap();
-            let instance_position = vec![position[0] as f32, position[1] as f32, position[2] as f32];
-            let instance_texture_index = vec![0];
-            let instance_damage = vec![0.0];
-            self.cube_mesh.set_instanced_data(0, &instance_position);
-            self.cube_mesh.set_instanced_data(1, &instance_texture_index);
-            self.cube_mesh.set_instanced_data(2, &instance_damage);
-            self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
-            self.cube_mesh.draw_instanced(1, &projection_view_matrix, body.repere());
-            self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);
-        }
-        if editor.symetry_x {
-            self.plane_x.draw(&projection_view_matrix, &Mat4f::identity());
-        }
-        if editor.symetry_y {
-            self.plane_y.draw(&projection_view_matrix, &Mat4f::identity());
-        }
-        if editor.symetry_z {
-            self.plane_z.draw(&projection_view_matrix, &Mat4f::identity());
-        }
+        self.editor_renderer.render(&projection_view_matrix, &mut self.cube_mesh, editor);
 
         self.interface_mesh.draw(&Mat4f::identity(), &Mat4f::identity());
 
