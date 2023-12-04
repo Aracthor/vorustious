@@ -135,7 +135,7 @@ impl Renderer {
         }
     }
 
-    pub fn render_frame(&mut self, view_matrix: Mat4f, body: &Body, projectiles: &Vec<Projectile>, editor: &Editor) {
+    pub fn render_frame(&mut self, view_matrix: Mat4f, body: &Body, projectiles: &Vec<Projectile>, editor: Option<&Editor>) {
         let projection_view_matrix = self.projection_matrix.clone() * view_matrix;
         let mut instance_positions: Vec<f32> = Default::default();
         let mut instance_texture_indices: Vec<i32> = Default::default();
@@ -159,7 +159,9 @@ impl Renderer {
             self.projectile_mesh.draw(&projection_view_matrix, &model_matrix);
         }
 
-        self.editor_renderer.render(&projection_view_matrix, &mut self.cube_mesh, editor);
+        if editor.is_some() {
+            self.editor_renderer.render(&projection_view_matrix, &mut self.cube_mesh, editor.unwrap());
+        }
 
         self.interface_mesh.draw(&Mat4f::identity(), &Mat4f::identity());
 
