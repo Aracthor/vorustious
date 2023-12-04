@@ -1,9 +1,12 @@
 mod graphic;
 mod maths;
 mod voxels;
+
+mod editor;
 mod projectile;
 mod weapon;
 
+use editor::Editor;
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
 use graphic::windowing::window::Window;
@@ -36,7 +39,7 @@ fn main() {
         Mat4f::perspective(fov, aspect, z_near, z_far)
     };
     let mut camera = Camera::new();
-    let mut ghost_cube_position: Option<Vect3i> = None;
+    let mut editor = Editor::new();
 
     let voxel_catalog = VoxelCatalog::create();
     let voxel = voxel_catalog.create_voxel(VoxelID::LightHull);
@@ -52,6 +55,16 @@ fn main() {
 
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
+
+        if window.event_handler().is_ctrl_pressed() && window.event_handler().is_key_just_pressed(Key::X) {
+            editor.symetry_x = !editor.symetry_x;
+        }
+        if window.event_handler().is_ctrl_pressed() && window.event_handler().is_key_just_pressed(Key::Y) {
+            editor.symetry_y = !editor.symetry_y;
+        }
+        if window.event_handler().is_ctrl_pressed() && window.event_handler().is_key_just_pressed(Key::Z) {
+            editor.symetry_z = !editor.symetry_z;
+        }
 
         if window.event_handler().is_key_just_pressed(Key::F5) {
             let str = body.structure().serialize();
@@ -80,14 +93,36 @@ fn main() {
             }
         }
 
-        if ghost_cube_position.is_some() && window.event_handler().is_mouse_button_just_released(MouseButton::Right) {
-            body.structure_mut().add_voxel(ghost_cube_position.unwrap(), voxel);
+        if editor.voxel_position.is_some() && window.event_handler().is_mouse_button_just_released(MouseButton::Right) {
+            let position = editor.voxel_position.unwrap();
+            body.structure_mut().add_voxel(position, voxel);
+            if editor.symetry_x {
+                body.structure_mut().add_voxel(Vect3i::new([-position[0], position[1], position[2]]), voxel);
+            }
+            if editor.symetry_y {
+                body.structure_mut().add_voxel(Vect3i::new([position[0], -position[1], position[2]]), voxel);
+            }
+            if editor.symetry_z {
+                body.structure_mut().add_voxel(Vect3i::new([position[0], position[1], -position[2]]), voxel);
+            }
+            if editor.symetry_x && editor.symetry_y {
+                body.structure_mut().add_voxel(Vect3i::new([-position[0], -position[1], position[2]]), voxel);
+            }
+            if editor.symetry_x && editor.symetry_z {
+                body.structure_mut().add_voxel(Vect3i::new([-position[0], position[1], -position[2]]), voxel);
+            }
+            if editor.symetry_y && editor.symetry_z {
+                body.structure_mut().add_voxel(Vect3i::new([position[0], -position[1], -position[2]]), voxel);
+            }
+            if editor.symetry_x && editor.symetry_y && editor.symetry_z {
+                body.structure_mut().add_voxel(Vect3i::new([-position[0], -position[1], -position[2]]), voxel);
+            }
         }
         if window.event_handler().is_mouse_button_pressed(MouseButton::Right) {
             let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0).transform(&body.repere().inverse());
-            ghost_cube_position = body.structure_mut().outside_voxel_coords(segment);
+            editor.voxel_position = body.structure_mut().outside_voxel_coords(segment);
         } else {
-            ghost_cube_position = None;
+            editor.voxel_position = None;
         }
 
         projectiles.retain_mut(|projectile| {
@@ -113,7 +148,7 @@ fn main() {
         window.clear();
 
         let projection_view_matrix = projection_matrix.clone() * camera.view_matrix();
-        renderer.render_frame(&projection_view_matrix, &body, &projectiles, ghost_cube_position);
+        renderer.render_frame(&projection_view_matrix, &body, &projectiles, &editor);
 
         window.update();
     }

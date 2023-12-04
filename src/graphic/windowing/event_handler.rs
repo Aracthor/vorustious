@@ -8,8 +8,13 @@ pub enum Key {
     D,
     S,
     W,
+    X,
+    Y,
+    Z,
     F5,
     F9,
+    LeftCtrl,
+    RightCtrl,
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -66,8 +71,13 @@ impl EventHandler {
                 (glfw::Key::D, Key::D),
                 (glfw::Key::S, Key::S),
                 (glfw::Key::W, Key::W),
+                (glfw::Key::X, Key::X),
+                (glfw::Key::Y, Key::Y),
+                (glfw::Key::Z, Key::Z),
                 (glfw::Key::F5, Key::F5),
                 (glfw::Key::F9, Key::F9),
+                (glfw::Key::LeftControl, Key::LeftCtrl),
+                (glfw::Key::RightControl, Key::RightCtrl),
             ]),
 
             key_status: Default::default(),
@@ -125,6 +135,10 @@ impl EventHandler {
     pub fn is_key_pressed(&self, key: Key) -> bool {
         let key_status = self.key_status.get(&key);
         key_status.is_some() && [Status::JustPressed, Status::Pressed].contains(key_status.unwrap())
+    }
+
+    pub fn is_ctrl_pressed(&self) -> bool {
+        return self.is_key_pressed(Key::LeftCtrl) || self.is_key_pressed(Key::RightCtrl);
     }
 
     pub fn is_key_just_pressed(&self, key: Key) -> bool {
