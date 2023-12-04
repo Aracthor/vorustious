@@ -24,14 +24,7 @@ impl Body {
         return &self.structure;
     }
 
-    pub fn structure_mut(&mut self) -> &mut Structure {
-        return &mut self.structure;
-    }
-
-    pub fn apply_transformation(&mut self, transformation: Mat4f) {
-        self.repere = self.repere.clone() * transformation;
-    }
-
+    #[allow(dead_code)]
     pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>)>(&mut self, segment: Segm3f, f: F) -> bool {
         let segment_in_repere = segment.transform(&self.repere.inverse());
         self.structure.for_first_voxel_in_segment(segment_in_repere, f)

@@ -4,6 +4,7 @@ use crate::maths::vector::Vect3i;
 use super::catalog::VoxelCatalog;
 use super::voxel::Voxel;
 
+#[derive(Clone)]
 pub struct Structure {
     voxel_box: Box3i,
     data: Vec<Option<Voxel>>,
