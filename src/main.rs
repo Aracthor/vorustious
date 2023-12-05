@@ -43,8 +43,9 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
     let voxel_catalog = VoxelCatalog::create();
     let structure_file_content = std::fs::read_to_string("structures/proto.vors").expect(&format!("Unable to read structures/proto.vors"));
     battle.add_body(Body::new(Structure::deserialize(&voxel_catalog, &structure_file_content), Mat4f::identity()));
-    let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 20.0);
+    let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 50.0, 20.0);
 
+    let tick_elapsed_time = 1.0 / 60.0; // Rather than real elapsed time in order to keep determinism.
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
 
@@ -57,7 +58,7 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
             }
         }
 
-        battle.update();
+        battle.update(tick_elapsed_time);
 
         window.clear();
         renderer.render_frame(camera.view_matrix(), &battle.bodies(), &battle.projectiles(), None);

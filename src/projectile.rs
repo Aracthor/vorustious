@@ -4,16 +4,18 @@ pub struct Projectile {
     position: Vect3f,
     movement: Vect3f,
     damage: f32,
+    speed: f32,
     max_range: f32,
     traveled_distance: f32,
 }
 
 impl Projectile {
-    pub fn new(position: Vect3f, movement: Vect3f, damage: f32, max_range: f32) -> Self {
+    pub fn new(position: Vect3f, movement: Vect3f, damage: f32, speed: f32, max_range: f32) -> Self {
         Self {
             position: position,
             movement: movement,
             damage: damage,
+            speed: speed,
             max_range: max_range,
             traveled_distance: 0.0,
         }
@@ -32,7 +34,7 @@ impl Projectile {
     }
 
     pub fn moove(&mut self, speed: f32) {
-        self.position += self.movement * speed;
-        self.traveled_distance += self.movement.length() * speed;
+        self.position += self.movement * self.speed * speed;
+        self.traveled_distance += self.movement.length() * self.speed * speed;
     }
 }

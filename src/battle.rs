@@ -48,14 +48,14 @@ impl Battle {
         &self.projectiles
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, elapsed_time: f32) {
         for body in &mut self.bodies {
-            body.apply_movement(1.0);
+            body.apply_movement(elapsed_time);
         }
 
         self.projectiles.retain_mut(|projectile| {
             let segment_start = projectile.position();
-            projectile.moove(1.0);
+            projectile.moove(elapsed_time);
             let segment_end = projectile.position();
             let mut hit = false;
             if !projectile.is_out_of_max_range() {
