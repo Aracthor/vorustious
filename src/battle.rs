@@ -50,7 +50,7 @@ impl Battle {
         });
 
         for body in &mut self.bodies {
-            body.structure_mut().for_each_voxel_mut(|_x, _y, _z, voxel: &mut Option<Voxel>| {
+            body.structure_mut().for_each_voxel_mut(|_coords, voxel: &mut Option<Voxel>| {
                 if voxel.unwrap().life <= 0.0 {
                     *voxel = None;
                 }

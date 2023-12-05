@@ -107,28 +107,30 @@ impl Structure {
         self.data[index] = Some(voxel);
     }
 
-    pub fn for_each_voxel<F: FnMut(i32, i32, i32, &Voxel)>(&self, mut f: F) {
+    pub fn for_each_voxel<F: FnMut(Vect3i, &Voxel)>(&self, mut f: F) {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
-                    if self.has_voxel(x, y, z) {
-                        let index = self.voxel_index(Vect3i::new([x, y, z]));
+                    let coords = Vect3i::new([x, y, z]);
+                    if self.has_voxel(coords) {
+                        let index = self.voxel_index(coords);
                         let voxel = &mut self.data[index].unwrap();
-                        f(x, y, z, voxel);
+                        f(coords, voxel);
                     }
                 }
             }
         }
     }
 
-    pub fn for_each_voxel_mut<F: Fn(i32, i32, i32, &mut Option<Voxel>)>(&mut self, f: F) {
+    pub fn for_each_voxel_mut<F: Fn(Vect3i, &mut Option<Voxel>)>(&mut self, f: F) {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
-                    if self.has_voxel(x, y, z) {
-                        let index = self.voxel_index(Vect3i::new([x, y, z]));
+                    let coords = Vect3i::new([x, y, z]);
+                    if self.has_voxel(coords) {
+                        let index = self.voxel_index(coords);
                         let voxel = &mut self.data[index];
-                        f(x, y, z, voxel);
+                        f(coords, voxel);
                     }
                 }
             }
@@ -311,8 +313,7 @@ impl Structure {
         (coords_in_data[2] * (extent[0] * extent[1]) + coords_in_data[1] * extent[0] + coords_in_data[0]).try_into().unwrap()
     }
 
-    fn has_voxel(&self, x: i32, y: i32, z: i32) -> bool {
-        let coords = Vect3i::new([x, y, z]);
+    fn has_voxel(&self, coords: Vect3i) -> bool {
         assert!(self.voxel_box.contains(coords));
         let index = self.voxel_index(coords);
         self.data[index].is_some()
@@ -328,7 +329,8 @@ impl PartialEq for Structure {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
-                    if self.has_voxel(x, y, z) != other.has_voxel(x, y, z) {
+                    let coords = Vect3i::new([x, y, z]);
+                    if self.has_voxel(coords) != other.has_voxel(coords) {
                         return false;
                     }
                 }

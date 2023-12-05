@@ -141,11 +141,11 @@ impl Renderer {
             let mut instance_positions: Vec<f32> = Default::default();
             let mut instance_texture_indices: Vec<i32> = Default::default();
             let mut instance_damages: Vec<f32> = Default::default();
-            body.structure().for_each_voxel(|x, y, z, voxel| {
+            body.structure().for_each_voxel(|coords, voxel| {
                 let descriptor = self.voxel_catalog.get_descriptor(voxel.id);
-                instance_positions.push(x as f32);
-                instance_positions.push(y as f32);
-                instance_positions.push(z as f32);
+                instance_positions.push(coords[0] as f32);
+                instance_positions.push(coords[1] as f32);
+                instance_positions.push(coords[2] as f32);
                 instance_texture_indices.push(descriptor.texture_type as i32);
                 instance_damages.push(1.0 - voxel.life / descriptor.max_life);
             });
