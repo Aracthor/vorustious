@@ -26,7 +26,7 @@ impl Weapon {
     pub fn shoot(&mut self, position: Vect3f, direction: Vect3f) -> Option<Projectile> {
         if self.last_shot_time.elapsed() > self.firerate {
             self.last_shot_time = Instant::now();
-            return Some(Projectile::new(position, direction, self.damage, self.projectile_speed, self.max_range));
+            return Some(Projectile::new(position, direction * self.projectile_speed, self.damage, self.max_range));
         }
         None
     }
