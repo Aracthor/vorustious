@@ -91,16 +91,17 @@ impl Battle {
                 result
             };
 
-            // Code to cut in separate bodies disjoincted structures.
-            // TODO It doesn't work if the structure has more than one separation in the same tick.
-            if !coords_to_check.is_empty() {
-                let mut coords_to_reach: HashSet<Vect3i> = coords_to_check.clone().into_iter().collect();
+            // Cut in separate bodies disjoincted structures.
+            let mut coords_to_reach: HashSet<Vect3i> = coords_to_check.clone().into_iter().collect();
+            let mut jointed_coords: Vec<HashSet<Vect3i>> = vec![];
+            while !coords_to_reach.is_empty() {
+                let first_coords = coords_to_reach.iter().next().unwrap().clone();
                 let mut coords_to_explore: VecDeque<Vect3i> = Default::default();
                 let mut explored_coords: HashSet<Vect3i> = Default::default();
-                coords_to_explore.push_back(coords_to_check[0]);
-                coords_to_reach.remove(&coords_to_check[0]);
-                explored_coords.insert(coords_to_check[0]);
-                while !coords_to_explore.is_empty() && !coords_to_reach.is_empty() {
+                coords_to_explore.push_back(first_coords);
+                coords_to_reach.remove(&first_coords);
+                explored_coords.insert(first_coords);
+                while !coords_to_explore.is_empty() && (!coords_to_reach.is_empty() || !jointed_coords.is_empty())  {
                     let coords = coords_to_explore.pop_front().unwrap();
                     for close_coords in close_coords(coords) {
                         if body.structure().has_voxel_on_coords(close_coords) && !explored_coords.contains(&close_coords) {
@@ -110,17 +111,24 @@ impl Battle {
                         }
                     }
                 }
-                if !coords_to_reach.is_empty() {
-                    let mut new_structure = Structure::new_empty();
-                    for coords in explored_coords {
-                        let voxel = body.structure_mut().remove_voxel(coords);
-                        new_structure.add_voxel(coords, voxel);
-                    }
+                jointed_coords.push(explored_coords);
+            }
+            if jointed_coords.len() > 1 {
+                for join in jointed_coords {
+                    if !join.contains(&Vect3i::zero()) {
+                        let coords = join.clone().iter().next().unwrap().clone();
+                        let mut new_structure = Structure::new_empty();
+                        for coords in join {
+                            let voxel = body.structure_mut().remove_voxel(coords);
+                            new_structure.add_voxel(coords, voxel);
+                        }
 
-                    let mut new_body = Body::new(new_structure, body.repere().clone());
-                    new_body.add_to_movement(body.movement());
-                    new_body.add_to_movement(Vect3f::new([0.0, 1.0, 0.0]));
-                    new_bodies.push(new_body);
+                        let mut new_body = Body::new(new_structure, body.repere().clone());
+                        new_body.add_to_movement(body.movement());
+                        // Debug to see result
+                        new_body.add_to_movement(Vect3f::new([coords[0] as f32, coords[1] as f32, coords[2] as f32]));
+                        new_bodies.push(new_body);
+                    }
                 }
             }
         }
