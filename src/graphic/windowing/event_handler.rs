@@ -53,8 +53,6 @@ pub struct EventHandler {
     core: glfw::Glfw,
     event_receiver: EventReceiver,
 
-    glfw_key_table: HashMap<glfw::Key, Key>,
-
     key_status: HashMap<Key, Status>,
     mouse_button_status: HashMap<MouseButton, Status>,
     cursor_movement: (f64, f64),
@@ -66,23 +64,26 @@ impl EventHandler {
             core: core,
             event_receiver: event_receiver,
 
-            glfw_key_table: HashMap::from([
-                (glfw::Key::A, Key::A),
-                (glfw::Key::D, Key::D),
-                (glfw::Key::S, Key::S),
-                (glfw::Key::W, Key::W),
-                (glfw::Key::X, Key::X),
-                (glfw::Key::Y, Key::Y),
-                (glfw::Key::Z, Key::Z),
-                (glfw::Key::F5, Key::F5),
-                (glfw::Key::F9, Key::F9),
-                (glfw::Key::LeftControl, Key::LeftCtrl),
-                (glfw::Key::RightControl, Key::RightCtrl),
-            ]),
-
             key_status: Default::default(),
             mouse_button_status: Default::default(),
             cursor_movement: (0.0, 0.0),
+        }
+    }
+
+    fn glfw_key_to_key(&self, key: glfw::Key) -> Option<Key> {
+        match key {
+            glfw::Key::A => Some(Key::A),
+            glfw::Key::D => Some(Key::D),
+            glfw::Key::S => Some(Key::S),
+            glfw::Key::W => Some(Key::W),
+            glfw::Key::X => Some(Key::X),
+            glfw::Key::Y => Some(Key::Y),
+            glfw::Key::Z => Some(Key::Z),
+            glfw::Key::F5 => Some(Key::F5),
+            glfw::Key::F9 => Some(Key::F9),
+            glfw::Key::LeftControl => Some(Key::LeftCtrl),
+            glfw::Key::RightControl => Some(Key::RightCtrl),
+            _ => None,
         }
     }
 
@@ -108,10 +109,10 @@ impl EventHandler {
         for (_, event) in glfw::flush_messages(&self.event_receiver) {
             match event {
                 glfw::WindowEvent::Key(glfw_key, _, action, _) => {
-                    let key = self.glfw_key_table.get(&glfw_key);
+                    let key = self.glfw_key_to_key(glfw_key);
                     let status = glfw_action_to_status(action);
                     if key.is_some() && status.is_some() {
-                        self.key_status.insert(*key.unwrap(), status.unwrap());
+                        self.key_status.insert(key.unwrap(), status.unwrap());
                     }
                 },
 
