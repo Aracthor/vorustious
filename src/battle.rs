@@ -118,6 +118,7 @@ impl Battle {
                     }
 
                     let mut new_body = Body::new(new_structure, body.repere().clone());
+                    new_body.add_to_movement(body.movement());
                     new_body.add_to_movement(Vect3f::new([0.0, 1.0, 0.0]));
                     new_bodies.push(new_body);
                 }

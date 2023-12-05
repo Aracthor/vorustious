@@ -36,6 +36,10 @@ impl Body {
         self.structure.for_first_voxel_in_segment(segment_in_repere, f)
     }
 
+    pub fn movement(&self) -> Vect3f {
+        self.movement
+    }
+
     pub fn add_to_movement(&mut self, movement: Vect3f) {
         self.movement += movement;
     }
