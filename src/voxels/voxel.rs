@@ -27,6 +27,14 @@ pub struct Voxel {
     pub life: f32,
 }
 
+impl Eq for Voxel {}
+impl PartialEq for Voxel {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id && self.life == other.life
+    }
+}
+
+
 #[derive(Clone)]
 pub struct VoxelDescriptor {
     pub max_life: f32,

@@ -105,6 +105,11 @@ impl Structure {
         return self.has_voxel(coords);
     }
 
+    pub fn get_voxel(&self, coords: Vect3i) -> Option<Voxel> {
+        let index = self.voxel_index(coords);
+        self.data[index]
+    }
+
     #[cfg(test)]
     pub fn set_voxel(&mut self, x: i32, y: i32, z: i32, voxel: Option<Voxel>) {
         let index = self.voxel_index(Vect3i::new([x, y, z]));
@@ -352,7 +357,7 @@ impl PartialEq for Structure {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
                     let coords = Vect3i::new([x, y, z]);
-                    if self.has_voxel(coords) != other.has_voxel(coords) {
+                    if self.get_voxel(coords) != other.get_voxel(coords) {
                         return false;
                     }
                 }
