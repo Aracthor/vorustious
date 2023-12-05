@@ -13,6 +13,7 @@ use graphic::renderer::Renderer;
 use graphic::camera::Camera;
 use graphic::windowing::window::Window;
 use graphic::windowing::event_handler::MouseButton;
+use maths::matrix::Mat4f;
 use voxels::body::Body;
 use voxels::structure::Structure;
 use voxels::catalog::VoxelCatalog;
@@ -28,7 +29,7 @@ fn run_editor(window: &mut Window, renderer: &mut Renderer) {
 
         window.clear();
 
-        let bodies = vec![Body::new(editor.structure.clone())];
+        let bodies = vec![Body::new(editor.structure.clone(), Mat4f::identity())];
         renderer.render_frame(camera.view_matrix(), &bodies, &vec![], Some(&editor));
 
         window.update();
@@ -41,7 +42,7 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
 
     let voxel_catalog = VoxelCatalog::create();
     let structure_file_content = std::fs::read_to_string("structures/proto.vors").expect(&format!("Unable to read structures/proto.vors"));
-    battle.add_body(Body::new(Structure::deserialize(&voxel_catalog, &structure_file_content)));
+    battle.add_body(Body::new(Structure::deserialize(&voxel_catalog, &structure_file_content), Mat4f::identity()));
     let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 20.0);
 
     while !window.should_close() {

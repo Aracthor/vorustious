@@ -11,9 +11,9 @@ pub struct Body {
 }
 
 impl Body {
-    pub fn new(structure: Structure) -> Self {
+    pub fn new(structure: Structure, repere: Mat4f) -> Self {
         Self {
-            repere: Mat4f::identity(),
+            repere: repere,
             structure: structure,
             movement: Vect3f::zero(),
         }
@@ -34,6 +34,10 @@ impl Body {
     pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>)>(&mut self, segment: Segm3f, f: F) -> bool {
         let segment_in_repere = segment.transform(&self.repere.inverse());
         self.structure.for_first_voxel_in_segment(segment_in_repere, f)
+    }
+
+    pub fn add_to_movement(&mut self, movement: Vect3f) {
+        self.movement += movement;
     }
 
     pub fn apply_movement(&mut self, elapsed_time: f32) {

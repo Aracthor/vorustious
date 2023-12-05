@@ -16,6 +16,13 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         }
     }
 
+    pub fn zero() -> Self {
+        Self {
+            min: Vect::<N, T>::zero(),
+            max: Vect::<N, T>::zero(),
+        }
+    }
+
     pub fn from_min_max(min: Vect<N, T>, max: Vect<N, T>) -> Self {
         Self {
             min: min,

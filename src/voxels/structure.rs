@@ -11,6 +11,13 @@ pub struct Structure {
 }
 
 impl Structure {
+    pub fn new_empty() -> Self {
+        Self {
+            voxel_box: Box3i::zero(),
+            data: vec![None; 1],
+        }
+    }
+
     pub fn new(min_x: i32, max_x: i32, min_y: i32, max_y: i32, min_z: i32, max_z: i32, voxel: Voxel) -> Self {
         let extent_x = max_x - min_x + 1;
         let extent_y = max_y - min_y + 1;
@@ -91,6 +98,13 @@ impl Structure {
         result
     }
 
+    pub fn has_voxel_on_coords(&self, coords: Vect3i) -> bool {
+        if !self.voxel_box.contains(coords) {
+            return false;
+        }
+        return self.has_voxel(coords);
+    }
+
     #[cfg(test)]
     pub fn set_voxel(&mut self, x: i32, y: i32, z: i32, voxel: Option<Voxel>) {
         let index = self.voxel_index(Vect3i::new([x, y, z]));
@@ -105,6 +119,14 @@ impl Structure {
         }
         let index = self.voxel_index(coords);
         self.data[index] = Some(voxel);
+    }
+
+    pub fn remove_voxel(&mut self, coords: Vect3i) -> Voxel {
+        let index = self.voxel_index(coords);
+        assert!(self.data[index].is_some());
+        let voxel = self.data[index].unwrap();
+        self.data[index] = None;
+        voxel
     }
 
     pub fn for_each_voxel<F: FnMut(Vect3i, &Voxel)>(&self, mut f: F) {
@@ -122,7 +144,7 @@ impl Structure {
         }
     }
 
-    pub fn for_each_voxel_mut<F: Fn(Vect3i, &mut Option<Voxel>)>(&mut self, f: F) {
+    pub fn for_each_voxel_mut<F: FnMut(Vect3i, &mut Option<Voxel>)>(&mut self, mut f: F) {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {

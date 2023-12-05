@@ -3,7 +3,7 @@ use core::ops::IndexMut;
 
 use super::traits::MathsUsable;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Hash)]
 pub struct Vect<const N: usize, T: MathsUsable> {
     data: [T; N],
 }
