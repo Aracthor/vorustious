@@ -33,6 +33,10 @@ impl Battle {
     }
 
     pub fn update(&mut self) {
+        for body in &mut self.bodies {
+            body.apply_movement(1.0);
+        }
+
         self.projectiles.retain_mut(|projectile| {
             let segment_start = projectile.position();
             projectile.moove(1.0);
