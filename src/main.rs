@@ -2,21 +2,20 @@ mod graphic;
 mod maths;
 mod voxels;
 
+mod battle;
 mod editor;
 mod projectile;
 mod weapon;
 
+use battle::Battle;
 use editor::Editor;
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
 use graphic::windowing::window::Window;
 use graphic::windowing::event_handler::MouseButton;
-use maths::segment::Segm3f;
-use projectile::Projectile;
 use voxels::body::Body;
 use voxels::structure::Structure;
 use voxels::catalog::VoxelCatalog;
-use voxels::voxel::Voxel;
 use weapon::Weapon;
 
 fn run_editor(window: &mut Window, renderer: &mut Renderer) {
@@ -29,8 +28,8 @@ fn run_editor(window: &mut Window, renderer: &mut Renderer) {
 
         window.clear();
 
-        let body = Body::new(editor.structure.clone());
-        renderer.render_frame(camera.view_matrix(), &body, &vec![], Some(&editor));
+        let bodies = vec![Body::new(editor.structure.clone())];
+        renderer.render_frame(camera.view_matrix(), &bodies, &vec![], Some(&editor));
 
         window.update();
     }
@@ -38,11 +37,11 @@ fn run_editor(window: &mut Window, renderer: &mut Renderer) {
 
 fn run_battle(window: &mut Window, renderer: &mut Renderer) {
     let mut camera = Camera::new();
+    let mut battle = Battle::new();
 
     let voxel_catalog = VoxelCatalog::create();
     let structure_file_content = std::fs::read_to_string("structures/proto.vors").expect(&format!("Unable to read structures/proto.vors"));
-    let mut body = Body::new(Structure::deserialize(&voxel_catalog, &structure_file_content));
-    let mut projectiles: Vec<Projectile> = vec![];
+    battle.add_body(Body::new(Structure::deserialize(&voxel_catalog, &structure_file_content)));
     let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 20.0);
 
     while !window.should_close() {
@@ -53,34 +52,14 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
             let projectile_direction = camera.forward();
             let projectile = weapon.shoot(projectile_start, projectile_direction);
             if projectile.is_some() {
-                projectiles.push(projectile.unwrap());
+                battle.add_projectile(projectile.unwrap());
             }
         }
 
-        projectiles.retain_mut(|projectile| {
-            let segment_start = projectile.position();
-            projectile.moove(1.0);
-            let segment_end = projectile.position();
-            let mut hit = false;
-            if !projectile.is_out_of_max_range() {
-                let segment = Segm3f::new(segment_start, segment_end);
-                hit = body.for_first_voxel_in_segment(segment, |voxel: &mut Option<Voxel>| {
-                    voxel.as_mut().unwrap().life -= projectile.damage();
-                });
-            }
-            !hit && !projectile.is_out_of_max_range()
-        });
-
-        body.structure_mut().for_each_voxel_mut(|_x, _y, _z, voxel: &mut Option<Voxel>| {
-            if voxel.unwrap().life <= 0.0 {
-                *voxel = None;
-            }
-        });
+        battle.update();
 
         window.clear();
-
-        renderer.render_frame(camera.view_matrix(), &body, &projectiles, None);
-
+        renderer.render_frame(camera.view_matrix(), &battle.bodies(), &battle.projectiles(), None);
         window.update();
     }
 

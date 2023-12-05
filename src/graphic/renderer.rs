@@ -135,24 +135,26 @@ impl Renderer {
         }
     }
 
-    pub fn render_frame(&mut self, view_matrix: Mat4f, body: &Body, projectiles: &Vec<Projectile>, editor: Option<&Editor>) {
+    pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: &Vec<Body>, projectiles: &Vec<Projectile>, editor: Option<&Editor>) {
         let projection_view_matrix = self.projection_matrix.clone() * view_matrix;
-        let mut instance_positions: Vec<f32> = Default::default();
-        let mut instance_texture_indices: Vec<i32> = Default::default();
-        let mut instance_damages: Vec<f32> = Default::default();
-        body.structure().for_each_voxel(|x, y, z, voxel| {
-            let descriptor = self.voxel_catalog.get_descriptor(voxel.id);
-            instance_positions.push(x as f32);
-            instance_positions.push(y as f32);
-            instance_positions.push(z as f32);
-            instance_texture_indices.push(descriptor.texture_type as i32);
-            instance_damages.push(1.0 - voxel.life / descriptor.max_life);
-        });
-        let instance_count = instance_damages.len().try_into().unwrap();
-        self.cube_mesh.set_instanced_data(0, &instance_positions);
-        self.cube_mesh.set_instanced_data(1, &instance_texture_indices);
-        self.cube_mesh.set_instanced_data(2, &instance_damages);
-        self.cube_mesh.draw_instanced(instance_count, &projection_view_matrix, body.repere());
+        for body in bodies {
+            let mut instance_positions: Vec<f32> = Default::default();
+            let mut instance_texture_indices: Vec<i32> = Default::default();
+            let mut instance_damages: Vec<f32> = Default::default();
+            body.structure().for_each_voxel(|x, y, z, voxel| {
+                let descriptor = self.voxel_catalog.get_descriptor(voxel.id);
+                instance_positions.push(x as f32);
+                instance_positions.push(y as f32);
+                instance_positions.push(z as f32);
+                instance_texture_indices.push(descriptor.texture_type as i32);
+                instance_damages.push(1.0 - voxel.life / descriptor.max_life);
+            });
+            let instance_count = instance_damages.len().try_into().unwrap();
+            self.cube_mesh.set_instanced_data(0, &instance_positions);
+            self.cube_mesh.set_instanced_data(1, &instance_texture_indices);
+            self.cube_mesh.set_instanced_data(2, &instance_damages);
+            self.cube_mesh.draw_instanced(instance_count, &projection_view_matrix, body.repere());
+        }
 
         for projectile in projectiles {
             let model_matrix = Mat4f::translation(projectile.position());
