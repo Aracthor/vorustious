@@ -1,13 +1,10 @@
 mod graphic;
 mod maths;
 mod voxels;
+mod warfare;
 
-mod battle;
 mod editor;
-mod projectile;
-mod weapon;
 
-use battle::Battle;
 use editor::Editor;
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
@@ -17,7 +14,8 @@ use maths::matrix::Mat4f;
 use voxels::body::Body;
 use voxels::structure::Structure;
 use voxels::catalog::VoxelCatalog;
-use weapon::Weapon;
+use warfare::battle::Battle;
+use warfare::weapon::Weapon;
 
 fn run_editor(window: &mut Window, renderer: &mut Renderer) {
     let mut camera = Camera::new();
