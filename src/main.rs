@@ -9,6 +9,7 @@ use editor::Editor;
 use graphic::renderer::Renderer;
 use graphic::camera::Camera;
 use graphic::windowing::window::Window;
+use graphic::windowing::event_handler::Key;
 use graphic::windowing::event_handler::MouseButton;
 use maths::matrix::Mat4f;
 use voxels::body::Body;
@@ -43,6 +44,8 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
     battle.add_body(Body::new(Structure::deserialize(&voxel_catalog, &structure_file_content), Mat4f::identity()));
     let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 50.0, 20.0);
 
+    let mut pause = false;
+
     let tick_elapsed_time = 1.0 / 60.0; // Rather than real elapsed time in order to keep determinism.
     while !window.should_close() {
         camera.update_from_events(&window.event_handler());
@@ -56,7 +59,13 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
             }
         }
 
-        battle.update(tick_elapsed_time);
+        if window.event_handler().is_key_just_pressed(Key::P) {
+            pause = !pause;
+        }
+
+        if !pause {
+            battle.update(tick_elapsed_time);
+        }
 
         window.clear();
         renderer.render_frame(camera.view_matrix(), &battle.bodies(), &battle.projectiles(), None);
