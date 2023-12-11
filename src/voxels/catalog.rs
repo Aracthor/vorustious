@@ -22,16 +22,7 @@ impl VoxelCatalog {
             texture_type: TextureType::Hull,
         };
         Self {
-            descriptors: vec![
-                VoxelDescriptor {
-                    max_life: 5.0,
-                    texture_type: TextureType::Core,
-                },
-                VoxelDescriptor {
-                    max_life: 2.0,
-                    texture_type: TextureType::Hull,
-                },
-            ]
+            descriptors: descriptors,
         }
     }
 
