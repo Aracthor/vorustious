@@ -72,17 +72,17 @@ impl EditorRenderer {
             cube_mesh.set_instanced_data(1, &instance_texture_index);
             cube_mesh.set_instanced_data(2, &instance_damage);
             cube_mesh.set_uniform_f32("uni_alpha", 0.5);
-            cube_mesh.draw_instanced(1, &projection_view_matrix, &Mat4f::identity());
+            cube_mesh.draw_instanced(1, &projection_view_matrix);
             cube_mesh.set_uniform_f32("uni_alpha", 1.0);
         }
         if editor.symetry_x {
-            self.plane_x.draw(&projection_view_matrix, &Mat4f::identity());
+            self.plane_x.draw(&projection_view_matrix);
         }
         if editor.symetry_y {
-            self.plane_y.draw(&projection_view_matrix, &Mat4f::identity());
+            self.plane_y.draw(&projection_view_matrix);
         }
         if editor.symetry_z {
-            self.plane_z.draw(&projection_view_matrix, &Mat4f::identity());
+            self.plane_z.draw(&projection_view_matrix);
         }
     }
 }

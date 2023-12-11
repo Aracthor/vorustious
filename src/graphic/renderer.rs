@@ -38,6 +38,7 @@ impl Renderer {
             material.add_instance_data_buffer("instance_position", 3);
             material.add_instance_data_buffer("instance_texture_index", 1);
             material.add_instance_data_buffer("instance_damage", 1);
+            material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
 
             let hull_texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
             material.add_texture(&format!("voxel_texture[{}]", TextureType::Hull as i32), hull_texture);
@@ -66,7 +67,8 @@ impl Renderer {
         };
 
         let projectile_mesh = {
-            let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
+            let mut material = Material::create("shaders/projectile.vert", "shaders/hello_color.frag");
+            material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
             material.add_uniform_vect4("uni_color", Color::new(0xB0, 0x30, 0x30, 0xFF).into());
 
             let positions = [
@@ -153,7 +155,8 @@ impl Renderer {
             self.cube_mesh.set_instanced_data(0, &instance_positions);
             self.cube_mesh.set_instanced_data(1, &instance_texture_indices);
             self.cube_mesh.set_instanced_data(2, &instance_damages);
-            self.cube_mesh.draw_instanced(instance_count, &projection_view_matrix, body.repere());
+            self.cube_mesh.set_uniform_matrix("uni_model_matrix", body.repere());
+            self.cube_mesh.draw_instanced(instance_count, &projection_view_matrix);
         }
 
         for projectile in projectiles {
@@ -161,14 +164,15 @@ impl Renderer {
             let yaw = f32::atan2(direction[1], direction[0]);
             let pitch = -f32::asin(direction[2]);
             let model_matrix = Mat4f::translation(projectile.position()) * Mat4f::rotation_around_z(yaw) * Mat4f::rotation_around_y(pitch);
-            self.projectile_mesh.draw(&projection_view_matrix, &model_matrix);
+            self.projectile_mesh.set_uniform_matrix("uni_model_matrix", &model_matrix);
+            self.projectile_mesh.draw(&projection_view_matrix);
         }
 
         if editor.is_some() {
             self.editor_renderer.render(&projection_view_matrix, &mut self.cube_mesh, editor.unwrap());
         }
 
-        self.interface_mesh.draw(&Mat4f::identity(), &Mat4f::identity());
+        self.interface_mesh.draw(&Mat4f::identity());
 
         self.frame_limiter.limit();
     }

@@ -27,19 +27,23 @@ impl Mesh {
         self.material.set_uniform_f32(uniform_name, value);
     }
 
+    pub fn set_uniform_matrix(&mut self, uniform_name: &str, value: &Mat4f) {
+        self.material.set_uniform_mat4(uniform_name, value);
+    }
+
     pub fn set_instanced_data<T>(&self, buffer_index: usize, data: &Vec<T>) {
         self.vao.fill_instanced_buffer(buffer_index, data);
     }
 
-    pub fn draw(&self, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
+    pub fn draw(&self, projection_view_matrix: &Mat4f) {
         self.material.bind();
-        self.material.set_transformation_matrices(projection_view_matrix, model_matrix);
+        self.material.set_projection_view_matrix(projection_view_matrix);
         self.vao.draw(self.primitive);
     }
 
-    pub fn draw_instanced(&self, instance_count: i32, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
+    pub fn draw_instanced(&self, instance_count: i32, projection_view_matrix: &Mat4f) {
         self.material.bind();
-        self.material.set_transformation_matrices(projection_view_matrix, model_matrix);
+        self.material.set_projection_view_matrix(projection_view_matrix);
         self.vao.draw_instanced(self.primitive, instance_count);
     }
 }

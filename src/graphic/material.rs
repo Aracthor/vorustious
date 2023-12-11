@@ -10,6 +10,7 @@ pub struct Material {
     shader: Shader,
     uniforms_f32: HashMap<String, f32>,
     uniforms_vect4: HashMap<String, Vect4f>,
+    uniforms_mat4: HashMap<String, Mat4f>,
     textures: HashMap<String, Texture>,
     instance_data_buffers: Vec<(String, i32)>,
 }
@@ -20,6 +21,7 @@ impl Material {
             shader: Shader::create_shader_program(vertex_file_name, fragment_file_name),
             uniforms_f32: Default::default(),
             uniforms_vect4: Default::default(),
+            uniforms_mat4: Default::default(),
             textures: Default::default(),
             instance_data_buffers: Default::default(),
         }
@@ -41,18 +43,26 @@ impl Material {
         self.uniforms_vect4.insert(String::from(uniform_name), value);
     }
 
+    pub fn add_uniform_mat4(&mut self, uniform_name: &str, value: Mat4f) {
+        self.uniforms_mat4.insert(String::from(uniform_name), value);
+    }
+
     pub fn set_uniform_f32(&mut self, uniform_name: &str, value: f32) {
         assert!(self.uniforms_f32.contains_key(uniform_name));
         *self.uniforms_f32.get_mut(uniform_name).unwrap() = value;
     }
 
-    pub fn get_instanced_buffer_locations(&self) -> Vec<(u32, i32)> {
-        self.instance_data_buffers.iter().map(|buffer| (self.shader.get_attrib_location(&buffer.0), buffer.1)).collect()
+    pub fn set_uniform_mat4(&mut self, uniform_name: &str, value: &Mat4f) {
+        assert!(self.uniforms_mat4.contains_key(uniform_name));
+        *self.uniforms_mat4.get_mut(uniform_name).unwrap() = value.clone();
     }
 
-    pub fn set_transformation_matrices(&self, projection_view_matrix: &Mat4f, model_matrix: &Mat4f) {
+    pub fn set_projection_view_matrix(&self, projection_view_matrix: &Mat4f) {
         self.shader.set_matrix_uniform("uni_projection_view_matrix", projection_view_matrix);
-        self.shader.set_matrix_uniform("uni_model_matrix", model_matrix);
+    }
+
+    pub fn get_instanced_buffer_locations(&self) -> Vec<(u32, i32)> {
+        self.instance_data_buffers.iter().map(|buffer| (self.shader.get_attrib_location(&buffer.0), buffer.1)).collect()
     }
 
     pub fn bind(&self) {
@@ -62,6 +72,9 @@ impl Material {
         }
         for uniform in &self.uniforms_vect4 {
             self.shader.set_vector_uniform(uniform.0, uniform.1);
+        }
+        for uniform in &self.uniforms_mat4 {
+            self.shader.set_matrix_uniform(uniform.0, uniform.1);
         }
         let mut texture_index = 0;
         for texture in &self.textures {
