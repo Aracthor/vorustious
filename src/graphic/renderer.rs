@@ -70,37 +70,37 @@ impl Renderer {
             material.add_uniform_vect4("uni_color", Color::new(0xB0, 0x30, 0x30, 0xFF).into());
 
             let positions = [
-                0.5, 0.0, 0.0,
-                0.0, 0.5, 0.0,
-                0.0, 0.0, 0.5,
+                0.2, 0.0, 0.0,
+                0.0, 0.2, 0.0,
+                0.0, 0.0, 0.2,
 
-                0.5, 0.0, 0.0,
-                0.0, 0.0, 0.5,
-                0.0, -0.5, 0.0,
+                0.2, 0.0, 0.0,
+                0.0, 0.0, 0.2,
+                0.0, -0.2, 0.0,
 
-                0.5, 0.0, 0.0,
-                0.0, -0.5, 0.0,
-                0.0, 0.0, -0.5,
+                0.2, 0.0, 0.0,
+                0.0, -0.2, 0.0,
+                0.0, 0.0, -0.2,
 
-                0.5, 0.0, 0.0,
-                0.0, 0.0, -0.5,
-                0.0, 0.5, 0.0,
-
-                -0.5, 0.0, 0.0,
-                0.0, 0.5, 0.0,
-                0.0, 0.0, 0.5,
+                0.2, 0.0, 0.0,
+                0.0, 0.0, -0.2,
+                0.0, 0.2, 0.0,
 
                 -0.5, 0.0, 0.0,
-                0.0, 0.0, 0.5,
-                0.0, -0.5, 0.0,
+                0.0, 0.2, 0.0,
+                0.0, 0.0, 0.2,
 
                 -0.5, 0.0, 0.0,
-                0.0, -0.5, 0.0,
-                0.0, 0.0, -0.5,
+                0.0, 0.0, 0.2,
+                0.0, -0.2, 0.0,
 
                 -0.5, 0.0, 0.0,
-                0.0, 0.0, -0.5,
-                0.0, 0.5, 0.0,
+                0.0, -0.2, 0.0,
+                0.0, 0.0, -0.2,
+
+                -0.5, 0.0, 0.0,
+                0.0, 0.0, -0.2,
+                0.0, 0.2, 0.0,
             ].to_vec();
 
             Mesh::create(positions, None, Primitive::Triangles, material)
@@ -157,7 +157,10 @@ impl Renderer {
         }
 
         for projectile in projectiles {
-            let model_matrix = Mat4f::translation(projectile.position());
+            let direction = projectile.movement().normalize();
+            let yaw = f32::atan2(direction[1], direction[0]);
+            let pitch = -f32::asin(direction[2]);
+            let model_matrix = Mat4f::translation(projectile.position()) * Mat4f::rotation_around_z(yaw) * Mat4f::rotation_around_y(pitch);
             self.projectile_mesh.draw(&projection_view_matrix, &model_matrix);
         }
 

@@ -23,6 +23,10 @@ impl Projectile {
         self.position
     }
 
+    pub fn movement(&self) -> Vect3f {
+        self.movement
+    }
+
     pub fn damage(&self) -> f32 {
         self.damage
     }
