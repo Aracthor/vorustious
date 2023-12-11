@@ -12,6 +12,7 @@ use crate::voxels::voxel::VoxelID;
 pub struct Editor {
     pub structure: Structure,
     pub voxel_position: Option<Vect3i>,
+    pub voxel_id: VoxelID,
     pub symetry_x: bool,
     pub symetry_y: bool,
     pub symetry_z: bool,
@@ -26,6 +27,7 @@ impl Editor {
         Self {
             structure: Structure::new(0, 0, 0, 0, 0, 0, Voxel{id: VoxelID::ShipCore, life: 5.0}),
             voxel_position: None,
+            voxel_id: VoxelID::LightHull,
             symetry_x: false,
             symetry_y: false,
             symetry_z: false,
@@ -55,9 +57,15 @@ impl Editor {
             self.structure = Structure::deserialize(&self.voxel_catalog, &str);
             println!("Loaded file '{SAVE_FILENAME}'");
         }
+        if event_handler.scroll_status() < 0.0 {
+            self.voxel_id = (if self.voxel_id as i32 == 0 { VoxelID::COUNT as i32 - 1 } else { self.voxel_id as i32 - 1}).into();
+        }
+        else if event_handler.scroll_status() > 0.0 {
+            self.voxel_id = (if self.voxel_id as i32 == VoxelID::COUNT as i32 - 1 { 0 } else { self.voxel_id as i32 + 1}).into();
+        }
 
         if self.voxel_position.is_some() && event_handler.is_mouse_button_just_released(MouseButton::Right) {
-            let voxel = self.voxel_catalog.create_voxel(VoxelID::LightHull);
+            let voxel = self.voxel_catalog.create_voxel(self.voxel_id);
             let position = self.voxel_position.unwrap();
             self.structure.add_voxel(position, voxel);
             if self.symetry_x {

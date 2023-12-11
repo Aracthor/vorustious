@@ -1,11 +1,13 @@
 use crate::editor::Editor;
 use crate::maths::matrix::Mat4f;
+use crate::voxels::catalog::VoxelCatalog;
 use super::core::color::Color;
 use super::material::Material;
 use super::mesh::Mesh;
 use super::opengl::vertex_objects::Primitive;
 
 pub struct EditorRenderer {
+    voxel_catalog: VoxelCatalog,
     plane_x: Mesh,
     plane_y: Mesh,
     plane_z: Mesh,
@@ -56,6 +58,7 @@ impl EditorRenderer {
         };
 
         Self {
+            voxel_catalog: VoxelCatalog::create(),
             plane_x: plane_x,
             plane_y: plane_y,
             plane_z: plane_z,
@@ -66,7 +69,7 @@ impl EditorRenderer {
         if editor.voxel_position.is_some() {
             let position = editor.voxel_position.unwrap();
             let instance_position = vec![position[0] as f32, position[1] as f32, position[2] as f32];
-            let instance_texture_index = vec![0];
+            let instance_texture_index = vec![self.voxel_catalog.get_descriptor(editor.voxel_id).texture_type as i32];
             let instance_damage = vec![0.0];
             cube_mesh.set_instanced_data(0, &instance_position);
             cube_mesh.set_instanced_data(1, &instance_texture_index);

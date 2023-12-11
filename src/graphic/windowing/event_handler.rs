@@ -56,6 +56,7 @@ pub struct EventHandler {
 
     key_status: HashMap<Key, Status>,
     mouse_button_status: HashMap<MouseButton, Status>,
+    scroll_status: f32,
     cursor_movement: (f64, f64),
 }
 
@@ -67,6 +68,7 @@ impl EventHandler {
 
             key_status: Default::default(),
             mouse_button_status: Default::default(),
+            scroll_status: 0.0,
             cursor_movement: (0.0, 0.0),
         }
     }
@@ -106,6 +108,7 @@ impl EventHandler {
                 *button = Status::Unpressed;
             }
         }
+        self.scroll_status = 0.0;
 
         self.core.poll_events();
         for (_, event) in glfw::flush_messages(&self.event_receiver) {
@@ -125,6 +128,10 @@ impl EventHandler {
                         self.mouse_button_status.insert(mouse_button.unwrap(), status.unwrap());
                     }
                 }
+
+                glfw::WindowEvent::Scroll(_x, y) => {
+                    self.scroll_status = y as f32;
+                },
 
                 _ => {},
             }
@@ -157,6 +164,10 @@ impl EventHandler {
     pub fn is_mouse_button_pressed(&self, button: MouseButton) -> bool {
         let button_status = self.mouse_button_status.get(&button);
         button_status.is_some() && [Status::JustPressed, Status::Pressed].contains(button_status.unwrap())
+    }
+
+    pub fn scroll_status(&self) -> f32 {
+        self.scroll_status
     }
 
     pub fn cursor_movement(&self) -> (f64, f64) { self.cursor_movement }
