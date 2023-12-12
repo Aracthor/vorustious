@@ -19,7 +19,15 @@ impl VoxelCatalog {
         };
         descriptors[VoxelID::LightHull as usize] = VoxelDescriptor {
             max_life: 2.0,
-            texture_type: TextureType::Hull,
+            texture_type: TextureType::LightHull,
+        };
+        descriptors[VoxelID::HeavyHull as usize] = VoxelDescriptor {
+            max_life: 5.0,
+            texture_type: TextureType::DarkHull,
+        };
+        descriptors[VoxelID::Canon as usize] = VoxelDescriptor {
+            max_life: 5.0,
+            texture_type: TextureType::Canon,
         };
         Self {
             descriptors: descriptors,

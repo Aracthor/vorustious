@@ -41,9 +41,13 @@ impl Renderer {
             material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
 
             let hull_texture = cube::cube_texture(Color::new(0x40, 0x40, 0x40, 0xFF), Color::new(0x80, 0x80, 0x80, 0xFF));
-            material.add_texture(&format!("voxel_texture[{}]", TextureType::Hull as i32), hull_texture);
+            material.add_texture(&format!("voxel_texture[{}]", TextureType::LightHull as i32), hull_texture);
+            let hull_texture = cube::cube_texture(Color::new(0x20, 0x20, 0x20, 0xFF), Color::new(0x30, 0x30, 0x30, 0xFF));
+            material.add_texture(&format!("voxel_texture[{}]", TextureType::DarkHull as i32), hull_texture);
             let core_texture = cube::cube_texture(Color::new(0x80, 0x80, 0x80, 0xFF), Color::new(0x80, 0x80, 0xFF, 0xFF));
             material.add_texture(&format!("voxel_texture[{}]", TextureType::Core as i32), core_texture);
+            let canon_texture = cube::circle_texture(Color::new(0x80, 0x80, 0x80, 0xFF), Color::new(0x20, 0x20, 0x20, 0xFF));
+            material.add_texture(&format!("voxel_texture[{}]", TextureType::Canon as i32), canon_texture);
 
             let damage_texture = {
                 let b = Color::black();

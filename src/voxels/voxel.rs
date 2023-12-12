@@ -1,14 +1,18 @@
 #[derive(Clone, Copy)]
 pub enum TextureType {
-    Hull = 0,
-    Core = 1,
+    LightHull = 0,
+    DarkHull = 1,
+    Core = 2,
+    Canon = 3,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub enum VoxelID {
     ShipCore = 0,
     LightHull = 1,
-    COUNT = 2,
+    HeavyHull = 2,
+    Canon = 3,
+    COUNT = 4,
 }
 
 impl From<i32> for VoxelID {
@@ -16,6 +20,8 @@ impl From<i32> for VoxelID {
         match value {
             0 => Self::ShipCore,
             1 => Self::LightHull,
+            2 => Self::HeavyHull,
+            3 => Self::Canon,
             _ => todo!(),
         }
     }

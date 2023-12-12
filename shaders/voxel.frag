@@ -6,7 +6,7 @@ in vec2 texture_coord;
 in flat int texture_index;
 in flat float damage;
 
-uniform sampler2D voxel_texture[2];
+uniform sampler2D voxel_texture[4];
 uniform sampler2D damage_texture;
 uniform float uni_alpha;
 

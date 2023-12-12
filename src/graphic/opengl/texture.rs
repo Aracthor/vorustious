@@ -30,6 +30,8 @@ impl Texture {
             0 => gl::TEXTURE0,
             1 => gl::TEXTURE1,
             2 => gl::TEXTURE2,
+            3 => gl::TEXTURE3,
+            4 => gl::TEXTURE4,
             _ => unimplemented!(),
         };
         unsafe {

@@ -20,6 +20,22 @@ pub fn cube_texture(border_color: Color, fill_color: Color) -> Texture {
     Texture::create(8, 8, texture_pixels)
 }
 
+pub fn circle_texture(border_color: Color, fill_color: Color) -> Texture {
+    let b = border_color;
+    let f = fill_color;
+    let texture_pixels: Vec<Color> = [
+        b,  b,  b,  b,  b,  b,  b,  b,
+        b,  b,  b,  f,  f,  b,  b,  b,
+        b,  b,  f,  f,  f,  f,  b,  b,
+        b,  f,  f,  f,  f,  f,  f,  b,
+        b,  f,  f,  f,  f,  f,  f,  b,
+        b,  b,  f,  f,  f,  f,  b,  b,
+        b,  b,  b,  f,  f,  b,  b,  b,
+        b,  b,  b,  b,  b,  b,  b,  b,
+    ].to_vec();
+    Texture::create(8, 8, texture_pixels)
+}
+
 pub fn cube_mesh(material: Material) -> Mesh {
 
     let positions: Vec<f32> = [
