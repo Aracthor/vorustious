@@ -198,9 +198,27 @@ fn orthographic_matrix() {
     let right = 800.0;
     let bottom = 0.0;
     let top = 600.0;
+    let matrix = Mat4f::orthographic(left, right, bottom, top);
+
+    let expected = Mat4f::from_data([
+        2.0 / 800.0, 0.0, 0.0, 0.0,
+        0.0, 2.0 / 600.0, 0.0, 0.0,
+        0.0, 0.0, -1.0, 0.0,
+        -1.0, -1.0, 0.0, 1.0,
+    ]);
+
+    assert!(mat_equals_with_delta(matrix, expected, 0.0001));
+}
+
+#[test]
+fn orthographic_with_z_matrix() {
+    let left = 0.0;
+    let right = 800.0;
+    let bottom = 0.0;
+    let top = 600.0;
     let z_near = 0.1;
     let z_far = 1000.0;
-    let matrix = Mat4f::orthographic(left, right, bottom, top, z_near, z_far);
+    let matrix = Mat4f::orthographic_with_z(left, right, bottom, top, z_near, z_far);
 
     let expected = Mat4f::from_data([
         2.0 / 800.0, 0.0, 0.0, 0.0,

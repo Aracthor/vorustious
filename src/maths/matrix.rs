@@ -107,7 +107,19 @@ impl<T: MathsUsable> Mat<4, T> {
     }
 
     #[allow(dead_code)]
-    pub fn orthographic(left: T, right: T, bottom: T, top: T, z_near: T, z_far: T) -> Self {
+    pub fn orthographic(left: T, right: T, bottom: T, top: T) -> Self {
+        let mut result = Self::identity();
+        let two_as_t: T = T::from(2);
+        result[0][0] = two_as_t / (right - left);
+        result[1][1] = two_as_t / (top - bottom);
+        result[2][2] = T::from(-1);
+        result[3][0] = -(right + left) / (right - left);
+        result[3][1] = -(top + bottom) / (top - bottom);
+        result
+    }
+
+    #[allow(dead_code)]
+    pub fn orthographic_with_z(left: T, right: T, bottom: T, top: T, z_near: T, z_far: T) -> Self {
         let mut result = Self::identity();
         let two_as_t: T = T::from(2);
         result[0][0] = two_as_t / (right - left);
