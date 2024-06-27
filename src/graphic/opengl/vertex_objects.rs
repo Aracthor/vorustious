@@ -61,41 +61,42 @@ impl Drop for VertexBufferObject {
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
     #[allow(dead_code)] // For buffer_objects storage, until I'm sure of their life expectancy...
-    buffer_objects: Vec<VertexBufferObject>,
+    position_buffer: VertexBufferObject,
+    #[allow(dead_code)] // For buffer_objects storage, until I'm sure of their life expectancy...
+    texture_coords_buffer: Option<VertexBufferObject>,
     instance_buffer_objects: Vec<VertexBufferObject>,
     element_count: i32,
 }
 
 impl VertexArrayObject {
     pub fn create(positions: Vec<f32>, texture_coords: Option<Vec<f32>>) -> VertexArrayObject {
-        let mut vao = 0;
-        let mut buffer_objects: Vec<VertexBufferObject> = Default::default();
-
         unsafe {
+            let mut vao = 0;
             gl::GenVertexArrays(1, &mut vao);
             gl::BindVertexArray(vao);
 
-            let position_vbo = VertexBufferObject::new(0, 3);
-            position_vbo.set_data(&positions, gl::STATIC_DRAW);
-            buffer_objects.push(position_vbo);
+            let position_buffer = VertexBufferObject::new(0, 3);
+            position_buffer.set_data(&positions, gl::STATIC_DRAW);
 
-            if texture_coords.is_some() {
+            let texture_coords_buffer = if texture_coords.is_some() {
                 assert!(positions.len() / 3 == texture_coords.as_ref().unwrap().len() / 2);
                 let texture_coords_vbo = VertexBufferObject::new(1, 2);
                 texture_coords_vbo.set_data(&texture_coords.unwrap(), gl::STATIC_DRAW);
-                buffer_objects.push(texture_coords_vbo);
-            }
+                Some(texture_coords_vbo)
+            } else {
+                None
+            };
 
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
             gl::BindVertexArray(0);
-        }
 
-
-        VertexArrayObject {
-            id: vao,
-            buffer_objects: buffer_objects,
-            instance_buffer_objects: Default::default(),
-            element_count: (positions.len() / 3).try_into().unwrap(),
+            VertexArrayObject {
+                id: vao,
+                position_buffer: position_buffer,
+                texture_coords_buffer: texture_coords_buffer,
+                instance_buffer_objects: Default::default(),
+                element_count: (positions.len() / 3).try_into().unwrap(),
+            }
         }
     }
 
