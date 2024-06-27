@@ -58,9 +58,9 @@ impl Drop for VertexBufferObject {
     }
 }
 
-#[allow(dead_code)] // For buffer_objects storage, until I'm sure of their life expectancy...
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
+    #[allow(dead_code)] // For buffer_objects storage, until I'm sure of their life expectancy...
     buffer_objects: Vec<VertexBufferObject>,
     instance_buffer_objects: Vec<VertexBufferObject>,
     element_count: i32,
