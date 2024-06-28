@@ -124,15 +124,19 @@ impl Renderer {
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
             material.add_uniform_vect4("uni_color", Color::new(0xFF, 0xFF, 0xFF, 0x80).into());
 
+            let half_width = window_width / 2.0;
+            let half_height = window_height / 2.0;
+            let reticle_center_size = 5.0;
+            let reticle_line_size = 10.0;
             let positions = [
-                -0.07, 0.0,
-                -0.02, 0.0,
-                0.07, 0.0,
-                0.02, 0.0,
-                0.0, -0.07,
-                0.0, -0.02,
-                0.0, 0.07,
-                0.0, 0.02,
+                half_width - reticle_center_size - reticle_line_size, half_height,
+                half_width - reticle_center_size,  half_height,
+                half_width + reticle_center_size + reticle_line_size, half_height,
+                half_width + reticle_center_size,  half_height,
+                half_width, half_height - reticle_center_size - reticle_line_size,
+                half_width, half_height - reticle_center_size,
+                half_width, half_height + reticle_center_size + reticle_line_size,
+                half_width, half_height + reticle_center_size,
             ].to_vec();
 
             let mut mesh = Mesh::create(Primitive::Lines, false, material);
@@ -189,7 +193,7 @@ impl Renderer {
             self.editor_renderer.render(&projection_view_matrix, &mut self.cube_mesh, editor.unwrap());
         }
 
-        self.interface_mesh.draw(&Mat4f::identity());
+        self.interface_mesh.draw(&self.ui_projection_matrix);
 
         let elapsed_time_ms = self.frame_limiter.elapsed_time_secs() * 1000.0;
         let text = format!("Frame time: {elapsed_time_ms} ms");
