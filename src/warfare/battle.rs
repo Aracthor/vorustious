@@ -61,7 +61,7 @@ impl Battle {
             if !projectile.is_out_of_max_range() {
                 let segment = Segm3f::new(segment_start, segment_end);
                 for body in &mut self.bodies {
-                    hit |= body.for_first_voxel_in_segment(segment, |voxel: &mut Option<Voxel>| {
+                    hit |= body.for_first_voxel_in_segment(segment, |voxel: &mut Option<Voxel>, _coords| {
                         voxel.as_mut().unwrap().life -= projectile.damage();
                     });
                 }

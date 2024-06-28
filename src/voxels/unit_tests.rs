@@ -92,7 +92,7 @@ fn structure_segment_intersection() {
 
 #[test]
 fn structure_segment_first_intersection() {
-    let erase_voxels = |voxel: &mut Option<Voxel>| {
+    let erase_voxels = |voxel: &mut Option<Voxel>, _coords: &Vect3i| {
         *voxel = None;
     };
 

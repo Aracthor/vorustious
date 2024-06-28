@@ -134,6 +134,11 @@ impl Structure {
         voxel
     }
 
+    pub fn remove_voxel_ifp(&mut self, coords: Vect3i) {
+        let index = self.voxel_index(coords);
+        self.data[index] = None;
+    }
+
     pub fn for_each_voxel<F: FnMut(Vect3i, &Voxel)>(&self, mut f: F) {
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
@@ -189,11 +194,11 @@ impl Structure {
         result
     }
 
-    pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>)>(&mut self, segment: Segm3f, mut f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, _face| {
+    pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, mut f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, coords, _face| {
             let has_voxel = voxel.is_some();
             if has_voxel {
-                f(voxel);
+                f(voxel, coords);
             }
             has_voxel
         })

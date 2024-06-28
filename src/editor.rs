@@ -64,6 +64,39 @@ impl Editor {
             self.voxel_id = (if self.voxel_id as i32 == VoxelID::COUNT as i32 - 1 { 0 } else { self.voxel_id as i32 + 1}).into();
         }
 
+        if event_handler.is_mouse_button_just_released(MouseButton::Left) {
+            let segment = Segm3f::new(camera.position(), camera.position() + camera.forward() * 4.0);
+            let mut aimed_coords = None;
+            self.structure.for_first_voxel_in_segment(segment, |_voxel, coords| {
+                aimed_coords = Some(*coords);
+            });
+            if aimed_coords.is_some() {
+                let position = aimed_coords.unwrap();
+                self.structure.remove_voxel(position);
+                if self.symetry_x {
+                    self.structure.remove_voxel_ifp(Vect3i::new([-position[0], position[1], position[2]]));
+                }
+                if self.symetry_y {
+                    self.structure.remove_voxel_ifp(Vect3i::new([position[0], -position[1], position[2]]));
+                }
+                if self.symetry_z {
+                    self.structure.remove_voxel_ifp(Vect3i::new([position[0], position[1], -position[2]]));
+                }
+                if self.symetry_x && self.symetry_y {
+                    self.structure.remove_voxel_ifp(Vect3i::new([-position[0], -position[1], position[2]]));
+                }
+                if self.symetry_x && self.symetry_z {
+                    self.structure.remove_voxel_ifp(Vect3i::new([-position[0], position[1], -position[2]]));
+                }
+                if self.symetry_y && self.symetry_z {
+                    self.structure.remove_voxel_ifp(Vect3i::new([position[0], -position[1], -position[2]]));
+                }
+                if self.symetry_x && self.symetry_y && self.symetry_z {
+                    self.structure.remove_voxel_ifp(Vect3i::new([-position[0], -position[1], -position[2]]));
+                }
+            }
+        }
+
         if self.voxel_position.is_some() && event_handler.is_mouse_button_just_released(MouseButton::Right) {
             let voxel = self.voxel_catalog.create_voxel(self.voxel_id);
             let position = self.voxel_position.unwrap();
