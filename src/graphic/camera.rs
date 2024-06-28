@@ -43,11 +43,12 @@ impl Camera {
         const CAMERA_SENSITIVITY: f32 = 0.005;
         let camera_forward = self.forward();
         let camera_right = Vect3f::cross(camera_forward, self.up()).normalize();
+        let camera_speed = if event_handler.is_shift_pressed() { CAMERA_SPEED * 10.0 } else { CAMERA_SPEED };
 
-        if event_handler.is_key_pressed(event_handler::Key::W) { self.position += camera_forward * CAMERA_SPEED }
-        if event_handler.is_key_pressed(event_handler::Key::S) { self.position -= camera_forward * CAMERA_SPEED }
-        if event_handler.is_key_pressed(event_handler::Key::A) { self.position -= camera_right * CAMERA_SPEED }
-        if event_handler.is_key_pressed(event_handler::Key::D) { self.position += camera_right * CAMERA_SPEED }
+        if event_handler.is_key_pressed(event_handler::Key::W) { self.position += camera_forward * camera_speed }
+        if event_handler.is_key_pressed(event_handler::Key::S) { self.position -= camera_forward * camera_speed }
+        if event_handler.is_key_pressed(event_handler::Key::A) { self.position -= camera_right * camera_speed }
+        if event_handler.is_key_pressed(event_handler::Key::D) { self.position += camera_right * camera_speed }
 
         let cursor_movement = event_handler.cursor_movement();
         self.angle_x -= cursor_movement.0 as f32 * CAMERA_SENSITIVITY;

@@ -16,6 +16,8 @@ pub enum Key {
     F9,
     LeftCtrl,
     RightCtrl,
+    LeftShift,
+    RightShift,
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -87,6 +89,8 @@ impl EventHandler {
             glfw::Key::F9 => Some(Key::F9),
             glfw::Key::LeftControl => Some(Key::LeftCtrl),
             glfw::Key::RightControl => Some(Key::RightCtrl),
+            glfw::Key::LeftShift => Some(Key::LeftShift),
+            glfw::Key::RightShift => Some(Key::RightShift),
             _ => None,
         }
     }
@@ -148,7 +152,11 @@ impl EventHandler {
     }
 
     pub fn is_ctrl_pressed(&self) -> bool {
-        return self.is_key_pressed(Key::LeftCtrl) || self.is_key_pressed(Key::RightCtrl);
+        self.is_key_pressed(Key::LeftCtrl) || self.is_key_pressed(Key::RightCtrl)
+    }
+
+    pub fn is_shift_pressed(&self) -> bool {
+        self.is_key_pressed(Key::LeftShift) || self.is_key_pressed(Key::RightShift)
     }
 
     pub fn is_key_just_pressed(&self, key: Key) -> bool {
