@@ -11,8 +11,8 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn create(positions: Vec<f32>, tex_coords: Option<Vec<f32>>, primitive: Primitive, material: Material) -> Mesh {
-        let mut vao = VertexArrayObject::create(positions, tex_coords);
+    pub fn create(primitive: Primitive, material: Material) -> Mesh {
+        let mut vao = VertexArrayObject::create();
         for instanced_buffer in material.get_instanced_buffer_locations() {
             vao.add_instanced_buffer(instanced_buffer.0, instanced_buffer.1);
         }
@@ -21,6 +21,14 @@ impl Mesh {
             primitive: primitive,
             material: material,
         }
+    }
+
+    pub fn set_positions(&mut self, positions: Vec<f32>) {
+        self.vao.set_positions(positions);
+    }
+
+    pub fn set_texture_coords(&mut self, texture_coords: Vec<f32>) {
+        self.vao.set_texture_coords(texture_coords);
     }
 
     pub fn set_uniform_f32(&mut self, uniform_name: &str, value: f32) {

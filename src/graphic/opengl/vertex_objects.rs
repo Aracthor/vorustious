@@ -60,43 +60,47 @@ impl Drop for VertexBufferObject {
 
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
-    #[allow(dead_code)] // For buffer_objects storage, until I'm sure of their life expectancy...
-    position_buffer: VertexBufferObject,
-    #[allow(dead_code)] // For buffer_objects storage, until I'm sure of their life expectancy...
+    position_buffer: Option<VertexBufferObject>,
     texture_coords_buffer: Option<VertexBufferObject>,
     instance_buffer_objects: Vec<VertexBufferObject>,
     element_count: i32,
 }
 
 impl VertexArrayObject {
-    pub fn create(positions: Vec<f32>, texture_coords: Option<Vec<f32>>) -> VertexArrayObject {
+    pub fn create() -> VertexArrayObject {
+        let mut vao = 0;
         unsafe {
-            let mut vao = 0;
             gl::GenVertexArrays(1, &mut vao);
-            gl::BindVertexArray(vao);
+        }
+        VertexArrayObject {
+            id: vao,
+            position_buffer: None,
+            texture_coords_buffer: None,
+            instance_buffer_objects: Default::default(),
+            element_count: 0,
+        }
+    }
 
-            let position_buffer = VertexBufferObject::new(0, 3);
-            position_buffer.set_data(&positions, gl::STATIC_DRAW);
-
-            let texture_coords_buffer = if texture_coords.is_some() {
-                assert!(positions.len() / 3 == texture_coords.as_ref().unwrap().len() / 2);
-                let texture_coords_vbo = VertexBufferObject::new(1, 2);
-                texture_coords_vbo.set_data(&texture_coords.unwrap(), gl::STATIC_DRAW);
-                Some(texture_coords_vbo)
-            } else {
-                None
-            };
-
-            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+    pub fn set_positions(&mut self, positions: Vec<f32>) {
+        assert!(self.position_buffer.is_none());
+        assert!(positions.len() % 3 == 0);
+        unsafe {
+            gl::BindVertexArray(self.id);
+            self.position_buffer = Some(VertexBufferObject::new(0, 3));
+            self.position_buffer.as_mut().unwrap().set_data(&positions, gl::STATIC_DRAW);
             gl::BindVertexArray(0);
+        }
+        self.element_count = (positions.len() / 3 as usize).try_into().unwrap();
+    }
 
-            VertexArrayObject {
-                id: vao,
-                position_buffer: position_buffer,
-                texture_coords_buffer: texture_coords_buffer,
-                instance_buffer_objects: Default::default(),
-                element_count: (positions.len() / 3).try_into().unwrap(),
-            }
+    pub fn set_texture_coords(&mut self, texture_coords: Vec<f32>) {
+        assert!(self.texture_coords_buffer.is_none());
+        assert!(texture_coords.len() % 2 == 0);
+        unsafe {
+            gl::BindVertexArray(self.id);
+            self.texture_coords_buffer = Some(VertexBufferObject::new(1, 2));
+            self.texture_coords_buffer.as_mut().unwrap().set_data(&texture_coords, gl::STATIC_DRAW);
+            gl::BindVertexArray(0);
         }
     }
 

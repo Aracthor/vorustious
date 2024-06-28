@@ -109,7 +109,9 @@ impl Renderer {
                 0.0, 0.2, 0.0,
             ].to_vec();
 
-            Mesh::create(positions, None, Primitive::Triangles, material)
+            let mut mesh = Mesh::create(Primitive::Triangles, material);
+            mesh.set_positions(positions);
+            mesh
         };
 
         let interface_mesh = {
@@ -127,7 +129,9 @@ impl Renderer {
                 0.0, 0.02, 0.0,
             ].to_vec();
 
-            Mesh::create(positions, None, Primitive::Lines, material)
+            let mut mesh = Mesh::create(Primitive::Lines, material);
+            mesh.set_positions(positions);
+            mesh
         };
 
         Renderer {
