@@ -125,18 +125,18 @@ impl Renderer {
             material.add_uniform_vect4("uni_color", Color::new(0xFF, 0xFF, 0xFF, 0x80).into());
 
             let positions = [
-                -0.07, 0.0, 0.0,
-                -0.02, 0.0, 0.0,
-                0.07, 0.0, 0.0,
-                0.02, 0.0, 0.0,
-                0.0, -0.07, 0.0,
-                0.0, -0.02, 0.0,
-                0.0, 0.07, 0.0,
-                0.0, 0.02, 0.0,
+                -0.07, 0.0,
+                -0.02, 0.0,
+                0.07, 0.0,
+                0.02, 0.0,
+                0.0, -0.07,
+                0.0, -0.02,
+                0.0, 0.07,
+                0.0, 0.02,
             ].to_vec();
 
             let mut mesh = Mesh::create(Primitive::Lines, false, material);
-            mesh.set_positions_3d(&positions);
+            mesh.set_positions_2d(&positions);
             mesh
         };
 
