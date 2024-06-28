@@ -26,8 +26,8 @@ impl EditorRenderer {
             ].to_vec();
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
             material.add_uniform_vect4("uni_color", Color::new(0xFF, 0x00, 0x00, 0x40).into());
-            let mut mesh = Mesh::create(Primitive::Triangles, material);
-            mesh.set_positions(positions);
+            let mut mesh = Mesh::create(Primitive::Triangles, false, material);
+            mesh.set_positions_3d(&positions);
             mesh
         };
 
@@ -42,8 +42,8 @@ impl EditorRenderer {
             ].to_vec();
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
             material.add_uniform_vect4("uni_color", Color::new(0x00, 0xFF, 0x00, 0x40).into());
-            let mut mesh = Mesh::create(Primitive::Triangles, material);
-            mesh.set_positions(positions);
+            let mut mesh = Mesh::create(Primitive::Triangles, false, material);
+            mesh.set_positions_3d(&positions);
             mesh
         };
 
@@ -58,8 +58,8 @@ impl EditorRenderer {
             ].to_vec();
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
             material.add_uniform_vect4("uni_color", Color::new(0x00, 0x00, 0xFF, 0x40).into());
-            let mut mesh = Mesh::create(Primitive::Triangles, material);
-            mesh.set_positions(positions);
+            let mut mesh = Mesh::create(Primitive::Triangles, false, material);
+            mesh.set_positions_3d(&positions);
             mesh
         };
 

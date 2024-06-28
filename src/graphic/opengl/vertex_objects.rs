@@ -60,6 +60,7 @@ impl Drop for VertexBufferObject {
 
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
+    dynamic: bool,
     position_buffer: Option<VertexBufferObject>,
     texture_coords_buffer: Option<VertexBufferObject>,
     instance_buffer_objects: Vec<VertexBufferObject>,
@@ -67,13 +68,14 @@ pub struct VertexArrayObject {
 }
 
 impl VertexArrayObject {
-    pub fn create() -> VertexArrayObject {
+    pub fn create(dynamic: bool) -> VertexArrayObject {
         let mut vao = 0;
         unsafe {
             gl::GenVertexArrays(1, &mut vao);
         }
         VertexArrayObject {
             id: vao,
+            dynamic: dynamic,
             position_buffer: None,
             texture_coords_buffer: None,
             instance_buffer_objects: Default::default(),
@@ -81,25 +83,39 @@ impl VertexArrayObject {
         }
     }
 
-    pub fn set_positions(&mut self, positions: Vec<f32>) {
-        assert!(self.position_buffer.is_none());
-        assert!(positions.len() % 3 == 0);
-        unsafe {
-            gl::BindVertexArray(self.id);
-            self.position_buffer = Some(VertexBufferObject::new(0, 3));
-            self.position_buffer.as_mut().unwrap().set_data(&positions, gl::STATIC_DRAW);
-            gl::BindVertexArray(0);
-        }
-        self.element_count = (positions.len() / 3 as usize).try_into().unwrap();
+    fn buffer_usage(&self) -> gl::types::GLenum {
+        if self.dynamic { gl::DYNAMIC_DRAW } else { gl::STATIC_DRAW }
     }
 
-    pub fn set_texture_coords(&mut self, texture_coords: Vec<f32>) {
-        assert!(self.texture_coords_buffer.is_none());
+    fn set_positions(&mut self, positions: &Vec<f32>, component_size: i32) {
+        assert!(self.dynamic || self.position_buffer.is_none());
+        assert!(positions.len() % component_size as usize == 0);
+        let usage = self.buffer_usage();
+        unsafe {
+            gl::BindVertexArray(self.id);
+            self.position_buffer = Some(VertexBufferObject::new(0, component_size));
+            self.position_buffer.as_mut().unwrap().set_data(&positions, usage);
+            gl::BindVertexArray(0);
+        }
+        self.element_count = (positions.len() / component_size as usize).try_into().unwrap();
+    }
+
+    pub fn set_positions_2d(&mut self, positions: &Vec<f32>) {
+        self.set_positions(positions, 2);
+    }
+
+    pub fn set_positions_3d(&mut self, positions: &Vec<f32>) {
+        self.set_positions(positions, 3);
+    }
+
+    pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>) {
+        let usage = self.buffer_usage();
+        assert!(self.dynamic || self.texture_coords_buffer.is_none());
         assert!(texture_coords.len() % 2 == 0);
         unsafe {
             gl::BindVertexArray(self.id);
             self.texture_coords_buffer = Some(VertexBufferObject::new(1, 2));
-            self.texture_coords_buffer.as_mut().unwrap().set_data(&texture_coords, gl::STATIC_DRAW);
+            self.texture_coords_buffer.as_mut().unwrap().set_data(&texture_coords, usage);
             gl::BindVertexArray(0);
         }
     }

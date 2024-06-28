@@ -1,4 +1,5 @@
 use crate::maths::matrix::Mat4f;
+use crate::maths::vector::Vect2f;
 use crate::editor::Editor;
 use crate::voxels::body::Body;
 use crate::voxels::catalog::VoxelCatalog;
@@ -12,13 +13,17 @@ use super::material::Material;
 use super::mesh::Mesh;
 use super::opengl::vertex_objects::Primitive;
 use super::opengl::texture::Texture;
+use super::text_drawer::TextDrawer;
 
 pub struct Renderer {
+    resolution: Vect2f,
     projection_matrix: Mat4f,
+    ui_projection_matrix: Mat4f,
     frame_limiter: FrameLimiter,
     cube_mesh: Mesh,
     projectile_mesh: Mesh,
     interface_mesh: Mesh,
+    text_drawer: TextDrawer,
     voxel_catalog: VoxelCatalog,
     editor_renderer: EditorRenderer,
 }
@@ -32,6 +37,7 @@ impl Renderer {
             let z_far = 1000.0;
             Mat4f::perspective(fov, aspect, z_near, z_far)
         };
+        let ui_projection_matrix = Mat4f::orthographic(0.0, window_width, 0.0, window_height);
         let cube_mesh = {
             let mut material = Material::create("shaders/voxel.vert", "shaders/voxel.frag");
 
@@ -109,8 +115,8 @@ impl Renderer {
                 0.0, 0.2, 0.0,
             ].to_vec();
 
-            let mut mesh = Mesh::create(Primitive::Triangles, material);
-            mesh.set_positions(positions);
+            let mut mesh = Mesh::create(Primitive::Triangles, false, material);
+            mesh.set_positions_3d(&positions);
             mesh
         };
 
@@ -129,17 +135,20 @@ impl Renderer {
                 0.0, 0.02, 0.0,
             ].to_vec();
 
-            let mut mesh = Mesh::create(Primitive::Lines, material);
-            mesh.set_positions(positions);
+            let mut mesh = Mesh::create(Primitive::Lines, false, material);
+            mesh.set_positions_3d(&positions);
             mesh
         };
 
         Renderer {
+            resolution: Vect2f::new([window_width, window_height]),
             projection_matrix: projection_matrix,
+            ui_projection_matrix: ui_projection_matrix,
             frame_limiter: FrameLimiter::new(60.0),
             cube_mesh: cube_mesh,
             projectile_mesh: projectile_mesh,
             interface_mesh: interface_mesh,
+            text_drawer: TextDrawer::create(),
             voxel_catalog: VoxelCatalog::create(),
             editor_renderer: EditorRenderer::new(),
         }
@@ -181,6 +190,13 @@ impl Renderer {
         }
 
         self.interface_mesh.draw(&Mat4f::identity());
+
+        let elapsed_time_ms = self.frame_limiter.elapsed_time_secs() * 1000.0;
+        let text = format!("Frame time: {elapsed_time_ms} ms");
+        let size = Vect2f::new([12.0, 12.0]);
+        let position = Vect2f::new([10.0, self.resolution[1] - size[1] - 10.0]);
+        self.text_drawer.add_text_to_draw(text.as_str(), position, size);
+        self.text_drawer.draw(&self.ui_projection_matrix);
 
         self.frame_limiter.limit();
     }

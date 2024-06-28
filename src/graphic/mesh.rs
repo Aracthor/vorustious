@@ -11,8 +11,8 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn create(primitive: Primitive, material: Material) -> Mesh {
-        let mut vao = VertexArrayObject::create();
+    pub fn create(primitive: Primitive, dynamic: bool, material: Material) -> Mesh {
+        let mut vao = VertexArrayObject::create(dynamic);
         for instanced_buffer in material.get_instanced_buffer_locations() {
             vao.add_instanced_buffer(instanced_buffer.0, instanced_buffer.1);
         }
@@ -23,11 +23,15 @@ impl Mesh {
         }
     }
 
-    pub fn set_positions(&mut self, positions: Vec<f32>) {
-        self.vao.set_positions(positions);
+    pub fn set_positions_2d(&mut self, positions: &Vec<f32>) {
+        self.vao.set_positions_2d(positions);
     }
 
-    pub fn set_texture_coords(&mut self, texture_coords: Vec<f32>) {
+    pub fn set_positions_3d(&mut self, positions: &Vec<f32>) {
+        self.vao.set_positions_3d(positions);
+    }
+
+    pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>) {
         self.vao.set_texture_coords(texture_coords);
     }
 
@@ -46,6 +50,12 @@ impl Mesh {
     pub fn draw(&self, projection_view_matrix: &Mat4f) {
         self.material.bind();
         self.material.set_projection_view_matrix(projection_view_matrix);
+        self.vao.draw(self.primitive);
+    }
+
+    pub fn draw_2d(&self, projection_matrix: &Mat4f) {
+        self.material.bind();
+        self.material.set_projection_matrix(projection_matrix);
         self.vao.draw(self.primitive);
     }
 
