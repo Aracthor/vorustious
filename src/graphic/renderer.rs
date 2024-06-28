@@ -195,8 +195,11 @@ impl Renderer {
 
         self.interface_mesh.draw(&self.ui_projection_matrix);
 
-        let elapsed_time_ms = self.frame_limiter.elapsed_time_secs() * 1000.0;
-        let text = format!("Frame time: {elapsed_time_ms} ms");
+        let frame_time_info = self.frame_limiter.frame_time();
+        let min_time_ms = frame_time_info.min * 1000.0;
+        let max_time_ms = frame_time_info.max * 1000.0;
+        let average_time_ms = frame_time_info.average * 1000.0;
+        let text = format!("Frame time: {average_time_ms:.2} ms ({min_time_ms:.2}..{max_time_ms:.2})");
         let size = Vect2f::new([12.0, 12.0]);
         let position = Vect2f::new([10.0, self.resolution[1] - size[1] - 10.0]);
         self.text_drawer.add_text_to_draw(text.as_str(), position, size);
