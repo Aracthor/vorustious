@@ -45,6 +45,10 @@ impl Battle {
         &self.bodies
     }
 
+    pub fn bodies_mut(&mut self) -> &mut Vec<Body> {
+        &mut self.bodies
+    }
+
     pub fn projectiles(&self) -> &Vec<Projectile> {
         &self.projectiles
     }
@@ -126,8 +130,7 @@ impl Battle {
 
                         let translation = Vect3f::new([new_center[0] as f32, new_center[1] as f32, new_center[2] as f32]);
                         let new_repere = body.repere().clone() * Mat4f::translation(translation);
-                        let mut new_body = Body::new(new_structure, new_repere);
-                        new_body.add_to_movement(body.movement());
+                        let mut new_body = Body::new_from_other(new_structure, new_repere, body);
                         // Debug to see result
                         new_body.add_to_movement(translation.normalize());
                         new_bodies.push(new_body);

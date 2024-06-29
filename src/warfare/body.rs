@@ -9,6 +9,7 @@ pub struct Body {
     repere: Mat4f,
     structure: Structure,
     movement: Vect3f,
+    rotation: Vect3f,
 }
 
 impl Body {
@@ -17,6 +18,16 @@ impl Body {
             repere: repere,
             structure: structure,
             movement: Vect3f::zero(),
+            rotation: Vect3f::zero(),
+        }
+    }
+
+    pub fn new_from_other(structure: Structure, repere: Mat4f, other: &Body) -> Self {
+        Self {
+            repere: repere,
+            structure: structure,
+            movement: other.movement,
+            rotation: other.rotation,
         }
     }
 
@@ -37,15 +48,19 @@ impl Body {
         self.structure.for_first_voxel_in_segment(segment_in_repere, f)
     }
 
-    pub fn movement(&self) -> Vect3f {
-        self.movement
-    }
-
     pub fn add_to_movement(&mut self, movement: Vect3f) {
         self.movement += movement;
     }
 
+    pub fn add_roll_rotation(&mut self, roll: f32) {
+        self.rotation[0] += roll;
+    }
+
     pub fn apply_movement(&mut self, elapsed_time: f32) {
-        self.repere = self.repere.clone() * Mat4f::translation(self.movement * elapsed_time);
+        self.repere = self.repere.clone()
+            * Mat4f::rotation_around_x(self.rotation[0] * elapsed_time)
+            * Mat4f::rotation_around_x(self.rotation[1] * elapsed_time)
+            * Mat4f::rotation_around_x(self.rotation[2] * elapsed_time)
+            * Mat4f::translation(self.movement * elapsed_time);
     }
 }

@@ -60,6 +60,13 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
             }
         }
 
+        if window.event_handler().is_key_pressed(Key::E) {
+            (*battle.bodies_mut())[0].add_roll_rotation(0.02);
+        }
+        if window.event_handler().is_key_pressed(Key::Q) {
+            (*battle.bodies_mut())[0].add_roll_rotation(-0.02);
+        }
+
         if window.event_handler().is_key_just_pressed(Key::P) {
             pause = !pause;
         }

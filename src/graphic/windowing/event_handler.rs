@@ -6,7 +6,9 @@ type EventReceiver = std::sync::mpsc::Receiver<(f64, glfw::WindowEvent)>;
 pub enum Key {
     A,
     D,
+    E,
     P,
+    Q,
     S,
     W,
     X,
@@ -79,7 +81,9 @@ impl EventHandler {
         match key {
             glfw::Key::A => Some(Key::A),
             glfw::Key::D => Some(Key::D),
+            glfw::Key::E => Some(Key::E),
             glfw::Key::P => Some(Key::P),
+            glfw::Key::Q => Some(Key::Q),
             glfw::Key::S => Some(Key::S),
             glfw::Key::W => Some(Key::W),
             glfw::Key::X => Some(Key::X),
