@@ -32,7 +32,7 @@ impl<const N: usize, T: MathsUsable> Mat<N, T> {
     }
 
     pub fn data_as_ptr(&self) -> *const T {
-        assert!(std::mem::size_of_val(self) == std::mem::size_of::<f32>() * 16);
+        assert!(std::mem::size_of_val(self) == std::mem::size_of::<T>() * 16);
         self.data.as_ptr().cast()
     }
 }
