@@ -117,7 +117,6 @@ impl Battle {
             if jointed_coords.len() > 1 {
                 for join in jointed_coords {
                     if !join.contains(&Vect3i::zero()) {
-                        let coords = join.clone().iter().next().unwrap().clone();
                         let mut new_structure = Structure::new_empty();
                         for coords in join {
                             let voxel = body.structure_mut().remove_voxel(coords);
@@ -130,7 +129,7 @@ impl Battle {
                         let mut new_body = Body::new(new_structure, new_repere);
                         new_body.add_to_movement(body.movement());
                         // Debug to see result
-                        new_body.add_to_movement(Vect3f::new([coords[0] as f32, coords[1] as f32, coords[2] as f32]));
+                        new_body.add_to_movement(translation.normalize());
                         new_bodies.push(new_body);
                     }
                 }
