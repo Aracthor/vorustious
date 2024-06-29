@@ -38,6 +38,10 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         self.max
     }
 
+    pub fn center(&self) -> Vect<N, T> {
+        (self.min + self.max) / T::from(2)
+    }
+
     pub fn extent(&self) -> Vect<N, T> {
         self.max - self.min
     }

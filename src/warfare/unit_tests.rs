@@ -113,6 +113,7 @@ fn structure_cut_in_half() {
         structure.set_voxel(1, 0, 0, None);
         structure
     };
+    let expected_new_structure = Structure::new(0, 0, -1, 1, -1, 1, Voxel{life: 2.0, id: VoxelID::LightHull});
 
     let body = Body::new(structure, Mat4f::identity());
     battle.add_body(body);
@@ -124,4 +125,5 @@ fn structure_cut_in_half() {
     battle.update(1.0);
 
     assert!(battle.bodies()[0].structure().clone() == expected_remaining_structure);
+    assert!(battle.bodies()[1].structure().clone() == expected_new_structure);
 }

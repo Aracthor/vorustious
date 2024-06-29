@@ -350,6 +350,22 @@ impl Structure {
         let index = self.voxel_index(coords);
         self.data[index].is_some()
     }
+
+    pub fn recenter(&mut self) -> Vect3i {
+        let mut new_box = Box3i::new();
+        let mut voxels: Vec<(Vect3i, Voxel)> = vec![];
+        self.for_each_voxel(|coords, voxel| {
+            new_box.add(coords);
+            voxels.push((coords, *voxel));
+        });
+        let center = new_box.center();
+        *self = Structure::new_empty();
+        for coords_and_voxel in voxels {
+            let new_coords = coords_and_voxel.0 - center;
+            self.add_voxel(new_coords, coords_and_voxel.1);
+        }
+        center
+    }
 }
 
 impl Eq for Structure {}

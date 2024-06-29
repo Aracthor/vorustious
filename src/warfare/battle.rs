@@ -2,6 +2,7 @@ use std::collections::{HashSet, VecDeque};
 
 use super::projectile::Projectile;
 use crate::maths::segment::Segm3f;
+use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use crate::voxels::body::Body;
@@ -122,8 +123,11 @@ impl Battle {
                             let voxel = body.structure_mut().remove_voxel(coords);
                             new_structure.add_voxel(coords, voxel);
                         }
+                        let new_center = new_structure.recenter();
 
-                        let mut new_body = Body::new(new_structure, body.repere().clone());
+                        let translation = Vect3f::new([new_center[0] as f32, new_center[1] as f32, new_center[2] as f32]);
+                        let new_repere = body.repere().clone() * Mat4f::translation(translation);
+                        let mut new_body = Body::new(new_structure, new_repere);
                         new_body.add_to_movement(body.movement());
                         // Debug to see result
                         new_body.add_to_movement(Vect3f::new([coords[0] as f32, coords[1] as f32, coords[2] as f32]));
