@@ -1,9 +1,9 @@
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect2f;
 use crate::editor::Editor;
-use crate::voxels::body::Body;
 use crate::voxels::catalog::VoxelCatalog;
 use crate::voxels::voxel::TextureType;
+use crate::warfare::body::Body;
 use crate::warfare::projectile::Projectile;
 use super::core::color::Color;
 use super::cube;

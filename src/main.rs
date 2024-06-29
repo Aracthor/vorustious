@@ -12,10 +12,10 @@ use graphic::windowing::window::Window;
 use graphic::windowing::event_handler::Key;
 use graphic::windowing::event_handler::MouseButton;
 use maths::matrix::Mat4f;
-use voxels::body::Body;
 use voxels::structure::Structure;
 use voxels::catalog::VoxelCatalog;
 use warfare::battle::Battle;
+use warfare::body::Body;
 use warfare::weapon::Weapon;
 
 fn run_editor(window: &mut Window, renderer: &mut Renderer) {

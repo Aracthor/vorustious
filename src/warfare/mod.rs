@@ -1,4 +1,5 @@
 pub mod battle;
+pub mod body;
 pub mod projectile;
 pub mod weapon;
 

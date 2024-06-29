@@ -1,11 +1,11 @@
 use std::collections::{HashSet, VecDeque};
 
+use super::body::Body;
 use super::projectile::Projectile;
 use crate::maths::segment::Segm3f;
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
-use crate::voxels::body::Body;
 use crate::voxels::structure::Structure;
 use crate::voxels::voxel::Voxel;
 

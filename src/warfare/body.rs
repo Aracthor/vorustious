@@ -2,8 +2,8 @@ use crate::maths::matrix::Mat4f;
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
-use super::structure::Structure;
-use super::voxel::Voxel;
+use crate::voxels::structure::Structure;
+use crate::voxels::voxel::Voxel;
 
 pub struct Body {
     repere: Mat4f,

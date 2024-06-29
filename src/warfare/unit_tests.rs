@@ -1,10 +1,10 @@
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
-use crate::voxels::body::Body;
 use crate::voxels::structure::Structure;
 use crate::voxels::voxel::Voxel;
 use crate::voxels::voxel::VoxelID;
+use super::body::Body;
 use super::battle::Battle;
 use super::projectile::Projectile;
 
