@@ -83,3 +83,45 @@ fn projectile_damage_on_moving_body() {
     // Nothing new, the projectile should have missed.
     assert!(battle.bodies()[0].structure().clone() == expected_structure);
 }
+
+#[test]
+fn structure_cut_in_half() {
+    let mut battle = Battle::new();
+    let structure = {
+        let mut structure = Structure::new(-2, 2, 0, 0, 0, 0, Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure.add_voxel(Vect3i::new([2, 1, 0]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure.add_voxel(Vect3i::new([2, 1, 1]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure.add_voxel(Vect3i::new([2, 0, 1]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure.add_voxel(Vect3i::new([2, -1, 1]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure.add_voxel(Vect3i::new([2, -1, 0]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure.add_voxel(Vect3i::new([2, -1, -1]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure.add_voxel(Vect3i::new([2, 0, -1]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure.add_voxel(Vect3i::new([2, 1, -1]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        structure
+    };
+    let expected_remaining_structure = {
+        let mut structure = structure.clone();
+        structure.set_voxel(2, 1, 1, None);
+        structure.set_voxel(2, 1, 0, None);
+        structure.set_voxel(2, 1, -1, None);
+        structure.set_voxel(2, 0, 1, None);
+        structure.set_voxel(2, 0, 0, None);
+        structure.set_voxel(2, 0, -1, None);
+        structure.set_voxel(2, -1, 1, None);
+        structure.set_voxel(2, -1, 0, None);
+        structure.set_voxel(2, -1, -1, None);
+        structure.set_voxel(1, 0, 0, None);
+        structure
+    };
+
+    let body = Body::new(structure, Mat4f::identity());
+    battle.add_body(body);
+
+    let initial_position = Vect3f::new([1.0, 0.0, 2.0]);
+    let movement = Vect3f::new([0.0, 0.0, -10.0]);
+    battle.add_projectile(Projectile::new(initial_position, movement, 10.0, f32::MAX));
+
+    battle.update(1.0);
+
+    assert!(battle.bodies()[0].structure().clone() == expected_remaining_structure);
+}
