@@ -73,8 +73,13 @@ impl Battle {
         self.body_list.player_body = Some(body);
     }
 
+    #[cfg(test)]
     pub fn add_projectile(&mut self, projectile: Projectile) {
         self.projectiles.push(projectile);
+    }
+
+    pub fn add_projectiles(&mut self, projectiles: Vec<Projectile>) {
+        self.projectiles.extend(projectiles);
     }
 
     pub fn player_body(&self) -> Option<&Body> {

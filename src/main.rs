@@ -76,7 +76,13 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
     battle.add_inert_body(Body::new(tie_fighter_structure.clone(), Mat4f::identity()));
 
     let player_repere = Mat4f::translation(Vect3f::new([-20.0, 0.0, 0.0]));
-    battle.set_player_body(Body::new(tie_fighter_structure.clone(), player_repere));
+    let player_body = {
+        let mut body = Body::new(tie_fighter_structure.clone(), player_repere);
+        body.add_weapon(Vect3f::new([2.0, 2.0, 0.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
+        body.add_weapon(Vect3f::new([2.0, -2.0, 0.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
+        body
+    };
+    battle.set_player_body(player_body);
 
     let mut pause = false;
 
@@ -84,6 +90,11 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
     while !window.should_close() {
 
         update_player_body_from_events(battle.player_body_mut().unwrap(), window.event_handler());
+
+        if window.event_handler().is_mouse_button_pressed(MouseButton::Left) {
+            let projectiles = battle.player_body_mut().unwrap().shoot();
+            battle.add_projectiles(projectiles);
+        }
 
         if window.event_handler().is_key_just_pressed(Key::P) {
             pause = !pause;
