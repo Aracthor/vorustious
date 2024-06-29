@@ -41,7 +41,8 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
 
     let voxel_catalog = VoxelCatalog::create();
     let structure_file_content = std::fs::read_to_string("structures/tie.vors").expect(&format!("Unable to read structures/tie.vors"));
-    battle.add_body(Body::new(Structure::deserialize(&voxel_catalog, &structure_file_content), Mat4f::identity()));
+    let tie_fighter_structure = Structure::deserialize(&voxel_catalog, &structure_file_content);
+    battle.add_body(Body::new(tie_fighter_structure, Mat4f::identity()));
     let mut weapon = Weapon::new(1.0 / 10.0, 0.5, 50.0, 20.0);
 
     let mut pause = false;

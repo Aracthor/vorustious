@@ -102,7 +102,7 @@ impl Structure {
         if !self.voxel_box.contains(coords) {
             return false;
         }
-        return self.has_voxel(coords);
+        self.has_voxel(coords)
     }
 
     pub fn get_voxel(&self, coords: Vect3i) -> Option<Voxel> {

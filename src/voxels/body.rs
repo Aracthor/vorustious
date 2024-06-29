@@ -21,15 +21,15 @@ impl Body {
     }
 
     pub fn repere(&self) -> &Mat4f {
-        return &self.repere;
+        &self.repere
     }
 
     pub fn structure(&self) -> &Structure {
-        return &self.structure;
+        &self.structure
     }
 
     pub fn structure_mut(&mut self) -> &mut Structure {
-        return &mut self.structure;
+        &mut self.structure
     }
 
     pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
