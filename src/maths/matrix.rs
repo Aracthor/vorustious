@@ -97,6 +97,25 @@ impl<T: MathsUsable> Mat<4, T> {
         result
     }
 
+    pub fn position(&self) -> Vect<3, T> {
+        Vect::<3, T>::new([self[3][0], self[3][1], self[3][2]])
+    }
+
+    pub fn forward(&self) -> Vect<3, T> {
+        let inverse = self.inverse();
+        Vect::<3, T>::new([inverse[0][0], inverse[1][0], inverse[2][0]])
+    }
+
+    pub fn right(&self) -> Vect<3, T> {
+        let inverse = self.inverse();
+        Vect::<3, T>::new([inverse[0][1], inverse[1][1], inverse[2][1]])
+    }
+
+    pub fn up(&self) -> Vect<3, T> {
+        let inverse = self.inverse();
+        Vect::<3, T>::new([inverse[0][2], inverse[1][2], inverse[2][2]])
+    }
+
     #[allow(dead_code)]
     pub fn translation(translate: Vect<3, T>) -> Self {
         let mut result = Self::identity();

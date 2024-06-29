@@ -52,15 +52,31 @@ impl Body {
         self.movement += movement;
     }
 
+    pub fn add_yaw_rotation(&mut self, yaw: f32) {
+        self.rotation[2] += yaw;
+    }
+
+    pub fn add_pitch_rotation(&mut self, pitch: f32) {
+        self.rotation[1] += pitch;
+    }
+
     pub fn add_roll_rotation(&mut self, roll: f32) {
         self.rotation[0] += roll;
     }
 
+    pub fn scale_movement(&mut self, scale: f32) {
+        self.movement *= scale;
+    }
+
+    pub fn scale_rotation(&mut self, scale: f32) {
+        self.rotation *= scale;
+    }
+
     pub fn apply_movement(&mut self, elapsed_time: f32) {
-        self.repere = self.repere.clone()
-            * Mat4f::rotation_around_x(self.rotation[0] * elapsed_time)
-            * Mat4f::rotation_around_x(self.rotation[1] * elapsed_time)
-            * Mat4f::rotation_around_x(self.rotation[2] * elapsed_time)
-            * Mat4f::translation(self.movement * elapsed_time);
+        self.repere = Mat4f::translation(self.movement * elapsed_time)
+        * self.repere.clone()
+        * Mat4f::rotation_around_z(self.rotation[2] * elapsed_time)
+        * Mat4f::rotation_around_y(self.rotation[1] * elapsed_time)
+        * Mat4f::rotation_around_x(self.rotation[0] * elapsed_time)
     }
 }

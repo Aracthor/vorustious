@@ -31,9 +31,9 @@ pub struct Renderer {
 impl Renderer {
     pub fn new(window_width: f32, window_height: f32) -> Self {
         let projection_matrix = {
-            let fov = 80.0_f32.to_radians();
+            let fov = 85.0_f32.to_radians();
             let aspect = window_width / window_height;
-            let z_near = 0.1;
+            let z_near = 3.0;
             let z_far = 1000.0;
             Mat4f::perspective(fov, aspect, z_near, z_far)
         };
@@ -158,7 +158,7 @@ impl Renderer {
         }
     }
 
-    pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: &Vec<Body>, projectiles: &Vec<Projectile>, editor: Option<&Editor>) {
+    pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: Vec<&Body>, projectiles: &Vec<Projectile>, editor: Option<&Editor>) {
         let projection_view_matrix = self.projection_matrix.clone() * view_matrix;
         for body in bodies {
             let mut instance_positions: Vec<f32> = Default::default();

@@ -148,6 +148,14 @@ impl<const N: usize, T: MathsUsable> std::ops::Sub<Self> for Vect<N, T> {
     }
 }
 
+impl<const N: usize, T: MathsUsable> std::ops::MulAssign<T> for Vect<N, T> {
+    fn mul_assign(&mut self, rhs: T) {
+        for d in &mut self.data {
+            *d *= rhs;
+        }
+    }
+}
+
 impl<const N: usize, T: MathsUsable> std::ops::Mul<T> for Vect<N, T> {
     type Output = Self;
 
