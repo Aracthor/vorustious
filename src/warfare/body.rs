@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+use std::collections::VecDeque;
+
 use crate::maths::matrix::Mat4f;
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
@@ -13,6 +16,17 @@ pub struct Body {
     weapons: Vec<(Vect3f, Weapon)>,
     movement: Vect3f,
     rotation: Vect3f,
+}
+
+fn close_coords(coords: Vect3i) -> [Vect3i; 6] {
+    [
+        coords + Vect3i::new([ 1, 0, 0]),
+        coords + Vect3i::new([-1, 0, 0]),
+        coords + Vect3i::new([0,  1, 0]),
+        coords + Vect3i::new([0, -1, 0]),
+        coords + Vect3i::new([0, 0,  1]),
+        coords + Vect3i::new([0, 0, -1]),
+    ]
 }
 
 impl Body {
@@ -74,10 +88,6 @@ impl Body {
         self.rotation[0]
     }
 
-    pub fn structure_mut(&mut self) -> &mut Structure {
-        &mut self.structure
-    }
-
     pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
         let segment_in_repere = segment.transform(&self.repere.inverse());
         self.structure.for_first_voxel_in_segment(segment_in_repere, f)
@@ -130,5 +140,70 @@ impl Body {
             }
         }
         result
+    }
+
+    pub fn update_dead_voxels(&mut self) -> Vec<Body> {
+        let mut new_bodies: Vec<Body> = vec![];
+        let mut destroyed_coords = vec![];
+        self.structure.for_each_voxel_mut(|coords, voxel: &mut Option<Voxel>| {
+            if voxel.unwrap().life <= 0.0 {
+                *voxel = None;
+                destroyed_coords.push(coords);
+            }
+        });
+
+        let coords_to_check = {
+            let mut result = vec![];
+            for coord in destroyed_coords {
+                for coord_to_check in close_coords(coord) {
+                    if self.structure.has_voxel_on_coords(coord_to_check) {
+                        result.push(coord_to_check);
+                    }
+                }
+            }
+            result
+        };
+
+        // Cut in separate bodies disjoincted structures.
+        let mut coords_to_reach: HashSet<Vect3i> = coords_to_check.clone().into_iter().collect();
+        let mut jointed_coords: Vec<HashSet<Vect3i>> = vec![];
+        while !coords_to_reach.is_empty() {
+            let first_coords = coords_to_reach.iter().next().unwrap().clone();
+            let mut coords_to_explore: VecDeque<Vect3i> = Default::default();
+            let mut explored_coords: HashSet<Vect3i> = Default::default();
+            coords_to_explore.push_back(first_coords);
+            coords_to_reach.remove(&first_coords);
+            explored_coords.insert(first_coords);
+            while !coords_to_explore.is_empty() && (!coords_to_reach.is_empty() || !jointed_coords.is_empty())  {
+                let coords = coords_to_explore.pop_front().unwrap();
+                for close_coords in close_coords(coords) {
+                    if self.structure.has_voxel_on_coords(close_coords) && !explored_coords.contains(&close_coords) {
+                        coords_to_reach.remove(&close_coords);
+                        coords_to_explore.push_back(close_coords);
+                        explored_coords.insert(close_coords);
+                    }
+                }
+            }
+            jointed_coords.push(explored_coords);
+        }
+        if jointed_coords.len() > 1 {
+            for join in jointed_coords {
+                if !join.contains(&Vect3i::zero()) {
+                    let mut new_structure = Structure::new_empty();
+                    for coords in join {
+                        let voxel = self.structure.remove_voxel(coords);
+                        new_structure.add_voxel(coords, voxel);
+                    }
+                    let new_center = new_structure.recenter();
+                    let translation = Vect3f::new([new_center[0] as f32, new_center[1] as f32, new_center[2] as f32]);
+                    let mut new_body = Body::new_from_other(new_structure, translation, self);
+
+                    // Debug to see result
+                    new_body.add_to_movement(translation.normalize());
+                    new_bodies.push(new_body);
+                }
+            }
+        }
+        new_bodies
     }
 }
