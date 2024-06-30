@@ -47,10 +47,10 @@ fn update_player_body_from_events(player_body: &mut Body, event_handler: &EventH
         player_body.add_to_movement(-forward);
     }
     if event_handler.is_key_pressed(Key::D) {
-        player_body.add_to_movement(-right);
+        player_body.add_to_movement(right);
     }
     if event_handler.is_key_pressed(Key::A) {
-        player_body.add_to_movement(right);
+        player_body.add_to_movement(-right);
     }
 
     if event_handler.is_key_pressed(Key::E) {

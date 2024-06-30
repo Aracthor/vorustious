@@ -108,7 +108,7 @@ impl<T: MathsUsable> Mat<4, T> {
 
     pub fn right(&self) -> Vect<3, T> {
         let inverse = self.inverse();
-        Vect::<3, T>::new([inverse[0][1], inverse[1][1], inverse[2][1]])
+        -Vect::<3, T>::new([inverse[0][1], inverse[1][1], inverse[2][1]])
     }
 
     pub fn up(&self) -> Vect<3, T> {
