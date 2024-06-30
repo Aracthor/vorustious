@@ -62,6 +62,7 @@ pub struct VertexArrayObject {
     id: gl::types::GLuint,
     dynamic: bool,
     position_buffer: Option<VertexBufferObject>,
+    color_buffer: Option<VertexBufferObject>,
     texture_coords_buffer: Option<VertexBufferObject>,
     instance_buffer_objects: Vec<VertexBufferObject>,
     element_count: i32,
@@ -77,6 +78,7 @@ impl VertexArrayObject {
             id: vao,
             dynamic: dynamic,
             position_buffer: None,
+            color_buffer: None,
             texture_coords_buffer: None,
             instance_buffer_objects: Default::default(),
             element_count: 0,
@@ -108,12 +110,25 @@ impl VertexArrayObject {
         self.set_positions(positions, 3);
     }
 
+    pub fn set_colors(&mut self, colors: &Vec<f32>) {
+        let usage = self.buffer_usage();
+        assert!(self.dynamic || self.color_buffer.is_none());
+        assert!(colors.len() % 4 == 0);
+        unsafe {
+            gl::BindVertexArray(self.id);
+            self.color_buffer = Some(VertexBufferObject::new(1, 4));
+            self.color_buffer.as_mut().unwrap().set_data(&colors, usage);
+            gl::BindVertexArray(0);
+        }
+    }
+
     pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>) {
         let usage = self.buffer_usage();
         assert!(self.dynamic || self.texture_coords_buffer.is_none());
         assert!(texture_coords.len() % 2 == 0);
         unsafe {
             gl::BindVertexArray(self.id);
+            // TODO get attrib_index from name rather than this 1 that forbid using colors AND texture coords.
             self.texture_coords_buffer = Some(VertexBufferObject::new(1, 2));
             self.texture_coords_buffer.as_mut().unwrap().set_data(&texture_coords, usage);
             gl::BindVertexArray(0);

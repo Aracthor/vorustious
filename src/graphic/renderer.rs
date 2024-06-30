@@ -26,6 +26,9 @@ pub struct Renderer {
     text_drawer: TextDrawer,
     voxel_catalog: VoxelCatalog,
     editor_renderer: EditorRenderer,
+
+    gizmo_mesh: Mesh,
+    show_gizmo: bool,
 }
 
 impl Renderer {
@@ -144,6 +147,34 @@ impl Renderer {
             mesh
         };
 
+        let gizmo_mesh = {
+            let mut material = Material::create("shaders/colored.vert", "shaders/colored.frag");
+            material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
+
+            let size = 10.0;
+            let positions = [
+                0.0, 0.0, 0.0,
+                size, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, size, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, size,
+            ].to_vec();
+            let colors = [
+                1.0, 0.0, 0.0, 1.0,
+                1.0, 0.0, 0.0, 1.0,
+                0.0, 1.0, 0.0, 1.0,
+                0.0, 1.0, 0.0, 1.0,
+                0.0, 0.0, 1.0, 1.0,
+                0.0, 0.0, 1.0, 1.0,
+            ].to_vec();
+
+            let mut mesh = Mesh::create(Primitive::Lines, false, material);
+            mesh.set_positions_3d(&positions);
+            mesh.set_colors(&colors);
+            mesh
+        };
+
         Renderer {
             resolution: Vect2f::new([window_width, window_height]),
             projection_matrix: projection_matrix,
@@ -155,7 +186,14 @@ impl Renderer {
             text_drawer: TextDrawer::create(),
             voxel_catalog: VoxelCatalog::create(),
             editor_renderer: EditorRenderer::new(),
+
+            gizmo_mesh: gizmo_mesh,
+            show_gizmo: false,
         }
+    }
+
+    pub fn toggle_gizmo(&mut self) {
+        self.show_gizmo = !self.show_gizmo;
     }
 
     pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: Vec<&Body>, projectiles: &Vec<Projectile>, editor: Option<&Editor>) {
@@ -178,6 +216,11 @@ impl Renderer {
             self.cube_mesh.set_instanced_data(2, &instance_damages);
             self.cube_mesh.set_uniform_matrix("uni_model_matrix", body.repere());
             self.cube_mesh.draw_instanced(instance_count, &projection_view_matrix);
+
+            if self.show_gizmo {
+                self.gizmo_mesh.set_uniform_matrix("uni_model_matrix", body.repere());
+                self.gizmo_mesh.draw(&projection_view_matrix)
+            }
         }
 
         for projectile in projectiles {

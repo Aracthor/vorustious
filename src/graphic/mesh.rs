@@ -31,6 +31,10 @@ impl Mesh {
         self.vao.set_positions_3d(positions);
     }
 
+    pub fn set_colors(&mut self, colors: &Vec<f32>) {
+        self.vao.set_colors(colors);
+    }
+
     pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>) {
         self.vao.set_texture_coords(texture_coords);
     }
