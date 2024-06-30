@@ -26,13 +26,31 @@ impl Body {
         }
     }
 
-    pub fn new_from_other(structure: Structure, repere: Mat4f, other: &Body) -> Self {
+    pub fn new_from_other(structure: Structure, distance: Vect3f, other: &Body) -> Self {
+        let new_repere = other.repere().clone() * Mat4f::translation(distance);
+        let repere_without_translation = {
+            let mut repere = other.repere().clone();
+            repere[3][0] = 0.0;
+            repere[3][1] = 0.0;
+            repere[3][2] = 0.0;
+            repere
+        };
+        let radius_sq = distance.length_sq();
+        let local_distance = repere_without_translation.clone() * distance.normalize();
+        let angular_speed_x_sq = other.roll() * other.roll();
+        let angular_speed_y_sq = other.pitch() * other.pitch();
+        let angular_speed_z_sq = other.yaw() * other.yaw();
+        let speed_from_roll_centrifugal = Vect3f::cross(local_distance, Vect3f::new([-1.0, 0.0, 0.0])) * f32::sqrt(radius_sq * angular_speed_x_sq);
+        let speed_from_yaw_centrifugal = Vect3f::cross(local_distance, Vect3f::new([0.0, -1.0, 0.0])) * f32::sqrt(radius_sq * angular_speed_y_sq);
+        let speed_from_pitch_centrifugal = Vect3f::cross(local_distance, Vect3f::new([0.0, 0.0, -1.0])) * f32::sqrt(radius_sq * angular_speed_z_sq);
+        let new_movement = other.movement + speed_from_roll_centrifugal + speed_from_yaw_centrifugal + speed_from_pitch_centrifugal;
+
         Self {
-            repere: repere,
+            repere: new_repere,
             structure: structure,
             weapons: vec![],
-            movement: other.movement,
-            rotation: other.rotation,
+            movement: new_movement,
+            rotation: Vect3f::zero(),
         }
     }
 
@@ -42,6 +60,18 @@ impl Body {
 
     pub fn structure(&self) -> &Structure {
         &self.structure
+    }
+
+    pub fn yaw(&self) -> f32 {
+        self.rotation[2]
+    }
+
+    pub fn pitch(&self) -> f32 {
+        self.rotation[1]
+    }
+
+    pub fn roll(&self) -> f32 {
+        self.rotation[0]
     }
 
     pub fn structure_mut(&mut self) -> &mut Structure {
