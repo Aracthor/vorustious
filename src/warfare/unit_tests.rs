@@ -85,7 +85,7 @@ fn projectile_damage_on_moving_body() {
 }
 
 #[test]
-fn structure_cut_in_half() {
+fn body_cut_in_half() {
     let mut structure = {
         let mut structure = Structure::new(-2, 2, 0, 0, 0, 0, Voxel{life: 2.0, id: VoxelID::LightHull});
         structure.add_voxel(Vect3i::new([2, 1, 0]), Voxel{life: 2.0, id: VoxelID::LightHull});
