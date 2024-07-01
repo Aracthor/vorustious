@@ -59,12 +59,17 @@ impl Body {
         let speed_from_pitch_centrifugal = Vect3f::cross(local_distance, Vect3f::new([0.0, 0.0, -1.0])) * f32::sqrt(radius_sq * angular_speed_z_sq);
         let new_movement = other.movement + speed_from_roll_centrifugal + speed_from_yaw_centrifugal + speed_from_pitch_centrifugal;
 
+        let distance_normalized = distance.normalize();
+        let roll = other.roll() * Vect3f::dot(distance_normalized, Vect3f::new([1.0, 0.0, 0.0])).abs();
+        let pitch = other.pitch() * Vect3f::dot(distance_normalized, Vect3f::new([0.0, 1.0, 0.0])).abs();
+        let yaw = other.yaw() * Vect3f::dot(distance_normalized, Vect3f::new([0.0, 0.0, 1.0])).abs();
+
         Self {
             repere: new_repere,
             structure: structure,
             weapons: vec![],
             movement: new_movement,
-            rotation: Vect3f::zero(),
+            rotation: Vect3f::new([roll, pitch, yaw]),
         }
     }
 
