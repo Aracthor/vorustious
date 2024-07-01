@@ -46,6 +46,19 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         self.max - self.min
     }
 
+    // TODO Should return an array, not a Vec, since size is static and can be deduced from N,
+    // But I can't figure how to write array size with something that is not "currently not permitted"...
+    pub fn corners(&self) -> Vec<Vect<N, T>> {
+        let corners_count = 2_u32.pow(N as u32) as usize;
+        let mut result = vec![Vect::<N, T>::zero(); corners_count];
+        for n in 0..N {
+            for i in 0..corners_count {
+                result[i][n] = if i / 2_usize.pow(n as u32) % 2 == 0 { self.min[n] } else { self.max[n] };
+            }
+        }
+        result
+    }
+
     pub fn contains(&self, point: Vect<N, T>) -> bool {
         for i in 0..N {
             if point[i] < self.min[i] || point[i] > self.max[i] {

@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::boxes::Box;
 use super::matrix::Mat3f;
 use super::matrix::Mat4f;
@@ -71,6 +73,27 @@ fn box_funcs() {
     assert!(boxe.contains(Vect3f::new([-3.0, -2.0, 1.5])) == true);
     assert!(boxe.contains(Vect3f::new([0.0, 0.0, 0.0])) == false);
     assert!(boxe.contains(Vect3f::new([-1.0, 1.0, 2.0])) == true);
+}
+
+#[test]
+fn box_corners() {
+    let boxe = Box::<3, i32>::from_min_max(Vect::<3, i32>::new([-3, -2, 1]), Vect::<3, i32>::new([1, 4, 4]));
+    let expected_corners = vec!
+    [
+        Vect::<3, i32>::new([-3, -2, 1]),
+        Vect::<3, i32>::new([-3, -2, 4]),
+        Vect::<3, i32>::new([-3, 4, 1]),
+        Vect::<3, i32>::new([-3, 4, 4]),
+        Vect::<3, i32>::new([1, -2, 1]),
+        Vect::<3, i32>::new([1, -2, 4]),
+        Vect::<3, i32>::new([1, 4, 1]),
+        Vect::<3, i32>::new([1, 4, 4]),
+    ];
+    let corners = boxe.corners();
+    // Order is not important, we just want to check if every item is in both list.
+    let sorted_expected_corners = HashSet::<Vect<3, i32>>::from_iter(expected_corners.into_iter());
+    let sorted_corners = HashSet::<Vect<3, i32>>::from_iter(corners.into_iter());
+    assert!(sorted_expected_corners == sorted_corners);
 }
 
 #[test]

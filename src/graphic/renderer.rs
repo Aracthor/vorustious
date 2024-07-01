@@ -1,5 +1,8 @@
+use crate::maths::boxes::Box3f;
 use crate::maths::matrix::Mat4f;
-use crate::maths::vector::{Vect2f, Vect4f};
+use crate::maths::vector::Vect2f;
+use crate::maths::vector::Vect3f;
+use crate::maths::vector::Vect4f;
 use crate::editor::Editor;
 use crate::voxels::catalog::VoxelCatalog;
 use crate::voxels::voxel::TextureType;
@@ -31,6 +34,39 @@ pub struct Renderer {
     gizmo_mesh: Mesh,
     show_boxes: bool,
     show_gizmo: bool,
+}
+
+fn positions_from_box(min: Vect3f, max: Vect3f) -> Vec<f32> {
+    // TODO being able to use glDrawElements would avoid duplicate vertices here.
+    [
+        min[0], min[1], min[2],
+        min[0], min[1], max[2],
+        min[0], min[1], max[2],
+        min[0], max[1], max[2],
+        min[0], max[1], max[2],
+        min[0], max[1], min[2],
+        min[0], max[1], min[2],
+        min[0], min[1], min[2],
+
+        min[0], min[1], min[2],
+        max[0], min[1], min[2],
+        max[0], min[1], min[2],
+        max[0], max[1], min[2],
+        max[0], max[1], min[2],
+        min[0], max[1], min[2],
+
+        min[0], min[1], max[2],
+        max[0], min[1], max[2],
+        max[0], min[1], max[2],
+        max[0], max[1], max[2],
+        max[0], max[1], max[2],
+        min[0], max[1], max[2],
+
+        max[0], min[1], min[2],
+        max[0], min[1], max[2],
+        max[0], max[1], min[2],
+        max[0], max[1], max[2],
+    ].to_vec()
 }
 
 impl Renderer {
@@ -235,40 +271,23 @@ impl Renderer {
 
             if self.show_boxes {
                 let body_box = body.structure().get_box();
-                // TODO being able to use glDrawElements would avoid duplicate vertices here.
-                let positions = [
-                    body_box.min()[0], body_box.min()[1], body_box.min()[2],
-                    body_box.min()[0], body_box.min()[1], body_box.max()[2],
-                    body_box.min()[0], body_box.min()[1], body_box.max()[2],
-                    body_box.min()[0], body_box.max()[1], body_box.max()[2],
-                    body_box.min()[0], body_box.max()[1], body_box.max()[2],
-                    body_box.min()[0], body_box.max()[1], body_box.min()[2],
-                    body_box.min()[0], body_box.max()[1], body_box.min()[2],
-                    body_box.min()[0], body_box.min()[1], body_box.min()[2],
+                let positions = positions_from_box(body_box.min(), body_box.max());
+                self.debug_cube_mesh.set_positions_3d(&positions);
+                self.debug_cube_mesh.set_uniform_vector("uni_color", Vect4f::new([0.0, 1.0, 0.0, 1.0]));
+                self.debug_cube_mesh.set_uniform_matrix("uni_model_matrix", body.repere());
+                self.debug_cube_mesh.draw(&projection_view_matrix);
 
-                    body_box.min()[0], body_box.min()[1], body_box.min()[2],
-                    body_box.max()[0], body_box.min()[1], body_box.min()[2],
-                    body_box.max()[0], body_box.min()[1], body_box.min()[2],
-                    body_box.max()[0], body_box.max()[1], body_box.min()[2],
-                    body_box.max()[0], body_box.max()[1], body_box.min()[2],
-                    body_box.min()[0], body_box.max()[1], body_box.min()[2],
-
-                    body_box.min()[0], body_box.min()[1], body_box.max()[2],
-                    body_box.max()[0], body_box.min()[1], body_box.max()[2],
-                    body_box.max()[0], body_box.min()[1], body_box.max()[2],
-                    body_box.max()[0], body_box.max()[1], body_box.max()[2],
-                    body_box.max()[0], body_box.max()[1], body_box.max()[2],
-                    body_box.min()[0], body_box.max()[1], body_box.max()[2],
-
-                    body_box.max()[0], body_box.min()[1], body_box.min()[2],
-                    body_box.max()[0], body_box.min()[1], body_box.max()[2],
-                    body_box.max()[0], body_box.max()[1], body_box.min()[2],
-                    body_box.max()[0], body_box.max()[1], body_box.max()[2],
-                ].to_vec();
-
+                let global_box = {
+                    let mut global_box = Box3f::new();
+                    for corner in body_box.corners() {
+                        global_box.add(body.repere().clone() * corner);
+                    }
+                    global_box
+                };
+                let positions = positions_from_box(global_box.min(), global_box.max());
                 self.debug_cube_mesh.set_positions_3d(&positions);
                 self.debug_cube_mesh.set_uniform_vector("uni_color", Vect4f::new([1.0, 1.0, 1.0, 1.0]));
-                self.debug_cube_mesh.set_uniform_matrix("uni_model_matrix", body.repere());
+                self.debug_cube_mesh.set_uniform_matrix("uni_model_matrix", &Mat4f::identity());
                 self.debug_cube_mesh.draw(&projection_view_matrix);
             }
 
