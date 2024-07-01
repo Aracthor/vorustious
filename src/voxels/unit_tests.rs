@@ -1,3 +1,4 @@
+use crate::maths::boxes::Box3f;
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
@@ -10,6 +11,36 @@ const TEST_VOXEL: Voxel = Voxel{
     life: 1.0,
     id: VoxelID::ShipCore,
 };
+
+#[test]
+fn structure_recalculate_box() {
+    let mut structure = Structure::new(-2, 4, -1, 1, -1, 0, TEST_VOXEL);
+    let min = Vect3f::new([-2.5, -1.5, -1.5]);
+    let max = Vect3f::new([4.5, 1.5, 0.5]);
+    assert!(structure.get_box() == Box3f::from_min_max(min, max));
+
+    structure.set_voxel(-2, -1, -1, None);
+    structure.set_voxel(-2, -1, 0, None);
+    structure.set_voxel(-2, 0, -1, None);
+    structure.set_voxel(-2, 0, 0, None);
+    structure.set_voxel(-2, 1, -1, None);
+    structure.set_voxel(-2, 1, 0, None);
+    structure.recalculate_box();
+    let min = Vect3f::new([-1.5, -1.5, -1.5]);
+    let max = Vect3f::new([4.5, 1.5, 0.5]);
+    assert!(structure.get_box() == Box3f::from_min_max(min, max));
+
+    structure.add_voxel(Vect3i::new([-4, 2, 0]), TEST_VOXEL);
+    let min = Vect3f::new([-4.5, -1.5, -1.5]);
+    let max = Vect3f::new([4.5, 2.5, 0.5]);
+    assert!(structure.get_box() == Box3f::from_min_max(min, max));
+
+    structure.set_voxel(-4, 2, 0, None);
+    structure.recalculate_box();
+    let min = Vect3f::new([-1.5, -1.5, -1.5]);
+    let max = Vect3f::new([4.5, 1.5, 0.5]);
+    assert!(structure.get_box() == Box3f::from_min_max(min, max));
+}
 
 #[test]
 fn structure_segment_intersection() {

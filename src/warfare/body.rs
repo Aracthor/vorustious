@@ -209,6 +209,9 @@ impl Body {
                 }
             }
         }
+        if !new_bodies.is_empty() {
+            self.structure.recalculate_box();
+        }
         new_bodies
     }
 }

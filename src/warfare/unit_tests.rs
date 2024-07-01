@@ -110,6 +110,7 @@ fn body_cut_in_half() {
         structure.set_voxel(2, -1, 0, None);
         structure.set_voxel(2, -1, -1, None);
         structure.set_voxel(1, 0, 0, None);
+        structure.recalculate_box();
         structure
     };
     let expected_new_structure = Structure::new(0, 0, -1, 1, -1, 1, Voxel{life: 2.0, id: VoxelID::LightHull});

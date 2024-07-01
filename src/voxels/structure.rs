@@ -106,6 +106,12 @@ impl Structure {
         Box3f::from_min_max(min, max)
     }
 
+    pub fn recalculate_box(&mut self) {
+        let mut new_box = Box3i::new();
+        self.for_each_voxel(|coord, _voxel| new_box.add(coord));
+        self.resize(new_box);
+    }
+
     pub fn has_voxel_on_coords(&self, coords: Vect3i) -> bool {
         if !self.voxel_box.contains(coords) {
             return false;
@@ -333,8 +339,10 @@ impl Structure {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
                     let coords = Vect3i::new([x, y, z]);
                     let index = Self::voxel_index_for_box(&self.voxel_box, coords);
-                    let new_index = Self::voxel_index_for_box(&new_box, coords);
-                    new_data[new_index] = self.data[index];
+                    if self.data[index].is_some() {
+                        let new_index = Self::voxel_index_for_box(&new_box, coords);
+                        new_data[new_index] = self.data[index];
+                    }
                 }
             }
         }
