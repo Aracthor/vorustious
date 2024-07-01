@@ -80,7 +80,7 @@ impl Renderer {
         };
 
         let projectile_mesh = {
-            let mut material = Material::create("shaders/projectile.vert", "shaders/hello_color.frag");
+            let mut material = Material::create("shaders/position.vert", "shaders/hello_color.frag");
             material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
             material.add_uniform_vect4("uni_color", Color::new(0xB0, 0x30, 0x30, 0xFF).into());
 
