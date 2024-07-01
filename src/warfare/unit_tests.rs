@@ -166,3 +166,21 @@ fn body_cut_in_half_with_same_center() {
     assert!(new_bodies.len() == 1);
     assert!(new_bodies[0].structure().clone() == expected_new_structure);
 }
+
+#[test]
+fn body_cut_in_half_with_father_body_becoming_empty() {
+    let mut structure = Structure::new(-1, 1, 0, 0, 0, 0, TEST_VOXEL);
+    structure.set_voxel(0, 0, 0, Some(TEST_DEAD_VOXEL));
+
+    let mut body = Body::new(structure, Mat4f::identity());
+    let new_bodies = body.update_dead_voxels();
+
+    let expected_structure = {
+        let mut structure = Structure::new(0, 0, 0, 0, 0, 0, TEST_VOXEL);
+        structure.set_voxel(0, 0, 0, None);
+        structure
+    };
+
+    assert!(body.structure().clone() == expected_structure);
+    assert!(new_bodies.len() == 2);
+}

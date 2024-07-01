@@ -30,6 +30,10 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        *self == Self::new()
+    }
+
     pub fn min(&self) -> Vect<N, T> {
         self.min
     }
@@ -39,10 +43,12 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
     }
 
     pub fn center(&self) -> Vect<N, T> {
+        assert!(!self.is_empty());
         (self.min + self.max) / T::from(2)
     }
 
     pub fn extent(&self) -> Vect<N, T> {
+        assert!(!self.is_empty());
         self.max - self.min
     }
 

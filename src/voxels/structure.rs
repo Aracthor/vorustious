@@ -109,6 +109,9 @@ impl Structure {
     pub fn recalculate_box(&mut self) {
         let mut new_box = Box3i::new();
         self.for_each_voxel(|coord, _voxel| new_box.add(coord));
+        if new_box.is_empty() {
+            new_box = Box3i::zero();
+        }
         self.resize(new_box);
     }
 
