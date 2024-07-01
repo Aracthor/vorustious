@@ -8,6 +8,10 @@ use super::body::Body;
 use super::battle::Battle;
 use super::projectile::Projectile;
 
+const TEST_VOXEL: Voxel = Voxel{
+    life: 2.0,
+    id: VoxelID::LightHull,
+};
 
 #[test]
 fn projectile_movement() {
@@ -38,7 +42,7 @@ fn projectile_max_distance() {
 #[test]
 fn projectile_damage() {
     let mut battle = Battle::new();
-    let structure = Structure::new(-1, 1, -1, 1, -1, 1, Voxel{life: 2.0, id: VoxelID::LightHull});
+    let structure = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
     battle.add_inert_body(Body::new(structure, Mat4f::identity()));
 
     let initial_position = Vect3f::new([-10.0, 1.0, 1.0]);
@@ -55,7 +59,7 @@ fn projectile_damage() {
 #[test]
 fn projectile_damage_on_moving_body() {
     let mut battle = Battle::new();
-    let structure = Structure::new(-1, 1, -1, 1, -1, 1, Voxel{life: 2.0, id: VoxelID::LightHull});
+    let structure = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
     let mut expected_structure = structure.clone();
     let mut body = Body::new(structure, Mat4f::identity());
     body.add_to_movement(Vect3f::new([0.0, 0.4, 0.0]));
@@ -87,15 +91,15 @@ fn projectile_damage_on_moving_body() {
 #[test]
 fn body_cut_in_half() {
     let mut structure = {
-        let mut structure = Structure::new(-2, 2, 0, 0, 0, 0, Voxel{life: 2.0, id: VoxelID::LightHull});
-        structure.add_voxel(Vect3i::new([2, 1, 0]), Voxel{life: 2.0, id: VoxelID::LightHull});
-        structure.add_voxel(Vect3i::new([2, 1, 1]), Voxel{life: 2.0, id: VoxelID::LightHull});
-        structure.add_voxel(Vect3i::new([2, 0, 1]), Voxel{life: 2.0, id: VoxelID::LightHull});
-        structure.add_voxel(Vect3i::new([2, -1, 1]), Voxel{life: 2.0, id: VoxelID::LightHull});
-        structure.add_voxel(Vect3i::new([2, -1, 0]), Voxel{life: 2.0, id: VoxelID::LightHull});
-        structure.add_voxel(Vect3i::new([2, -1, -1]), Voxel{life: 2.0, id: VoxelID::LightHull});
-        structure.add_voxel(Vect3i::new([2, 0, -1]), Voxel{life: 2.0, id: VoxelID::LightHull});
-        structure.add_voxel(Vect3i::new([2, 1, -1]), Voxel{life: 2.0, id: VoxelID::LightHull});
+        let mut structure = Structure::new(-2, 2, 0, 0, 0, 0, TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, 1, 0]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, 1, 1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, 0, 1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, -1, 1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, -1, 0]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, -1, -1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, 0, -1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, 1, -1]), TEST_VOXEL);
         structure
     };
     let expected_remaining_structure = {
@@ -113,7 +117,7 @@ fn body_cut_in_half() {
         structure.recalculate_box();
         structure
     };
-    let expected_new_structure = Structure::new(0, 0, -1, 1, -1, 1, Voxel{life: 2.0, id: VoxelID::LightHull});
+    let expected_new_structure = Structure::new(0, 0, -1, 1, -1, 1, TEST_VOXEL);
 
     structure.set_voxel(1, 0, 0, Some(Voxel{life: 0.0, id: VoxelID::LightHull}));
     let mut body = Body::new(structure, Mat4f::identity());
