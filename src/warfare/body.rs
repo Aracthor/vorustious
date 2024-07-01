@@ -41,6 +41,16 @@ impl Body {
     }
 
     pub fn new_from_other(structure: Structure, distance: Vect3f, other: &Body) -> Self {
+        if distance == Vect3f::zero() {
+            return Self {
+                repere: other.repere.clone(),
+                structure: structure,
+                weapons: vec![],
+                movement: other.movement,
+                rotation: other.rotation,
+            };
+        }
+
         let new_repere = other.repere().clone() * Mat4f::translation(distance);
         let repere_without_translation = {
             let mut repere = other.repere().clone();
@@ -204,7 +214,7 @@ impl Body {
                     let mut new_body = Body::new_from_other(new_structure, translation, self);
 
                     // Debug to see result
-                    new_body.add_to_movement(translation.normalize());
+                    new_body.add_to_movement(if translation == Vect3f::zero() { Vect3f::new([0.0, 0.0, 1.0]) } else { translation.normalize() });
                     new_bodies.push(new_body);
                 }
             }

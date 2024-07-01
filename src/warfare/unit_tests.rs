@@ -13,6 +13,11 @@ const TEST_VOXEL: Voxel = Voxel{
     id: VoxelID::LightHull,
 };
 
+const TEST_DEAD_VOXEL: Voxel = Voxel{
+    life: 0.0,
+    id: VoxelID::ShipCore,
+};
+
 #[test]
 fn projectile_movement() {
     let initial_position = Vect3f::new([0.0, 0.0, 2.0]);
@@ -124,6 +129,40 @@ fn body_cut_in_half() {
     let new_bodies = body.update_dead_voxels();
 
     assert!(body.structure().clone() == expected_remaining_structure);
+    assert!(new_bodies.len() == 1);
+    assert!(new_bodies[0].structure().clone() == expected_new_structure);
+}
+
+#[test]
+fn body_cut_in_half_with_same_center() {
+    let mut structure = Structure::new(-2, 2, -2, 2, 0, 0, TEST_VOXEL);
+    structure.set_voxel(-1, -1, 0, Some(TEST_DEAD_VOXEL));
+    structure.set_voxel(-1, 0, 0, Some(TEST_DEAD_VOXEL));
+    structure.set_voxel(-1, 1, 0, Some(TEST_DEAD_VOXEL));
+    structure.set_voxel(0, 1, 0, Some(TEST_DEAD_VOXEL));
+    structure.set_voxel(1, 1, 0, Some(TEST_DEAD_VOXEL));
+    structure.set_voxel(1, 0, 0, Some(TEST_DEAD_VOXEL));
+    structure.set_voxel(1, -1, 0, Some(TEST_DEAD_VOXEL));
+    structure.set_voxel(0, -1, 0, Some(TEST_DEAD_VOXEL));
+
+    let expected_new_structure = {
+        let mut new_structure = structure.clone();
+        new_structure.set_voxel(-1, -1, 0, None);
+        new_structure.set_voxel(-1, 0, 0, None);
+        new_structure.set_voxel(-1, 1, 0, None);
+        new_structure.set_voxel(0, 1, 0, None);
+        new_structure.set_voxel(1, 1, 0, None);
+        new_structure.set_voxel(1, 0, 0, None);
+        new_structure.set_voxel(1, -1, 0, None);
+        new_structure.set_voxel(0, -1, 0, None);
+        new_structure.set_voxel(0, 0, 0, None);
+        new_structure
+    };
+
+    let mut body = Body::new(structure, Mat4f::identity());
+    let new_bodies = body.update_dead_voxels();
+
+    assert!(body.structure().clone() == Structure::new(0, 0, 0, 0, 0, 0, TEST_VOXEL));
     assert!(new_bodies.len() == 1);
     assert!(new_bodies[0].structure().clone() == expected_new_structure);
 }
