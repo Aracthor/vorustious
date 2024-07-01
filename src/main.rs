@@ -96,6 +96,9 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
             battle.add_projectiles(projectiles);
         }
 
+        if window.event_handler().is_key_just_pressed(Key::F3) {
+            renderer.toggle_debug_boxes();
+        }
         if window.event_handler().is_key_just_pressed(Key::F4) {
             renderer.toggle_gizmo();
         }

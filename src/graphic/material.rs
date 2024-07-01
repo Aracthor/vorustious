@@ -52,6 +52,11 @@ impl Material {
         *self.uniforms_f32.get_mut(uniform_name).unwrap() = value;
     }
 
+    pub fn set_uniform_vec4(&mut self, uniform_name: &str, value: Vect4f) {
+        assert!(self.uniforms_vect4.contains_key(uniform_name));
+        *self.uniforms_vect4.get_mut(uniform_name).unwrap() = value;
+    }
+
     pub fn set_uniform_mat4(&mut self, uniform_name: &str, value: &Mat4f) {
         assert!(self.uniforms_mat4.contains_key(uniform_name));
         *self.uniforms_mat4.get_mut(uniform_name).unwrap() = value.clone();

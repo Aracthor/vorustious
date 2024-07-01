@@ -1,5 +1,5 @@
 use crate::maths::matrix::Mat4f;
-use crate::maths::vector::Vect2f;
+use crate::maths::vector::{Vect2f, Vect4f};
 use crate::editor::Editor;
 use crate::voxels::catalog::VoxelCatalog;
 use crate::voxels::voxel::TextureType;
@@ -27,7 +27,9 @@ pub struct Renderer {
     voxel_catalog: VoxelCatalog,
     editor_renderer: EditorRenderer,
 
+    debug_cube_mesh: Mesh,
     gizmo_mesh: Mesh,
+    show_boxes: bool,
     show_gizmo: bool,
 }
 
@@ -147,6 +149,14 @@ impl Renderer {
             mesh
         };
 
+        let debug_cube = {
+            let mut material = Material::create("shaders/position.vert", "shaders/hello_color.frag");
+            material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
+            material.add_uniform_vect4("uni_color", Vect4f::zero());
+
+            Mesh::create(Primitive::Lines, true, material)
+        };
+
         let gizmo_mesh = {
             let mut material = Material::create("shaders/colored.vert", "shaders/colored.frag");
             material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
@@ -187,9 +197,15 @@ impl Renderer {
             voxel_catalog: VoxelCatalog::create(),
             editor_renderer: EditorRenderer::new(),
 
+            debug_cube_mesh: debug_cube,
             gizmo_mesh: gizmo_mesh,
+            show_boxes: false,
             show_gizmo: false,
         }
+    }
+
+    pub fn toggle_debug_boxes(&mut self) {
+        self.show_boxes = !self.show_boxes;
     }
 
     pub fn toggle_gizmo(&mut self) {
@@ -216,6 +232,45 @@ impl Renderer {
             self.cube_mesh.set_instanced_data(2, &instance_damages);
             self.cube_mesh.set_uniform_matrix("uni_model_matrix", body.repere());
             self.cube_mesh.draw_instanced(instance_count, &projection_view_matrix);
+
+            if self.show_boxes {
+                let body_box = body.structure().get_box();
+                // TODO being able to use glDrawElements would avoid duplicate vertices here.
+                let positions = [
+                    body_box.min()[0], body_box.min()[1], body_box.min()[2],
+                    body_box.min()[0], body_box.min()[1], body_box.max()[2],
+                    body_box.min()[0], body_box.min()[1], body_box.max()[2],
+                    body_box.min()[0], body_box.max()[1], body_box.max()[2],
+                    body_box.min()[0], body_box.max()[1], body_box.max()[2],
+                    body_box.min()[0], body_box.max()[1], body_box.min()[2],
+                    body_box.min()[0], body_box.max()[1], body_box.min()[2],
+                    body_box.min()[0], body_box.min()[1], body_box.min()[2],
+
+                    body_box.min()[0], body_box.min()[1], body_box.min()[2],
+                    body_box.max()[0], body_box.min()[1], body_box.min()[2],
+                    body_box.max()[0], body_box.min()[1], body_box.min()[2],
+                    body_box.max()[0], body_box.max()[1], body_box.min()[2],
+                    body_box.max()[0], body_box.max()[1], body_box.min()[2],
+                    body_box.min()[0], body_box.max()[1], body_box.min()[2],
+
+                    body_box.min()[0], body_box.min()[1], body_box.max()[2],
+                    body_box.max()[0], body_box.min()[1], body_box.max()[2],
+                    body_box.max()[0], body_box.min()[1], body_box.max()[2],
+                    body_box.max()[0], body_box.max()[1], body_box.max()[2],
+                    body_box.max()[0], body_box.max()[1], body_box.max()[2],
+                    body_box.min()[0], body_box.max()[1], body_box.max()[2],
+
+                    body_box.max()[0], body_box.min()[1], body_box.min()[2],
+                    body_box.max()[0], body_box.min()[1], body_box.max()[2],
+                    body_box.max()[0], body_box.max()[1], body_box.min()[2],
+                    body_box.max()[0], body_box.max()[1], body_box.max()[2],
+                ].to_vec();
+
+                self.debug_cube_mesh.set_positions_3d(&positions);
+                self.debug_cube_mesh.set_uniform_vector("uni_color", Vect4f::new([1.0, 1.0, 1.0, 1.0]));
+                self.debug_cube_mesh.set_uniform_matrix("uni_model_matrix", body.repere());
+                self.debug_cube_mesh.draw(&projection_view_matrix);
+            }
 
             if self.show_gizmo {
                 self.gizmo_mesh.set_uniform_matrix("uni_model_matrix", body.repere());

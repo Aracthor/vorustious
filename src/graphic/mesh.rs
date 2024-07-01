@@ -3,6 +3,7 @@ use super::opengl::vertex_objects::Primitive;
 use super::opengl::vertex_objects::VertexArrayObject;
 
 use crate::maths::matrix::Mat4f;
+use crate::maths::vector::Vect4f;
 
 pub struct Mesh {
     vao: VertexArrayObject,
@@ -41,6 +42,10 @@ impl Mesh {
 
     pub fn set_uniform_f32(&mut self, uniform_name: &str, value: f32) {
         self.material.set_uniform_f32(uniform_name, value);
+    }
+
+    pub fn set_uniform_vector(&mut self, uniform_name: &str, value: Vect4f) {
+        self.material.set_uniform_vec4(uniform_name, value);
     }
 
     pub fn set_uniform_matrix(&mut self, uniform_name: &str, value: &Mat4f) {

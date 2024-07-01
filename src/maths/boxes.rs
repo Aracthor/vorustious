@@ -70,4 +70,5 @@ impl<const N: usize, T: MathsUsable> PartialEq for Box<N, T> {
     }
 }
 
+pub type Box3f = Box<3, f32>;
 pub type Box3i = Box<3, i32>;

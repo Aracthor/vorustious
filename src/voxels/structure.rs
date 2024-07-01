@@ -1,5 +1,7 @@
+use crate::maths::boxes::Box3f;
 use crate::maths::boxes::Box3i;
 use crate::maths::segment::Segm3f;
+use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use super::catalog::VoxelCatalog;
 use super::voxel::Voxel;
@@ -96,6 +98,12 @@ impl Structure {
             }
         }
         result
+    }
+
+    pub fn get_box(&self) -> Box3f {
+        let min = Vect3f::new([self.voxel_box.min()[0] as f32 - 0.5, self.voxel_box.min()[1] as f32 - 0.5, self.voxel_box.min()[2] as f32 - 0.5]);
+        let max = Vect3f::new([self.voxel_box.max()[0] as f32 + 0.5, self.voxel_box.max()[1] as f32 + 0.5, self.voxel_box.max()[2] as f32 + 0.5]);
+        Box3f::from_min_max(min, max)
     }
 
     pub fn has_voxel_on_coords(&self, coords: Vect3i) -> bool {
