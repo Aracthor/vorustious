@@ -48,6 +48,7 @@ impl Editor {
         }
 
         if event_handler.is_key_just_pressed(Key::F5) {
+            self.structure.recalculate_box();
             let str = self.structure.serialize();
             std::fs::write(SAVE_FILENAME, str).expect(&format!("Unable to save {SAVE_FILENAME}"));
             println!("Saved file '{SAVE_FILENAME}'");
