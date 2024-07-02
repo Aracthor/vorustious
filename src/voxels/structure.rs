@@ -100,6 +100,10 @@ impl Structure {
         result
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.every_voxel_is(|voxel| voxel.is_none())
+    }
+
     pub fn get_box(&self) -> Box3f {
         let min = Vect3f::new([self.voxel_box.min()[0] as f32 - 0.5, self.voxel_box.min()[1] as f32 - 0.5, self.voxel_box.min()[2] as f32 - 0.5]);
         let max = Vect3f::new([self.voxel_box.max()[0] as f32 + 0.5, self.voxel_box.max()[1] as f32 + 0.5, self.voxel_box.max()[2] as f32 + 0.5]);
@@ -154,6 +158,22 @@ impl Structure {
     pub fn remove_voxel_ifp(&mut self, coords: Vect3i) {
         let index = self.voxel_index(coords);
         self.data[index] = None;
+    }
+
+    pub fn every_voxel_is<F: Fn(&Option<Voxel>) -> bool>(&self, f: F) -> bool {
+        for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
+            for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
+                for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
+                    let coords = Vect3i::new([x, y, z]);
+                    let index = self.voxel_index(coords);
+                    let voxel = &self.data[index];
+                    if !f(voxel) {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
     }
 
     pub fn for_each_voxel<F: FnMut(Vect3i, &Voxel)>(&self, mut f: F) {

@@ -107,5 +107,7 @@ impl Battle {
             new_bodies.extend(body.update_dead_voxels());
         }
         self.body_list.inert_bodies.extend(new_bodies);
+
+        self.body_list.inert_bodies.retain(|body| !body.structure().is_empty());
     }
 }

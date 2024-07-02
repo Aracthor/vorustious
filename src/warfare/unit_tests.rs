@@ -184,3 +184,14 @@ fn body_cut_in_half_with_father_body_becoming_empty() {
     assert!(body.structure().clone() == expected_structure);
     assert!(new_bodies.len() == 2);
 }
+
+#[test]
+fn battle_forget_empty_bodies() {
+    let structure = Structure::new(-1, 1, 0, 0, 0, 0, TEST_DEAD_VOXEL);
+    let body = Body::new(structure, Mat4f::identity());
+    let mut battle = Battle::new();
+    battle.add_inert_body(body);
+
+    battle.update(1.0);
+    assert!(battle.bodies().is_empty());
+}
