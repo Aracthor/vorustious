@@ -1,10 +1,13 @@
 use std::collections::HashSet;
+use std::f32::consts::PI;
 
 use super::boxes::Box;
+use super::boxes::Box3f;
 use super::matrix::Mat3f;
 use super::matrix::Mat4f;
 use super::vector::Vect;
 use super::vector::Vect3f;
+use super::intersection;
 
 fn equals_with_delta(a: f32, b: f32, delta: f32) -> bool {
     (a - b).abs() < delta
@@ -286,4 +289,15 @@ fn view_matrix() {
     ]);
 
     assert!(mat_equals_with_delta(matrix, expected, 0.0001));
+}
+
+#[test]
+fn intersection_oob() {
+    let box_a = Box3f::from_min_max(Vect3f::new([-2.0, -2.0, -2.0]), Vect3f::new([2.0, 2.0, 2.0]));
+    let repere_a = Mat4f::identity();
+    let box_b = Box3f::from_min_max(Vect3f::new([-1.0, -1.0, -1.0]), Vect3f::new([1.0, 1.0, 1.0]));
+    let mut repere_b = Mat4f::translation(Vect3f::new([0.0, 3.5, 0.0])) * Mat4f::rotation_around_z(PI / 4.0);
+    assert!(!intersection::obb_intersect(box_a.clone(), &repere_a, box_b.clone(), &repere_b));
+    repere_b = Mat4f::translation(Vect3f::new([0.0, -0.1, 0.0])) * repere_b;
+    assert!(intersection::obb_intersect(box_a.clone(), &repere_a, box_b.clone(), &repere_b));
 }

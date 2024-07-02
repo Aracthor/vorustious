@@ -52,15 +52,8 @@ impl Body {
         }
 
         let new_repere = other.repere().clone() * Mat4f::translation(distance);
-        let repere_without_translation = {
-            let mut repere = other.repere().clone();
-            repere[3][0] = 0.0;
-            repere[3][1] = 0.0;
-            repere[3][2] = 0.0;
-            repere
-        };
         let radius_sq = distance.length_sq();
-        let local_distance = repere_without_translation.clone() * distance.normalize();
+        let local_distance = other.repere().without_translation() * distance.normalize();
         let angular_speed_x_sq = other.roll() * other.roll();
         let angular_speed_y_sq = other.pitch() * other.pitch();
         let angular_speed_z_sq = other.yaw() * other.yaw();

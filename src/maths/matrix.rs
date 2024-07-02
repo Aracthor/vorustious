@@ -116,6 +116,14 @@ impl<T: MathsUsable> Mat<4, T> {
         Vect::<3, T>::new([inverse[0][2], inverse[1][2], inverse[2][2]])
     }
 
+    pub fn without_translation(&self) -> Self {
+        let mut copy = self.clone();
+        copy[3][0] = T::from(0);
+        copy[3][1] = T::from(0);
+        copy[3][2] = T::from(0);
+        copy
+    }
+
     #[allow(dead_code)]
     pub fn translation(translate: Vect<3, T>) -> Self {
         let mut result = Self::identity();

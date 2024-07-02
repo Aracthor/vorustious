@@ -74,11 +74,26 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         true
     }
 
+    pub fn intersects(&self, other: Box<N, T>) -> bool {
+        for i in 0..N {
+            if self.min[i] >= other.max[i] || self.max[i] <= other.min[i] {
+                return false;
+            }
+        }
+        true
+    }
+
     pub fn add(&mut self, point: Vect<N, T>) {
         for i in 0..N {
             self.min[i] = num_traits::clamp_max(self.min[i], point[i]);
             self.max[i] = num_traits::clamp_min(self.max[i], point[i]);
         }
+    }
+}
+
+impl<T: MathsUsable> Box<1, T> {
+    pub fn add_value(&mut self, value: T) {
+        self.add(Vect::<1, T>::new([value]));
     }
 }
 
@@ -89,5 +104,6 @@ impl<const N: usize, T: MathsUsable> PartialEq for Box<N, T> {
     }
 }
 
+pub type Box1f = Box<1, f32>;
 pub type Box3f = Box<3, f32>;
 pub type Box3i = Box<3, i32>;
