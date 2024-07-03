@@ -93,7 +93,7 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         self.contains(other.min()) && self.contains(other.max())
     }
 
-    pub fn intersects(&self, other: Box<N, T>) -> bool {
+    pub fn intersects(&self, other: &Box<N, T>) -> bool {
         for i in 0..N {
             if self.min[i] >= other.max[i] || self.max[i] <= other.min[i] {
                 return false;

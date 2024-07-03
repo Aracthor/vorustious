@@ -13,7 +13,7 @@ fn projection_intersects(corners_a: &Vec<Vect3f>, corners_b: &Vec<Vect3f>, axis:
         range_a.add_value(Vect3f::dot(corners_a[i], axis));
         range_b.add_value(Vect3f::dot(corners_b[i], axis));
     }
-    range_a.intersects(range_b)
+    range_a.intersects(&range_b)
 }
 
 pub fn obb_intersect(box_a: Box3f, repere_a: &Mat4f, box_b: Box3f, repere_b: &Mat4f) -> bool {

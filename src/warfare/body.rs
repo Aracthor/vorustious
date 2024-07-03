@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
+use crate::maths::boxes::Box3f;
+use crate::maths::intersection;
 use crate::maths::matrix::Mat4f;
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
@@ -82,6 +84,15 @@ impl Body {
 
     pub fn structure(&self) -> &Structure {
         &self.structure
+    }
+
+    pub fn get_box(&self) -> Box3f {
+        let voxel_box = self.structure.get_box();
+        let mut result = Box3f::new();
+        for corner in voxel_box.corners() {
+            result.add(self.repere.clone() * corner);
+        }
+        result
     }
 
     pub fn yaw(&self) -> f32 {
@@ -216,5 +227,69 @@ impl Body {
             self.structure.recalculate_box();
         }
         new_bodies
+    }
+
+    fn taking_box(&self) -> Box3f {
+        let mut result = Box3f::from_min_max(Vect3f::new([-1.0, -1.0, -1.0]), Vect3f::new([1.0, 1.0, 1.0]));
+        let structure_box = self.structure.get_box();
+        let min_to_take = Vect3f::new([structure_box.min()[0] as f32 + 0.5, structure_box.min()[1] as f32 + 0.5, structure_box.min()[2] as f32 + 0.5]);
+        let max_to_take = Vect3f::new([structure_box.max()[0] as f32 + 0.5, structure_box.max()[1] as f32 + 0.5, structure_box.max()[2] as f32 + 0.5]);
+        let box_to_take_in = Box3f::from_min_max(min_to_take, max_to_take);
+        while !result.contains_box(&box_to_take_in) {
+            result = Box3f::from_min_max(result.min() * 2.0, result.max() * 2.0);
+        }
+        result
+    }
+
+    fn voxels_intersection_subbox(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f)-> Vec<(Vect3i, Vect3i)> {
+        assert!(box_a.extent()[0] > 1.0);
+        let boxes_to_try = box_a.subdivide();
+        let mut result: Vec<(Vect3i, Vect3i)> = vec![];
+        let structure_box = body_a.structure.get_box();
+        for subbox in boxes_to_try {
+            if structure_box.intersects(&subbox) {
+                result.extend(Self::voxels_intersection(body_a, subbox, body_b, box_b.clone()));
+            }
+        }
+        result
+    }
+
+    fn voxels_intersection(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f)-> Vec<(Vect3i, Vect3i)> {
+        let recenter = Vect3f::new([-0.5, -0.5, -0.5]);
+        let box_a_centered = Box3f::from_min_max(box_a.min() + recenter, box_a.max() + recenter);
+        let box_b_centered = Box3f::from_min_max(box_b.min() + recenter, box_b.max() + recenter);
+        if !intersection::obb_intersect(box_a_centered.clone(), body_a.repere(), box_b_centered.clone(), body_b.repere()) {
+            return vec![];
+        }
+
+        let size_a = box_a.extent()[0];
+        let size_b = box_b.extent()[0];
+        if size_a == 1.0 && size_b == 1.0 {
+            let box_a_center = box_a_centered.center();
+            let box_b_center = box_b_centered.center();
+            let voxel_a = Vect3i::new([box_a_center[0] as i32, box_a_center[1] as i32, box_a_center[2] as i32]);
+            let voxel_b = Vect3i::new([box_b_center[0] as i32, box_b_center[1] as i32, box_b_center[2] as i32]);
+            if body_a.structure.has_voxel_on_coords(voxel_a) && body_b.structure.has_voxel_on_coords(voxel_b) {
+                return vec![(voxel_a, voxel_b)];
+            }
+            return vec![];
+        }
+        if size_a < size_b {
+            let intersections = Self::voxels_intersection_subbox(body_b, box_b, body_a, box_a);
+            intersections.iter().map(|pair| (pair.1, pair.0)).collect()
+        } else {
+            Self::voxels_intersection_subbox(body_a, box_a, body_b, box_b)
+        }
+    }
+
+    pub fn intersection(body_a: &Self, body_b: &Self) -> Vec<(Vect3i, Vect3i)> {
+        let box_a = body_a.get_box();
+        let box_b = body_b.get_box();
+        if !box_a.intersects(&box_b) {
+            return Default::default();
+        }
+        let englobing_box_a = body_a.taking_box();
+        let englobing_box_b = body_b.taking_box();
+        Self::voxels_intersection(body_a, englobing_box_a, body_b, englobing_box_b)
     }
 }

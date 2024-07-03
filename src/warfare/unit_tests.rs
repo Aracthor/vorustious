@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
@@ -183,6 +185,51 @@ fn body_cut_in_half_with_father_body_becoming_empty() {
 
     assert!(body.structure().clone() == expected_structure);
     assert!(new_bodies.len() == 2);
+}
+
+#[test]
+fn body_cube_intersection() {
+    // Cubes with same axis, with a corner voxel half-mingled.
+    //        +-------+
+    //        |       |
+    //        |       |
+    //        |       |
+    // +------++------+
+    // |      ++
+    // |       |
+    // |       |
+    // +-------+
+    let structure_square = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
+    let body_a = Body::new(structure_square.clone(), Mat4f::identity());
+    let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([2.5, 2.5, 2.5])));
+    let result = Body::intersection(&body_a, &body_b);
+    assert!(result.len() == 1);
+    assert!(result[0] == (Vect3i::new([1, 1, 1]), Vect3i::new([-1, -1, -1])));
+
+    // Same, in the other side.
+    let body_a = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([-2.0, 3.0, -2.0])));
+    let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([-4.5, 0.5, -4.5])));
+    let result = Body::intersection(&body_a, &body_b);
+    assert!(result.len() == 1);
+    assert!(result[0] == (Vect3i::new([-1, -1, -1]), Vect3i::new([1, 1, 1])));
+
+    // A cube rotated with a corner on the top of another.
+    //     +
+    //    / \
+    //  /     \
+    // +       +
+    //  \     /
+    //    \ /
+    // +---+---+
+    // |       |
+    // |       |
+    // |       |
+    // +-------+
+    let body_a = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 0.0])));
+    let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 4.0])) * Mat4f::rotation_around_y(PI / 5.0) * Mat4f::rotation_around_x(PI / 4.0));
+    let result = Body::intersection(&body_a, &body_b);
+    assert!(result.len() == 1);
+    assert!(result[0] == (Vect3i::new([0, 0, 1]), Vect3i::new([1, -1, -1])));
 }
 
 #[test]
