@@ -321,10 +321,20 @@ fn view_matrix() {
 #[test]
 fn intersection_oob() {
     let box_a = Box3f::from_min_max(Vect3f::new([-2.0, -2.0, -2.0]), Vect3f::new([2.0, 2.0, 2.0]));
-    let repere_a = Mat4f::identity();
+    let mut repere_a = Mat4f::identity();
     let box_b = Box3f::from_min_max(Vect3f::new([-1.0, -1.0, -1.0]), Vect3f::new([1.0, 1.0, 1.0]));
     let mut repere_b = Mat4f::translation(Vect3f::new([0.0, 3.5, 0.0])) * Mat4f::rotation_around_z(PI / 4.0);
     assert!(!intersection::obb_intersect(box_a.clone(), &repere_a, box_b.clone(), &repere_b));
+    assert!(!intersection::obb_intersect(box_b.clone(), &repere_b, box_a.clone(), &repere_a));
     repere_b = Mat4f::translation(Vect3f::new([0.0, -0.1, 0.0])) * repere_b;
     assert!(intersection::obb_intersect(box_a.clone(), &repere_a, box_b.clone(), &repere_b));
+    assert!(intersection::obb_intersect(box_b.clone(), &repere_b, box_a.clone(), &repere_a));
+
+    repere_a = Mat4f::rotation_around_x(PI / 4.0) * repere_a;
+    repere_b = Mat4f::rotation_around_x(PI / 4.0) * repere_b;
+    assert!(intersection::obb_intersect(box_a.clone(), &repere_a, box_b.clone(), &repere_b));
+    assert!(intersection::obb_intersect(box_b.clone(), &repere_b, box_a.clone(), &repere_a));
+    repere_b = Mat4f::translation(Vect3f::new([0.0, 0.1, 0.0])) * repere_b;
+    assert!(!intersection::obb_intersect(box_a.clone(), &repere_a, box_b.clone(), &repere_b));
+    assert!(!intersection::obb_intersect(box_b.clone(), &repere_b, box_a.clone(), &repere_a));
 }
