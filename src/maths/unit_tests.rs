@@ -2,10 +2,12 @@ use std::collections::HashSet;
 use std::f32::consts::PI;
 
 use super::boxes::Box;
+use super::boxes::Box3i;
 use super::boxes::Box3f;
 use super::matrix::Mat3f;
 use super::matrix::Mat4f;
 use super::vector::Vect;
+use super::vector::Vect3i;
 use super::vector::Vect3f;
 use super::intersection;
 
@@ -98,6 +100,31 @@ fn box_corners() {
     let sorted_corners = HashSet::<Vect<3, i32>>::from_iter(corners.into_iter());
     assert!(sorted_expected_corners == sorted_corners);
 }
+
+#[test]
+fn box_subdivide() {
+    let boxe = Box3i::from_min_max(Vect3i::new([-1, -1, -1]), Vect3i::new([3, 3, 3]));
+    let subdivisions = boxe.subdivide();
+    let expected_result = vec![
+        Box3i::from_min_max(Vect3i::new([-1, -1, -1]), Vect3i::new([1, 1, 1])),
+        Box3i::from_min_max(Vect3i::new([-1, -1, 1]), Vect3i::new([1, 1, 3])),
+        Box3i::from_min_max(Vect3i::new([-1, 1, -1]), Vect3i::new([1, 3, 1])),
+        Box3i::from_min_max(Vect3i::new([-1, 1, 1]), Vect3i::new([1, 3, 3])),
+        Box3i::from_min_max(Vect3i::new([1, -1, -1]), Vect3i::new([3, 1, 1])),
+        Box3i::from_min_max(Vect3i::new([1, -1, 1]), Vect3i::new([3, 1, 3])),
+        Box3i::from_min_max(Vect3i::new([1, 1, -1]), Vect3i::new([3, 3, 1])),
+        Box3i::from_min_max(Vect3i::new([1, 1, 1]), Vect3i::new([3, 3, 3])),
+    ];
+
+    // Order is not important, we just want to check if every item is in both list.
+    let sorted_expected_subdivisions = HashSet::<Box3i>::from_iter(expected_result.into_iter());
+    let sorted_subdivisions = HashSet::<Box3i>::from_iter(subdivisions.into_iter());
+    assert!(sorted_expected_subdivisions == sorted_subdivisions);
+    for subdivision in sorted_subdivisions {
+        assert!(boxe.contains_box(&subdivision));
+    }
+}
+
 
 #[test]
 fn matrix_determinant() {

@@ -1,7 +1,7 @@
 use super::traits::MathsUsable;
 use super::vector::Vect;
 
-#[derive(Clone)]
+#[derive(Clone, Hash)]
 pub struct Box<const N: usize, T: MathsUsable> {
     min: Vect<N, T>,
     max: Vect<N, T>,
@@ -65,6 +65,21 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
         result
     }
 
+    pub fn subdivide(&self) -> Vec<Box<N, T>> {
+        let center = self.center();
+        let subdivision_count = 2_u32.pow(N as u32) as usize;
+        let mut result = vec![Box::<N, T>::zero(); subdivision_count];
+        for n in 0..N {
+            for i in 0..subdivision_count {
+                let low = i / 2_usize.pow(n as u32) % 2 == 0;
+                result[i].min[n] = if low { self.min[n] } else { center[n] };
+                result[i].max[n] = if low { center[n] } else { self.max[n] };
+            }
+        }
+        result
+
+    }
+
     pub fn contains(&self, point: Vect<N, T>) -> bool {
         for i in 0..N {
             if point[i] < self.min[i] || point[i] > self.max[i] {
@@ -72,6 +87,10 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
             }
         }
         true
+    }
+
+    pub fn contains_box(&self, other: &Box<N, T>) -> bool {
+        self.contains(other.min()) && self.contains(other.max())
     }
 
     pub fn intersects(&self, other: Box<N, T>) -> bool {
