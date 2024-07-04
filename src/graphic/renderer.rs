@@ -70,12 +70,9 @@ fn positions_from_box(min: Vect3f, max: Vect3f) -> Vec<f32> {
 }
 
 impl Renderer {
-    pub fn new(window_width: f32, window_height: f32) -> Self {
+    pub fn new(window_width: f32, window_height: f32, fov: f32, z_near: f32, z_far: f32) -> Self {
         let projection_matrix = {
-            let fov = 85.0_f32.to_radians();
             let aspect = window_width / window_height;
-            let z_near = 3.0;
-            let z_far = 1000.0;
             Mat4f::perspective(fov, aspect, z_near, z_far)
         };
         let ui_projection_matrix = Mat4f::orthographic(0.0, window_width, 0.0, window_height);

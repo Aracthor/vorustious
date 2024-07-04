@@ -142,7 +142,7 @@ pub fn run_editor() {
     const WINDOW_HEIGHT:u32 = 600;
 
     let mut window = Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious - Editor");
-    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32);
+    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32, 80.0_f32.to_radians(), 0.1, 1000.0);
 
     let mut camera = Camera::new();
     let mut editor = Editor::new();
