@@ -5,8 +5,6 @@ mod warfare;
 
 mod editor;
 
-use editor::Editor;
-use graphic::camera::Camera;
 use graphic::renderer::Renderer;
 use graphic::windowing::event_handler::EventHandler;
 use graphic::windowing::window::Window;
@@ -19,23 +17,6 @@ use voxels::catalog::VoxelCatalog;
 use warfare::battle::Battle;
 use warfare::body::Body;
 use warfare::weapon::Weapon;
-
-fn run_editor(window: &mut Window, renderer: &mut Renderer) {
-    let mut camera = Camera::new();
-    let mut editor = Editor::new();
-
-    while !window.should_close() {
-        camera.update_from_events(&window.event_handler());
-        editor.update_from_events(&camera, &window.event_handler());
-
-        window.clear();
-
-        let bodies = vec![Body::new(editor.structure.clone(), Mat4f::identity())];
-        renderer.render_frame(camera.view_matrix(), bodies.iter().collect(), &vec![], Some(&editor));
-
-        window.update();
-    }
-}
 
 fn update_player_body_from_events(player_body: &mut Body, event_handler: &EventHandler) {
     let forward = player_body.repere().forward();
@@ -67,7 +48,13 @@ fn update_player_body_from_events(player_body: &mut Body, event_handler: &EventH
     player_body.scale_movement(0.95);
 }
 
-fn run_battle(window: &mut Window, renderer: &mut Renderer) {
+fn run_battle() {
+    const WINDOW_WIDTH:u32 = 800;
+    const WINDOW_HEIGHT:u32 = 600;
+
+    let mut window = Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious");
+    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32);
+
     let mut battle = Battle::new();
 
     let voxel_catalog = VoxelCatalog::create();
@@ -126,17 +113,11 @@ fn run_battle(window: &mut Window, renderer: &mut Renderer) {
 }
 
 fn main() {
-    const WINDOW_WIDTH:u32 = 800;
-    const WINDOW_HEIGHT:u32 = 600;
-
-    let mut window = Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious");
-    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32);
-
     let first_arg = std::env::args().nth(1);
     if first_arg.is_some() && first_arg.unwrap() == "editor" {
-        run_editor(&mut window, &mut renderer);
+        editor::run_editor();
     }
     else {
-        run_battle(&mut window, &mut renderer);
+        run_battle();
     }
 }

@@ -1,13 +1,17 @@
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3i;
+use crate::maths::matrix::Mat4f;
 use crate::graphic::camera::Camera;
+use crate::graphic::renderer::Renderer;
 use crate::graphic::windowing::event_handler::EventHandler;
 use crate::graphic::windowing::event_handler::Key;
 use crate::graphic::windowing::event_handler::MouseButton;
+use crate::graphic::windowing::window::Window;
 use crate::voxels::structure::Structure;
 use crate::voxels::catalog::VoxelCatalog;
 use crate::voxels::voxel::Voxel;
 use crate::voxels::voxel::VoxelID;
+use crate::warfare::body::Body;
 
 pub struct Editor {
     pub structure: Structure,
@@ -23,7 +27,7 @@ pub struct Editor {
 const SAVE_FILENAME: &str = "save.vors";
 
 impl Editor {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             structure: Structure::new(0, 0, 0, 0, 0, 0, Voxel{id: VoxelID::ShipCore, life: 5.0}),
             voxel_position: None,
@@ -36,7 +40,7 @@ impl Editor {
         }
     }
 
-    pub fn update_from_events(&mut self, camera: &Camera, event_handler: &EventHandler) {
+    fn update_from_events(&mut self, camera: &Camera, event_handler: &EventHandler) {
         if event_handler.is_ctrl_pressed() && event_handler.is_key_just_pressed(Key::X) {
             self.symetry_x = !self.symetry_x;
         }
@@ -133,3 +137,25 @@ impl Editor {
     }
 }
 
+pub fn run_editor() {
+    const WINDOW_WIDTH:u32 = 800;
+    const WINDOW_HEIGHT:u32 = 600;
+
+    let mut window = Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious - Editor");
+    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32);
+
+    let mut camera = Camera::new();
+    let mut editor = Editor::new();
+
+    while !window.should_close() {
+        camera.update_from_events(&window.event_handler());
+        editor.update_from_events(&camera, &window.event_handler());
+
+        window.clear();
+
+        let bodies = vec![Body::new(editor.structure.clone(), Mat4f::identity())];
+        renderer.render_frame(camera.view_matrix(), bodies.iter().collect(), &vec![], Some(&editor));
+
+        window.update();
+    }
+}
