@@ -233,6 +233,67 @@ fn body_cube_intersection() {
 }
 
 #[test]
+fn body_heavy_intersection() {
+    let structure_h = {
+        let mut structure = Structure::new(0, 0, 0, 0, 0, 0, TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([1, 0, 0]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([2, 0, 0]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([3, 0, 0]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-1, 0, 0]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-2, 0, 0]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-3, 0, 0]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-3, 0, 1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-3, 0, -1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-3, 0, 2]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-3, 0, -2]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-3, 0, 3]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([-3, 0, -3]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([3, 0, 1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([3, 0, -1]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([3, 0, 2]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([3, 0, -2]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([3, 0, 3]), TEST_VOXEL);
+        structure.add_voxel(Vect3i::new([3, 0, -3]), TEST_VOXEL);
+        structure
+    };
+
+    // Two structure where their global boxes heavily collide, but their voxels don't.
+    //     |     |
+    //     |     |
+    //     +-----+
+    //     |     |
+    //  |  |  |  |
+    //  |     |
+    //  +-----+
+    //  |     |
+    //  |     |
+    let body_a = Body::new(structure_h.clone(), Mat4f::identity());
+    let body_b = Body::new(structure_h.clone(), Mat4f::translation(Vect3f::new([1.5, 0.0, 4.5])));
+    assert!(Body::intersection(&body_a, &body_b).is_empty());
+
+    // Two structure with two intersections.
+    //  |     |
+    //  |     |
+    //  +-----+
+    //  |     |
+    //  X     X
+    //  |     |
+    //  +-----+
+    //  |     |
+    //  |     |
+    let body_a = Body::new(structure_h.clone(), Mat4f::identity());
+    let body_b = Body::new(structure_h.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 6.5])));
+    let result = Body::intersection(&body_a, &body_b);
+    assert!(result.len() == 2);
+    let expected_result_1 = (Vect3i::new([-3, 0, 3]), Vect3i::new([-3, 0, -3]));
+    let expected_result_2 = (Vect3i::new([3, 0, 3]), Vect3i::new([3, 0, -3]));
+    assert!(
+        (result[0] == expected_result_1 && result[1] == expected_result_2) ||
+        (result[0] == expected_result_2 && result[1] == expected_result_1));
+}
+
+
+#[test]
 fn battle_forget_empty_bodies() {
     let structure = Structure::new(-1, 1, 0, 0, 0, 0, TEST_DEAD_VOXEL);
     let body = Body::new(structure, Mat4f::identity());
