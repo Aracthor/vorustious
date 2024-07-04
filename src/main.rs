@@ -4,6 +4,7 @@ mod voxels;
 mod warfare;
 
 mod editor;
+mod profiler;
 
 use graphic::renderer::Renderer;
 use graphic::windowing::event_handler::EventHandler;
@@ -114,8 +115,10 @@ fn run_battle() {
 
 fn main() {
     let first_arg = std::env::args().nth(1);
-    if first_arg.is_some() && first_arg.unwrap() == "editor" {
+    if first_arg.is_some() && first_arg.as_ref().unwrap() == "editor" {
         editor::run_editor();
+    } else if first_arg.is_some() && first_arg.as_ref().unwrap() == "profile" {
+        profiler::run_profiler();
     }
     else {
         run_battle();
