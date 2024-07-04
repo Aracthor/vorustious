@@ -3,6 +3,7 @@ use std::collections::VecDeque;
 
 use crate::maths::boxes::Box3f;
 use crate::maths::intersection;
+use crate::maths::intersection::OBBAxis;
 use crate::maths::matrix::Mat4f;
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
@@ -241,24 +242,24 @@ impl Body {
         result
     }
 
-    fn voxels_intersection_subbox(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f)-> Vec<(Vect3i, Vect3i)> {
+    fn voxels_intersection_subbox(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f, axis: &OBBAxis)-> Vec<(Vect3i, Vect3i)> {
         assert!(box_a.extent()[0] > 1.0);
         let boxes_to_try = box_a.subdivide();
         let mut result: Vec<(Vect3i, Vect3i)> = vec![];
         let structure_box = body_a.structure.get_box();
         for subbox in boxes_to_try {
             if structure_box.intersects(&subbox) {
-                result.extend(Self::voxels_intersection(body_a, subbox, body_b, box_b.clone()));
+                result.extend(Self::voxels_intersection(body_a, subbox, body_b, box_b.clone(), axis));
             }
         }
         result
     }
 
-    fn voxels_intersection(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f)-> Vec<(Vect3i, Vect3i)> {
+    fn voxels_intersection(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f, axis: &OBBAxis)-> Vec<(Vect3i, Vect3i)> {
         let recenter = Vect3f::new([-0.5, -0.5, -0.5]);
         let box_a_centered = Box3f::from_min_max(box_a.min() + recenter, box_a.max() + recenter);
         let box_b_centered = Box3f::from_min_max(box_b.min() + recenter, box_b.max() + recenter);
-        if !intersection::obb_intersect(box_a_centered.clone(), body_a.repere(), box_b_centered.clone(), body_b.repere()) {
+        if !intersection::obb_intersect_with_axis(box_a_centered.clone(), body_a.repere(), box_b_centered.clone(), body_b.repere(), axis) {
             return vec![];
         }
 
@@ -275,14 +276,15 @@ impl Body {
             return vec![];
         }
         if size_a < size_b {
-            let intersections = Self::voxels_intersection_subbox(body_b, box_b, body_a, box_a);
+            let intersections = Self::voxels_intersection_subbox(body_b, box_b, body_a, box_a, axis);
             intersections.iter().map(|pair| (pair.1, pair.0)).collect()
         } else {
-            Self::voxels_intersection_subbox(body_a, box_a, body_b, box_b)
+            Self::voxels_intersection_subbox(body_a, box_a, body_b, box_b, axis)
         }
     }
 
     pub fn intersection(body_a: &Self, body_b: &Self) -> Vec<(Vect3i, Vect3i)> {
+        let axis = intersection::boxes_projection_axis(body_a.repere(), body_b.repere());
         let box_a = body_a.get_box();
         let box_b = body_b.get_box();
         if !box_a.intersects(&box_b) {
@@ -290,6 +292,6 @@ impl Body {
         }
         let englobing_box_a = body_a.taking_box();
         let englobing_box_b = body_b.taking_box();
-        Self::voxels_intersection(body_a, englobing_box_a, body_b, englobing_box_b)
+        Self::voxels_intersection(body_a, englobing_box_a, body_b, englobing_box_b, &axis)
     }
 }
