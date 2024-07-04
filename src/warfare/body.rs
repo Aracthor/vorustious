@@ -242,19 +242,6 @@ impl Body {
         result
     }
 
-    fn voxels_intersection_subbox(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f, axis: &OBBAxis)-> Vec<(Vect3i, Vect3i)> {
-        assert!(box_a.extent()[0] > 1.0);
-        let boxes_to_try = box_a.subdivide();
-        let mut result: Vec<(Vect3i, Vect3i)> = vec![];
-        let structure_box = body_a.structure.get_box();
-        for subbox in boxes_to_try {
-            if structure_box.intersects(&subbox) {
-                result.extend(Self::voxels_intersection(body_a, subbox, body_b, box_b.clone(), axis));
-            }
-        }
-        result
-    }
-
     fn voxels_intersection(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f, axis: &OBBAxis)-> Vec<(Vect3i, Vect3i)> {
         let recenter = Vect3f::new([-0.5, -0.5, -0.5]);
         let box_a_centered = Box3f::from_min_max(box_a.min() + recenter, box_a.max() + recenter);
@@ -275,12 +262,24 @@ impl Body {
             }
             return vec![];
         }
+
+        let mut result: Vec<(Vect3i, Vect3i)> = vec![];
         if size_a < size_b {
-            let intersections = Self::voxels_intersection_subbox(body_b, box_b, body_a, box_a, axis);
-            intersections.iter().map(|pair| (pair.1, pair.0)).collect()
+            let structure_box = body_b.structure.get_box();
+            for subbox in box_b.subdivide() {
+                if structure_box.intersects(&subbox) {
+                    result.extend(Self::voxels_intersection(body_a, box_a.clone(), body_b, subbox, axis));
+                }
+            }
         } else {
-            Self::voxels_intersection_subbox(body_a, box_a, body_b, box_b, axis)
+            let structure_box = body_a.structure.get_box();
+            for subbox in box_a.subdivide() {
+                if structure_box.intersects(&subbox) {
+                    result.extend(Self::voxels_intersection(body_a, subbox, body_b, box_b.clone(), axis));
+                }
+            }
         }
+        result
     }
 
     pub fn intersection(body_a: &Self, body_b: &Self) -> Vec<(Vect3i, Vect3i)> {
