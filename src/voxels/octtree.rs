@@ -137,6 +137,7 @@ impl Octcell {
     }
 }
 
+#[derive(Clone)]
 pub struct Octtree {
     root: Octcell
 }

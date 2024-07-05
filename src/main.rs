@@ -84,11 +84,17 @@ fn run_battle() {
             battle.add_projectiles(projectiles);
         }
 
+        if window.event_handler().is_key_just_pressed(Key::F1) {
+            renderer.toggle_debug_bodies();
+        }
         if window.event_handler().is_key_just_pressed(Key::F3) {
             renderer.toggle_debug_boxes();
         }
         if window.event_handler().is_key_just_pressed(Key::F4) {
             renderer.toggle_gizmo();
+        }
+        if window.event_handler().is_key_just_pressed(Key::F8) {
+            renderer.toggle_octtree();
         }
 
         if window.event_handler().is_key_just_pressed(Key::P) {

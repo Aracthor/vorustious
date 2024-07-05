@@ -4,11 +4,13 @@ use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use super::catalog::VoxelCatalog;
+use super::octtree::Octtree;
 use super::voxel::Voxel;
 
 #[derive(Clone)]
 pub struct Structure {
     voxel_box: Box3i,
+    octtree: Octtree,
     data: Vec<Option<Voxel>>,
 }
 
@@ -16,6 +18,7 @@ impl Structure {
     pub fn new_empty() -> Self {
         Self {
             voxel_box: Box3i::zero(),
+            octtree: Octtree::new(16),
             data: vec![None; 1],
         }
     }
@@ -25,8 +28,19 @@ impl Structure {
         let extent_y = max_y - min_y + 1;
         let extent_z = max_z - min_z + 1;
         let vec_size: usize = (extent_x * extent_y * extent_z).try_into().unwrap();
+        let mut tree = Octtree::new(16);
+        for z in min_z..max_z + 1 {
+            for y in min_y..max_y + 1 {
+                for x in min_x..max_x + 1 {
+                    let coord = Vect3i::new([x, y, z]);
+                    tree.add_voxel(coord);
+                }
+            }
+        }
+
         Self {
             voxel_box: Box3i::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
+            octtree: tree,
             data: vec![Some(voxel); vec_size],
         }
     }
@@ -38,6 +52,7 @@ impl Structure {
         let vec_size: usize = (extent_x * extent_y * extent_z).try_into().unwrap();
         Self {
             voxel_box: Box3i::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
+            octtree: Octtree::new(16),
             data: vec![None; vec_size],
         }
     }
@@ -110,6 +125,10 @@ impl Structure {
         Box3f::from_min_max(min, max)
     }
 
+    pub fn octtree(&self) -> &Octtree {
+        &self.octtree
+    }
+
     pub fn recalculate_box(&mut self) {
         let mut new_box = Box3i::new();
         self.for_each_voxel(|coord, _voxel| new_box.add(coord));
@@ -145,6 +164,7 @@ impl Structure {
         }
         let index = self.voxel_index(coords);
         self.data[index] = Some(voxel);
+        self.octtree.add_voxel(coords);
     }
 
     pub fn remove_voxel(&mut self, coords: Vect3i) -> Voxel {
@@ -152,12 +172,14 @@ impl Structure {
         assert!(self.data[index].is_some());
         let voxel = self.data[index].unwrap();
         self.data[index] = None;
+        self.octtree.remove_voxel(coords);
         voxel
     }
 
     pub fn remove_voxel_ifp(&mut self, coords: Vect3i) {
         let index = self.voxel_index(coords);
         self.data[index] = None;
+        self.octtree.remove_voxel(coords);
     }
 
     pub fn every_voxel_is<F: Fn(&Option<Voxel>) -> bool>(&self, f: F) -> bool {
