@@ -1,11 +1,51 @@
 use crate::maths::boxes::Box3f;
+use crate::maths::boxes::Box3i;
 use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use super::structure::Structure;
 use super::catalog::VoxelCatalog;
+use super::octtree::Octtree;
 use super::voxel::Voxel;
 use super::voxel::VoxelID;
+
+fn assert_octtree_equals(tree: &Octtree, expected_boxes: &Vec<Box3i>) {
+    let mut count = 0;
+    tree.walk(&mut |oct, _| {
+        assert!(expected_boxes.contains(&oct));
+        count += 1;
+    });
+    assert!(count == expected_boxes.len());
+}
+
+#[test]
+fn octtree() {
+    let mut tree = Octtree::new(4);
+    tree.add_voxel(Vect3i::new([1, 1, -1]));
+    let big_box = Box3i::from_min_max(Vect3i::new([-4, -4, -4]), Vect3i::new([4, 4, 4]));
+    let sub_box = Box3i::from_min_max(Vect3i::new([0, 0, -4]), Vect3i::new([4, 4, 0]));
+    let sub_sub_box = Box3i::from_min_max(Vect3i::new([0, 0, -2]), Vect3i::new([2, 2, 0]));
+    let mut expected_boxes = vec![big_box.clone()];
+    expected_boxes.extend(big_box.subdivide());
+    expected_boxes.extend(sub_box.subdivide());
+    expected_boxes.extend(sub_sub_box.subdivide());
+
+    assert_octtree_equals(&tree, &expected_boxes);
+
+    tree.add_voxel(Vect3i::new([2, 1, -1]));
+    tree.add_voxel(Vect3i::new([-4, -4, -4]));
+    let new_sub_box = Box3i::from_min_max(Vect3i::new([-4, -4, -4]), Vect3i::new([0, 0, 0]));
+    let new_sub_sub_box = Box3i::from_min_max(Vect3i::new([-4, -4, -4]), Vect3i::new([-2, -2, -2]));
+    let mut new_expected_boxes = expected_boxes.clone();
+    new_expected_boxes.extend(new_sub_box.subdivide());
+    new_expected_boxes.extend(new_sub_sub_box.subdivide());
+
+    assert_octtree_equals(&tree, &new_expected_boxes);
+
+    tree.remove_voxel(Vect3i::new([-4, -4, -4]));
+
+    assert_octtree_equals(&tree, &expected_boxes);
+}
 
 const TEST_VOXEL: Voxel = Voxel{
     life: 1.0,
