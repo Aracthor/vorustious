@@ -231,7 +231,7 @@ impl Body {
     }
 
     fn taking_box(&self) -> Box3f {
-        let mut result = Box3f::from_min_max(Vect3f::new([-1.0, -1.0, -1.0]), Vect3f::new([1.0, 1.0, 1.0]));
+        let mut result = Box3f::from_min_max(Vect3f::all(-1.0), Vect3f::all(1.0));
         let structure_box = self.structure.get_box();
         let min_to_take = Vect3f::new([structure_box.min()[0] as f32 + 0.5, structure_box.min()[1] as f32 + 0.5, structure_box.min()[2] as f32 + 0.5]);
         let max_to_take = Vect3f::new([structure_box.max()[0] as f32 + 0.5, structure_box.max()[1] as f32 + 0.5, structure_box.max()[2] as f32 + 0.5]);
@@ -243,7 +243,7 @@ impl Body {
     }
 
     fn voxels_intersection(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f, axis: &OBBAxis)-> Vec<(Vect3i, Vect3i)> {
-        let recenter = Vect3f::new([-0.5, -0.5, -0.5]);
+        let recenter = Vect3f::all(-0.5);
         let box_a_centered = Box3f::from_min_max(box_a.min() + recenter, box_a.max() + recenter);
         let box_b_centered = Box3f::from_min_max(box_b.min() + recenter, box_b.max() + recenter);
         if !intersection::obb_intersect_with_axis(box_a_centered.clone(), body_a.repere(), box_b_centered.clone(), body_b.repere(), axis) {

@@ -9,11 +9,15 @@ pub struct Vect<const N: usize, T: MathsUsable> {
 }
 
 impl<const N: usize, T: MathsUsable> Vect<N, T> {
-    pub fn new(data: [T; N]) -> Vect<N, T> {
+    pub fn new(data: [T; N]) -> Self {
         Self { data: data }
     }
 
-    pub fn from_slice(data: &[T]) -> Vect<N, T> {
+    pub fn all(value: T) -> Self {
+        Self { data: [value; N] }
+    }
+
+    pub fn from_slice(data: &[T]) -> Self {
         let mut result = Self::zero();
         for i in 0..N {
             result[i] = data[i];

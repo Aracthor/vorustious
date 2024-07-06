@@ -311,8 +311,8 @@ impl Structure {
 
         let mut new_segment = segment.clone();
 
-        new_segment.start += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);
-        new_segment.end += crate::maths::vector::Vect3f::new([0.5, 0.5, 0.5]);
+        new_segment.start += Vect3f::all(0.5);
+        new_segment.end += Vect3f::all(0.5);
 
         let dir = new_segment.direction();
 

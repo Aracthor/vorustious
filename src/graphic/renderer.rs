@@ -309,7 +309,7 @@ impl Renderer {
 
             if self.show_octtree {
                 body.structure().octtree().walk(&mut |oct, _| {
-                    let recenter = Vect3f::new([0.5, 0.5, 0.5]);
+                    let recenter = Vect3f::all(0.5);
                     let min = Vect3f::new([oct.min()[0] as f32, oct.min()[1] as f32, oct.min()[2] as f32]) + recenter;
                     let max = Vect3f::new([oct.max()[0] as f32, oct.max()[1] as f32, oct.max()[2] as f32]) + recenter;
                     let positions = positions_from_box(min, max);
