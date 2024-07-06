@@ -80,6 +80,22 @@ fn box_funcs() {
 }
 
 #[test]
+fn box_intersects() {
+    let boxe = Box3i::from_min_max(Vect3i::new([2, 1, -2]), Vect3i::new([4, 4, -1]));
+
+    let boxes_to_try = [
+        Box3i::from_min_max(Vect3i::new([2, 1, -2]), Vect3i::new([4, 4, -1])),
+        Box3i::from_min_max(Vect3i::new([2, 1, -2]), Vect3i::new([2, 1, -2])),
+        Box3i::from_min_max(Vect3i::new([-10, -10, -10]), Vect3i::new([10, 10, 10])),
+    ];
+
+    for box_to_try in boxes_to_try {
+        assert!(boxe.intersects(&box_to_try));
+        assert!(box_to_try.intersects(&boxe));
+    }
+}
+
+#[test]
 fn box_corners() {
     let boxe = Box3i::from_min_max(Vect3i::new([-3, -2, 1]), Vect3i::new([1, 4, 4]));
     let expected_corners = vec!
