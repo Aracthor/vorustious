@@ -23,16 +23,16 @@ fn update_player_body_from_events(player_body: &mut Body, event_handler: &EventH
     let forward = player_body.repere().forward();
     let right = player_body.repere().right();
     if event_handler.is_key_pressed(Key::W) {
-        player_body.add_to_movement(forward);
+        player_body.add_to_velocity(forward);
     }
     if event_handler.is_key_pressed(Key::S) {
-        player_body.add_to_movement(-forward);
+        player_body.add_to_velocity(-forward);
     }
     if event_handler.is_key_pressed(Key::D) {
-        player_body.add_to_movement(right);
+        player_body.add_to_velocity(right);
     }
     if event_handler.is_key_pressed(Key::A) {
-        player_body.add_to_movement(-right);
+        player_body.add_to_velocity(-right);
     }
 
     if event_handler.is_key_pressed(Key::E) {
@@ -46,7 +46,7 @@ fn update_player_body_from_events(player_body: &mut Body, event_handler: &EventH
     player_body.add_pitch_rotation(cursor_movement.1 as f32 / 100.0);
 
     player_body.scale_rotation(0.9);
-    player_body.scale_movement(0.95);
+    player_body.scale_velocity(0.95);
 }
 
 fn run_battle() {

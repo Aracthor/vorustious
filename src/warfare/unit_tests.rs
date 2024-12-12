@@ -21,23 +21,23 @@ const TEST_DEAD_VOXEL: Voxel = Voxel{
 };
 
 #[test]
-fn projectile_movement() {
+fn projectile_velocity() {
     let initial_position = Vect3f::new([0.0, 0.0, 2.0]);
-    let movement = Vect3f::new([10.0, -20.0, 0.0]);
-    let mut projectile = Projectile::new(initial_position, movement, 1.0, f32::MAX);
+    let velocity = Vect3f::new([10.0, -20.0, 0.0]);
+    let mut projectile = Projectile::new(initial_position, velocity, 1.0, f32::MAX);
     projectile.moove(2.0);
     projectile.moove(2.0);
     projectile.moove(2.0);
-    let expected_position = initial_position + movement * 6.0;
+    let expected_position = initial_position + velocity * 6.0;
     assert!(projectile.position() == expected_position);
 }
 
 #[test]
 fn projectile_max_distance() {
     let initial_position = Vect3f::zero();
-    let movement = Vect3f::new([10.0, 0.0, 0.0]);
+    let velocity = Vect3f::new([10.0, 0.0, 0.0]);
     let max_distance = 25.0;
-    let mut projectile = Projectile::new(initial_position, movement, 1.0, max_distance);
+    let mut projectile = Projectile::new(initial_position, velocity, 1.0, max_distance);
     projectile.moove(1.0);
     assert!(!projectile.is_out_of_max_range());
     projectile.moove(1.0);
@@ -53,12 +53,12 @@ fn projectile_damage() {
     battle.add_inert_body(Body::new(structure, Mat4f::identity()));
 
     let initial_position = Vect3f::new([-10.0, 1.0, 1.0]);
-    let movement = Vect3f::new([10.0, 0.0, 0.0]);
-    battle.add_projectile(Projectile::new(initial_position, movement, 1.0, f32::MAX));
+    let velocity = Vect3f::new([10.0, 0.0, 0.0]);
+    battle.add_projectile(Projectile::new(initial_position, velocity, 1.0, f32::MAX));
     battle.update(1.0);
     assert!(battle.bodies()[0].structure().get_voxel(Vect3i::new([-1, 1, 1])).unwrap().life == 1.0);
 
-    battle.add_projectile(Projectile::new(initial_position, movement, 1.0, f32::MAX));
+    battle.add_projectile(Projectile::new(initial_position, velocity, 1.0, f32::MAX));
     battle.update(1.0);
     assert!(battle.bodies()[0].structure().get_voxel(Vect3i::new([-1, 1, 1])).is_none());
 }
@@ -69,27 +69,27 @@ fn projectile_damage_on_moving_body() {
     let structure = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
     let mut expected_structure = structure.clone();
     let mut body = Body::new(structure, Mat4f::identity());
-    body.add_to_movement(Vect3f::new([0.0, 0.4, 0.0]));
+    body.add_to_velocity(Vect3f::new([0.0, 0.4, 0.0]));
     battle.add_inert_body(body);
 
     let initial_position = Vect3f::new([-10.0, 0.0, 0.0]);
-    let movement = Vect3f::new([10.0, 0.0, 0.0]);
-    battle.add_projectile(Projectile::new(initial_position, movement, 1.0, f32::MAX));
+    let velocity = Vect3f::new([10.0, 0.0, 0.0]);
+    battle.add_projectile(Projectile::new(initial_position, velocity, 1.0, f32::MAX));
     battle.update(1.0);
     expected_structure.set_voxel(-1, 0, 0, Some(Voxel{life: 1.0, id: VoxelID::LightHull}));
     assert!(battle.bodies()[0].structure().clone() == expected_structure);
 
-    battle.add_projectile(Projectile::new(initial_position, movement, 1.0, f32::MAX));
+    battle.add_projectile(Projectile::new(initial_position, velocity, 1.0, f32::MAX));
     battle.update(1.0);
     expected_structure.set_voxel(-1, -1, 0, Some(Voxel{life: 1.0, id: VoxelID::LightHull}));
     assert!(battle.bodies()[0].structure().clone() == expected_structure);
 
-    battle.add_projectile(Projectile::new(initial_position, movement, 1.0, f32::MAX));
+    battle.add_projectile(Projectile::new(initial_position, velocity, 1.0, f32::MAX));
     battle.update(1.0);
     expected_structure.set_voxel(-1, -1, 0, None);
     assert!(battle.bodies()[0].structure().clone() == expected_structure);
 
-    battle.add_projectile(Projectile::new(initial_position, movement, 1.0, f32::MAX));
+    battle.add_projectile(Projectile::new(initial_position, velocity, 1.0, f32::MAX));
     battle.update(1.0);
     // Nothing new, the projectile should have missed.
     assert!(battle.bodies()[0].structure().clone() == expected_structure);

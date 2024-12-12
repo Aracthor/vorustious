@@ -18,7 +18,7 @@ pub struct Body {
     repere: Mat4f,
     structure: Structure,
     weapons: Vec<(Vect3f, Weapon)>,
-    movement: Vect3f,
+    velocity: Vect3f,
     rotation: Vect3f,
 }
 
@@ -39,7 +39,7 @@ impl Body {
             repere: repere,
             structure: structure,
             weapons: vec![],
-            movement: Vect3f::zero(),
+            velocity: Vect3f::zero(),
             rotation: Vect3f::zero(),
         }
     }
@@ -50,7 +50,7 @@ impl Body {
                 repere: other.repere.clone(),
                 structure: structure,
                 weapons: vec![],
-                movement: other.movement,
+                velocity: other.velocity,
                 rotation: other.rotation,
             };
         }
@@ -61,10 +61,10 @@ impl Body {
         let angular_speed_x_sq = other.roll() * other.roll();
         let angular_speed_y_sq = other.pitch() * other.pitch();
         let angular_speed_z_sq = other.yaw() * other.yaw();
-        let speed_from_roll_centrifugal = Vect3f::cross(local_distance, Vect3f::new([-1.0, 0.0, 0.0])) * f32::sqrt(radius_sq * angular_speed_x_sq);
-        let speed_from_yaw_centrifugal = Vect3f::cross(local_distance, Vect3f::new([0.0, -1.0, 0.0])) * f32::sqrt(radius_sq * angular_speed_y_sq);
-        let speed_from_pitch_centrifugal = Vect3f::cross(local_distance, Vect3f::new([0.0, 0.0, -1.0])) * f32::sqrt(radius_sq * angular_speed_z_sq);
-        let new_movement = other.movement + speed_from_roll_centrifugal + speed_from_yaw_centrifugal + speed_from_pitch_centrifugal;
+        let velocity_from_roll_centrifugal = Vect3f::cross(local_distance, Vect3f::new([-1.0, 0.0, 0.0])) * f32::sqrt(radius_sq * angular_speed_x_sq);
+        let velocity_from_yaw_centrifugal = Vect3f::cross(local_distance, Vect3f::new([0.0, -1.0, 0.0])) * f32::sqrt(radius_sq * angular_speed_y_sq);
+        let velocity_from_pitch_centrifugal = Vect3f::cross(local_distance, Vect3f::new([0.0, 0.0, -1.0])) * f32::sqrt(radius_sq * angular_speed_z_sq);
+        let velocity = other.velocity + velocity_from_roll_centrifugal + velocity_from_yaw_centrifugal + velocity_from_pitch_centrifugal;
 
         let distance_normalized = distance.normalize();
         let roll = other.roll() * Vect3f::dot(distance_normalized, Vect3f::new([1.0, 0.0, 0.0])).abs();
@@ -75,7 +75,7 @@ impl Body {
             repere: new_repere,
             structure: structure,
             weapons: vec![],
-            movement: new_movement,
+            velocity,
             rotation: Vect3f::new([roll, pitch, yaw]),
         }
     }
@@ -114,8 +114,8 @@ impl Body {
         self.structure.for_first_voxel_in_segment(segment_in_repere, f)
     }
 
-    pub fn add_to_movement(&mut self, movement: Vect3f) {
-        self.movement += movement;
+    pub fn add_to_velocity(&mut self, velocity: Vect3f) {
+        self.velocity += velocity;
     }
 
     pub fn add_yaw_rotation(&mut self, yaw: f32) {
@@ -130,16 +130,16 @@ impl Body {
         self.rotation[0] += roll;
     }
 
-    pub fn scale_movement(&mut self, scale: f32) {
-        self.movement *= scale;
+    pub fn scale_velocity(&mut self, scale: f32) {
+        self.velocity *= scale;
     }
 
     pub fn scale_rotation(&mut self, scale: f32) {
         self.rotation *= scale;
     }
 
-    pub fn apply_movement(&mut self, elapsed_time: f32) {
-        self.repere = Mat4f::translation(self.movement * elapsed_time)
+    pub fn apply_velocity(&mut self, elapsed_time: f32) {
+        self.repere = Mat4f::translation(self.velocity * elapsed_time)
         * self.repere.clone()
         * Mat4f::rotation_around_z(self.rotation[2] * elapsed_time)
         * Mat4f::rotation_around_y(self.rotation[1] * elapsed_time)
@@ -220,7 +220,7 @@ impl Body {
                     let mut new_body = Body::new_from_other(new_structure, translation, self);
 
                     // Debug to see result
-                    new_body.add_to_movement(if translation == Vect3f::zero() { Vect3f::new([0.0, 0.0, 1.0]) } else { translation.normalize() });
+                    new_body.add_to_velocity(if translation == Vect3f::zero() { Vect3f::new([0.0, 0.0, 1.0]) } else { translation.normalize() });
                     new_bodies.push(new_body);
                 }
             }

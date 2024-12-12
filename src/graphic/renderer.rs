@@ -331,7 +331,7 @@ impl Renderer {
         }
 
         for projectile in projectiles {
-            let direction = projectile.movement().normalize();
+            let direction = projectile.velocity().normalize();
             let yaw = f32::atan2(direction[1], direction[0]);
             let pitch = -f32::asin(direction[2]);
             let model_matrix = Mat4f::translation(projectile.position()) * Mat4f::rotation_around_z(yaw) * Mat4f::rotation_around_y(pitch);
