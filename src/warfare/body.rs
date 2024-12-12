@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
+use crate::maths::boxes::Box3i;
 use crate::maths::boxes::Box3f;
 use crate::maths::intersection;
 use crate::maths::intersection::OBBAxis;
@@ -243,7 +244,7 @@ impl Body {
     }
 
     fn voxels_intersection(body_a: &Self, box_a: Box3f, body_b: &Self, box_b: Box3f, axis: &OBBAxis)-> Vec<(Vect3i, Vect3i)> {
-        let recenter = Vect3f::all(-0.5);
+        let recenter = Vect3f::all(0.5);
         let box_a_centered = Box3f::from_min_max(box_a.min() + recenter, box_a.max() + recenter);
         let box_b_centered = Box3f::from_min_max(box_b.min() + recenter, box_b.max() + recenter);
         if !intersection::obb_intersect_with_axis(box_a_centered.clone(), body_a.repere(), box_b_centered.clone(), body_b.repere(), axis) {
@@ -265,16 +266,20 @@ impl Body {
 
         let mut result: Vec<(Vect3i, Vect3i)> = vec![];
         if size_a < size_b {
-            let structure_box = body_b.structure.get_box();
             for subbox in box_b.subdivide() {
-                if structure_box.intersects(&subbox) {
+                let min = subbox.min() + Vect3f::new([0.5, 0.5, 0.5]);
+                let max = subbox.max() - Vect3f::new([0.5, 0.5, 0.5]);
+                let subbox_i32 = Box3i::from_min_max(Vect3i::new([min[0] as i32, min[1] as i32, min[2] as i32]), Vect3i::new([max[0] as i32, max[1] as i32, max[2] as i32]));
+                if body_b.structure.octtree().has_box(subbox_i32) {
                     result.extend(Self::voxels_intersection(body_a, box_a.clone(), body_b, subbox, axis));
                 }
             }
         } else {
-            let structure_box = body_a.structure.get_box();
             for subbox in box_a.subdivide() {
-                if structure_box.intersects(&subbox) {
+                let min = subbox.min() + Vect3f::new([0.5, 0.5, 0.5]);
+                let max = subbox.max() - Vect3f::new([0.5, 0.5, 0.5]);
+                let subbox_i32 = Box3i::from_min_max(Vect3i::new([min[0] as i32, min[1] as i32, min[2] as i32]), Vect3i::new([max[0] as i32, max[1] as i32, max[2] as i32]));
+                if body_a.structure.octtree().has_box(subbox_i32) {
                     result.extend(Self::voxels_intersection(body_a, subbox, body_b, box_b.clone(), axis));
                 }
             }

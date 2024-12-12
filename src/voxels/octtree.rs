@@ -69,6 +69,25 @@ impl Octcell {
         }
     }
 
+    pub fn has_box(&self, voxel_box: Box3i) -> bool {
+        if !self.oct.intersects(&voxel_box) {
+            return false;
+        }
+        match self.state {
+            CellState::Empty => false,
+            CellState::Full => true,
+            CellState::Partitioned => {
+                let children = self.children.as_ref().unwrap();
+                for child in &**children {
+                    if child.has_box(voxel_box.clone()) {
+                        return true;
+                    }
+                }
+                false
+            }
+        }
+    }
+
     fn partition(&mut self) {
         assert!(self.size() / 2 * 2 == self.size());
         let subdivisions = self.oct.subdivide();
@@ -87,6 +106,10 @@ impl Octcell {
         }
         self.children = None;
         self.state = state;
+    }
+
+    pub fn get_box(&self) -> &Box3i {
+        &self.oct
     }
 
     pub fn add_voxel(&mut self, coord: Vect3i) {
@@ -154,12 +177,17 @@ impl Octtree {
         self.root.has_voxel(coord)
     }
 
+    pub fn has_box(&self, voxel_box: Box3i) -> bool {
+        self.root.has_box(voxel_box)
+    }
+
     // For debug purpose only !
     pub fn walk<F: FnMut(Box3i, CellState)>(&self, f: &mut F) {
         self.root.walk(f)
     }
 
     pub fn add_voxel(&mut self, coord: Vect3i) {
+        assert!(self.root.get_box().contains(coord));
         self.root.add_voxel(coord);
     }
 

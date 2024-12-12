@@ -110,6 +110,19 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
     }
 }
 
+impl<const N: usize, T: MathsUsable> std::ops::Add<Vect<N, T>> for Box<N, T> {
+    type Output = Self;
+
+    fn add(self, other: Vect<N, T>) -> Self::Output {
+        let mut result = self.clone();
+        for i in 0..N {
+            result.min[i] += other[i];
+            result.max[i] += other[i];
+        }
+        result
+    }
+}
+
 impl<T: MathsUsable> Box<1, T> {
     pub fn add_value(&mut self, value: T) {
         self.add(Vect::<1, T>::new([value]));
