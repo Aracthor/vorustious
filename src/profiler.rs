@@ -5,9 +5,9 @@ use std::time::Instant;
 use crate::maths::boxes::Box3f;
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3f;
+use crate::physics::body::Body;
 use crate::voxels::structure::Structure;
 use crate::voxels::catalog::VoxelCatalog;
-use crate::warfare::body::Body;
 
 fn profile<F: Fn()>(f: F, name: &str) -> Duration {
     const COUNT: u32 = 10;

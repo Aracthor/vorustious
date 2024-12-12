@@ -7,11 +7,11 @@ use crate::graphic::windowing::event_handler::EventHandler;
 use crate::graphic::windowing::event_handler::Key;
 use crate::graphic::windowing::event_handler::MouseButton;
 use crate::graphic::windowing::window::Window;
+use crate::physics::body::Body;
 use crate::voxels::structure::Structure;
 use crate::voxels::catalog::VoxelCatalog;
 use crate::voxels::voxel::Voxel;
 use crate::voxels::voxel::VoxelID;
-use crate::warfare::body::Body;
 
 pub struct Editor {
     pub structure: Structure,

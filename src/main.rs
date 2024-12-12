@@ -1,5 +1,6 @@
 mod graphic;
 mod maths;
+mod physics;
 mod voxels;
 mod warfare;
 
@@ -13,10 +14,11 @@ use graphic::windowing::event_handler::Key;
 use graphic::windowing::event_handler::MouseButton;
 use maths::matrix::Mat4f;
 use maths::vector::Vect3f;
+use physics::body::Body;
 use voxels::structure::Structure;
 use voxels::catalog::VoxelCatalog;
 use warfare::battle::Battle;
-use warfare::body::Body;
+use warfare::ship::Ship;
 use warfare::weapon::Weapon;
 
 fn update_player_body_from_events(player_body: &mut Body, event_handler: &EventHandler) {
@@ -63,24 +65,25 @@ fn run_battle() {
     let tie_fighter_structure = Structure::deserialize(&voxel_catalog, &structure_file_content);
     battle.add_inert_body(Body::new(tie_fighter_structure.clone(), Mat4f::identity()));
 
-    let player_repere = Mat4f::translation(Vect3f::new([-20.0, 0.0, 0.0]));
-    let player_body = {
-        let mut body = Body::new(tie_fighter_structure.clone(), player_repere);
-        body.add_weapon(Vect3f::new([2.0, 2.0, 0.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
-        body.add_weapon(Vect3f::new([2.0, -2.0, 0.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
-        body
+    let player_ship = {
+        let player_repere = Mat4f::translation(Vect3f::new([-20.0, 0.0, 0.0]));
+        let player_body = Body::new(tie_fighter_structure.clone(), player_repere);
+        let mut ship = Ship::new(player_body);
+        ship.add_weapon(Vect3f::new([2.0, 2.0, 0.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
+        ship.add_weapon(Vect3f::new([2.0, -2.0, 0.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
+        ship
     };
-    battle.set_player_body(player_body);
+    battle.set_player_ship(player_ship);
 
     let mut pause = false;
 
     let tick_elapsed_time = 1.0 / 60.0; // Rather than real elapsed time in order to keep determinism.
     while !window.should_close() {
 
-        update_player_body_from_events(battle.player_body_mut().unwrap(), window.event_handler());
+        update_player_body_from_events(battle.player_ship_mut().unwrap().body_mut(), window.event_handler());
 
         if window.event_handler().is_mouse_button_pressed(MouseButton::Left) {
-            let projectiles = battle.player_body_mut().unwrap().shoot();
+            let projectiles = battle.player_ship_mut().unwrap().shoot();
             battle.add_projectiles(projectiles);
         }
 
@@ -107,7 +110,7 @@ fn run_battle() {
 
         window.clear();
         let view_matrix = {
-            let player_body = battle.player_body().unwrap();
+            let player_body = battle.player_ship().unwrap();
             let position = player_body.repere().position();
             let forward = player_body.repere().forward();
             let up = player_body.repere().up();

@@ -11,13 +11,10 @@ use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use crate::voxels::structure::Structure;
 use crate::voxels::voxel::Voxel;
-use super::projectile::Projectile;
-use super::weapon::Weapon;
 
 pub struct Body {
     repere: Mat4f,
     structure: Structure,
-    weapons: Vec<(Vect3f, Weapon)>,
     velocity: Vect3f,
     rotation: Vect3f,
 }
@@ -38,7 +35,6 @@ impl Body {
         Self {
             repere: repere,
             structure: structure,
-            weapons: vec![],
             velocity: Vect3f::zero(),
             rotation: Vect3f::zero(),
         }
@@ -49,7 +45,6 @@ impl Body {
             return Self {
                 repere: other.repere.clone(),
                 structure: structure,
-                weapons: vec![],
                 velocity: other.velocity,
                 rotation: other.rotation,
             };
@@ -74,7 +69,6 @@ impl Body {
         Self {
             repere: new_repere,
             structure: structure,
-            weapons: vec![],
             velocity,
             rotation: Vect3f::new([roll, pitch, yaw]),
         }
@@ -144,23 +138,6 @@ impl Body {
         * Mat4f::rotation_around_z(self.rotation[2] * elapsed_time)
         * Mat4f::rotation_around_y(self.rotation[1] * elapsed_time)
         * Mat4f::rotation_around_x(self.rotation[0] * elapsed_time)
-    }
-
-    pub fn add_weapon(&mut self, position: Vect3f, weapon: Weapon) {
-        self.weapons.push((position, weapon));
-    }
-
-    pub fn shoot(&mut self) -> Vec<Projectile> {
-        let mut result = vec![];
-        let direction = self.repere.forward();
-        for weapon in &mut self.weapons {
-            let position = self.repere.clone() * weapon.0;
-            let projectile = weapon.1.shoot(position, direction);
-            if projectile.is_some() {
-                result.push(projectile.unwrap());
-            }
-        }
-        result
     }
 
     pub fn update_dead_voxels(&mut self) -> Vec<Body> {

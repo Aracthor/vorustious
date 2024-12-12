@@ -1,33 +1,34 @@
-use super::body::Body;
 use super::projectile::Projectile;
+use super::ship::Ship;
+use crate::physics::body::Body;
 use crate::maths::segment::Segm3f;
 use crate::voxels::voxel::Voxel;
 
 struct BodyList {
     pub inert_bodies: Vec<Body>,
-    pub player_body: Option<Body>,
+    pub player_ship: Option<Ship>,
 }
 
 impl BodyList {
     pub fn new() -> Self {
         Self {
             inert_bodies: vec![],
-            player_body: None,
+            player_ship: None,
         }
     }
 
     pub fn bodies(&self) -> Vec<&Body> {
         let mut bodies: Vec<&Body> = self.inert_bodies.iter().collect();
-        if self.player_body.is_some() {
-            bodies.push(self.player_body.as_ref().unwrap());
+        if self.player_ship.is_some() {
+            bodies.push(self.player_ship.as_ref().unwrap().body());
         }
         bodies
     }
 
     pub fn bodies_mut(&mut self) -> Vec<&mut Body> {
         let mut bodies: Vec<&mut Body> = self.inert_bodies.iter_mut().collect();
-        if self.player_body.is_some() {
-            bodies.push(self.player_body.as_mut().unwrap());
+        if self.player_ship.is_some() {
+            bodies.push(self.player_ship.as_mut().unwrap().body_mut());
         }
         bodies
     }
@@ -51,9 +52,9 @@ impl Battle {
         self.body_list.inert_bodies.push(body);
     }
 
-    pub fn set_player_body(&mut self, body: Body) {
-        assert!(self.body_list.player_body.is_none());
-        self.body_list.player_body = Some(body);
+    pub fn set_player_ship(&mut self, ship: Ship) {
+        assert!(self.body_list.player_ship.is_none());
+        self.body_list.player_ship = Some(ship);
     }
 
     #[cfg(test)]
@@ -65,12 +66,12 @@ impl Battle {
         self.projectiles.extend(projectiles);
     }
 
-    pub fn player_body(&self) -> Option<&Body> {
-        self.body_list.player_body.as_ref()
+    pub fn player_ship(&self) -> Option<&Ship> {
+        self.body_list.player_ship.as_ref()
     }
 
-    pub fn player_body_mut(&mut self) -> Option<&mut Body> {
-        self.body_list.player_body.as_mut()
+    pub fn player_ship_mut(&mut self) -> Option<&mut Ship> {
+        self.body_list.player_ship.as_mut()
     }
 
     pub fn bodies(&self) -> Vec<&Body> {
