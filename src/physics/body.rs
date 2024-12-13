@@ -132,7 +132,7 @@ impl Body {
         self.rotation *= scale;
     }
 
-    pub fn apply_velocity(&mut self, elapsed_time: f32) {
+    pub fn apply_velocity_and_rotation(&mut self, elapsed_time: f32) {
         self.repere = Mat4f::translation(self.velocity * elapsed_time)
         * self.repere.clone()
         * Mat4f::rotation_around_z(self.rotation[2] * elapsed_time)

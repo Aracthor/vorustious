@@ -84,7 +84,7 @@ impl Battle {
 
     pub fn update(&mut self, elapsed_time: f32) {
         for body in self.body_list.bodies_mut() {
-            body.apply_velocity(elapsed_time);
+            body.apply_velocity_and_rotation(elapsed_time);
         }
 
         self.projectiles.retain_mut(|projectile| {
