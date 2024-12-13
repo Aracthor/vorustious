@@ -1,5 +1,6 @@
 use super::projectile::Projectile;
 use super::ship::Ship;
+use crate::physics::collision;
 use crate::physics::body::Body;
 use crate::maths::segment::Segm3f;
 use crate::voxels::voxel::Voxel;
@@ -102,6 +103,19 @@ impl Battle {
             }
             !hit && !projectile.is_out_of_max_range()
         });
+
+        {
+            const RESTITUTION: f32 = 0.8;
+            let mut bodies = self.body_list.bodies_mut();
+            // TODO better than this O(n^2)...
+            for i1 in 0..bodies.len() -1 {
+                let split_bodies = bodies.split_at_mut(i1 + 1);
+                let body = &mut split_bodies.0[i1];
+                for other_body in split_bodies.1 {
+                    collision::apply_collision_if_any(body, other_body, RESTITUTION);
+                }
+            }
+        }
 
         let mut new_bodies = vec![];
         for body in self.body_list.bodies_mut() {

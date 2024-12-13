@@ -1,6 +1,7 @@
 use std::f32::consts::PI;
 
 use super::body::Body;
+use super::collision;
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
@@ -214,4 +215,87 @@ fn body_heavy_intersection() {
     assert!(
         (result[0] == expected_result_1 && result[1] == expected_result_2) ||
         (result[0] == expected_result_2 && result[1] == expected_result_1));
+}
+
+#[test]
+fn elastic_collision_same_mass() {
+    let restitution = 1.0;
+    let structure = Structure::new(-1, 1, 0, 0, 0, 0, TEST_VOXEL);
+    let mut body_a = Body::new(structure.clone(), Mat4f::translation(Vect3f::new([-1.2, 0.0, 0.0])));
+    let mut body_b = Body::new(structure.clone(), Mat4f::translation(Vect3f::new([1.2, 0.0, 0.0])));
+
+    body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
+    body_b.set_velocity(Vect3f::new([0.0, 0.0, 0.0]));
+    collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
+    assert!(body_a.velocity() == Vect3f::new([0.0, 0.0, 0.0]));
+    assert!(body_b.velocity() == Vect3f::new([1.0, 0.0, 0.0]));
+
+    body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
+    body_b.set_velocity(Vect3f::new([-1.0, 0.0, 0.0]));
+    collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
+    assert!(body_a.velocity() == Vect3f::new([-1.0, 0.0, 0.0]));
+    assert!(body_b.velocity() == Vect3f::new([1.0, 0.0, 0.0]));
+}
+
+#[test]
+fn perfectly_inelastic_collision_same_mass() {
+    let restitution = 0.0;
+    let structure = Structure::new(-1, 1, 0, 0, 0, 0, TEST_VOXEL);
+    let mut body_a = Body::new(structure.clone(), Mat4f::translation(Vect3f::new([-1.2, 0.0, 0.0])));
+    let mut body_b = Body::new(structure.clone(), Mat4f::translation(Vect3f::new([1.2, 0.0, 0.0])));
+
+    body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
+    body_b.set_velocity(Vect3f::new([0.0, 0.0, 0.0]));
+    collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
+    assert!(body_a.velocity() == Vect3f::new([0.5, 0.0, 0.0]));
+    assert!(body_b.velocity() == Vect3f::new([0.5, 0.0, 0.0]));
+
+    body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
+    body_b.set_velocity(Vect3f::new([-1.0, 0.0, 0.0]));
+    collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
+    assert!(body_a.velocity() == Vect3f::new([0.0, 0.0, 0.0]));
+    assert!(body_b.velocity() == Vect3f::new([0.0, 0.0, 0.0]));
+}
+
+
+#[test]
+fn elastic_collision_different_mass() {
+    let restitution = 1.0;
+    let structure_a = Structure::new(-4, 1, 0, 0, 0, 0, TEST_VOXEL);
+    let structure_b = Structure::new(-1, 1, 0, 0, 0, 0, TEST_VOXEL);
+    let mut body_a = Body::new(structure_a, Mat4f::translation(Vect3f::new([-1.2, 0.0, 0.0])));
+    let mut body_b = Body::new(structure_b, Mat4f::translation(Vect3f::new([1.2, 0.0, 0.0])));
+
+    body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
+    body_b.set_velocity(Vect3f::new([0.0, 0.0, 0.0]));
+    collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
+    assert!(body_a.velocity() == Vect3f::new([1.0 / 3.0, 0.0, 0.0]));
+    assert!(body_b.velocity() == Vect3f::new([4.0 / 3.0, 0.0, 0.0]));
+
+    body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
+    body_b.set_velocity(Vect3f::new([-1.0, 0.0, 0.0]));
+    collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
+    assert!(body_a.velocity() == Vect3f::new([-1.0 / 3.0, 0.0, 0.0]));
+    assert!(body_b.velocity() == Vect3f::new([5.0 / 3.0, 0.0, 0.0]));
+}
+
+#[test]
+fn perfectly_inelastic_collision_different_mass() {
+    let restitution = 0.0;
+    let structure_a = Structure::new(-4, 1, 0, 0, 0, 0, TEST_VOXEL);
+    let structure_b = Structure::new(-1, 1, 0, 0, 0, 0, TEST_VOXEL);
+    let mut body_a = Body::new(structure_a, Mat4f::translation(Vect3f::new([-1.2, 0.0, 0.0])));
+    let mut body_b = Body::new(structure_b, Mat4f::translation(Vect3f::new([1.2, 0.0, 0.0])));
+
+    body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
+    body_b.set_velocity(Vect3f::new([0.0, 0.0, 0.0]));
+    collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
+    assert!(body_a.velocity() == Vect3f::new([2.0 / 3.0, 0.0, 0.0]));
+    assert!(body_b.velocity() == Vect3f::new([2.0 / 3.0, 0.0, 0.0]));
+
+    body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
+    body_b.set_velocity(Vect3f::new([-1.0, 0.0, 0.0]));
+    collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
+    assert!(body_a.velocity() == Vect3f::new([1.0 / 3.0, 0.0, 0.0]));
+    assert!(body_b.velocity() == Vect3f::new([1.0 / 3.0, 0.0, 0.0]));
 }

@@ -82,6 +82,14 @@ impl Body {
         &self.structure
     }
 
+    pub fn velocity(&self) -> Vect3f {
+        self.velocity
+    }
+
+    pub fn momentum(&self) -> Vect3f {
+        self.velocity * self.structure.mass()
+    }
+
     pub fn get_box(&self) -> Box3f {
         let voxel_box = self.structure.get_box();
         let mut result = Box3f::new();
@@ -106,6 +114,10 @@ impl Body {
     pub fn for_first_voxel_in_segment<F: FnMut(&mut Voxel, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
         let segment_in_repere = segment.transform(&self.repere.inverse());
         self.structure.for_first_voxel_in_segment(segment_in_repere, f)
+    }
+
+    pub fn set_velocity(&mut self, velocity: Vect3f) {
+        self.velocity = velocity;
     }
 
     pub fn add_to_velocity(&mut self, velocity: Vect3f) {

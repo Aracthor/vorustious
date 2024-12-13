@@ -11,14 +11,18 @@ use super::voxel::Voxel;
 pub struct Structure {
     voxel_box: Box3i,
     octtree: Octtree,
+    mass: f32, // Expressed in tonnes
     data: Vec<Option<Voxel>>,
 }
+
+const VOXEL_WEIGHT: f32 = 10.0;
 
 impl Structure {
     pub fn new_empty() -> Self {
         Self {
             voxel_box: Box3i::zero(),
             octtree: Octtree::new(16),
+            mass: 0.0,
             data: vec![None; 1],
         }
     }
@@ -41,6 +45,7 @@ impl Structure {
         Self {
             voxel_box: Box3i::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
             octtree: tree,
+            mass: vec_size as f32 * VOXEL_WEIGHT,
             data: vec![Some(voxel); vec_size],
         }
     }
@@ -53,6 +58,7 @@ impl Structure {
         Self {
             voxel_box: Box3i::from_min_max(Vect3i::new([min_x, min_y, min_z]), Vect3i::new([max_x, max_y, max_z])),
             octtree: Octtree::new(16),
+            mass: vec_size as f32 * VOXEL_WEIGHT,
             data: vec![None; vec_size],
         }
     }
@@ -129,6 +135,10 @@ impl Structure {
         &self.octtree
     }
 
+    pub fn mass(&self) -> f32 {
+        self.mass
+    }
+
     pub fn recalculate_box(&mut self) {
         let mut new_box = Box3i::new();
         self.for_each_voxel(|coord, _voxel| new_box.add(coord));
@@ -165,12 +175,14 @@ impl Structure {
         let index = self.voxel_index(coords);
         self.data[index] = Some(voxel);
         self.octtree.add_voxel(coords);
+        self.mass += VOXEL_WEIGHT;
     }
 
     pub fn remove_voxel(&mut self, coords: Vect3i) -> Voxel {
         let index = self.voxel_index(coords);
         assert!(self.data[index].is_some());
         let voxel = self.data[index].unwrap();
+        self.mass -= VOXEL_WEIGHT;
         self.data[index] = None;
         self.octtree.remove_voxel(coords);
         voxel
@@ -178,8 +190,11 @@ impl Structure {
 
     pub fn remove_voxel_ifp(&mut self, coords: Vect3i) {
         let index = self.voxel_index(coords);
-        self.data[index] = None;
-        self.octtree.remove_voxel(coords);
+        if self.data[index].is_some() {
+            self.mass -= VOXEL_WEIGHT;
+            self.data[index] = None;
+            self.octtree.remove_voxel(coords);
+        }
     }
 
     pub fn every_voxel_is<F: Fn(&Option<Voxel>) -> bool>(&self, f: F) -> bool {
@@ -224,6 +239,7 @@ impl Structure {
                         let voxel = &mut self.data[index];
                         if voxel.unwrap().life <= 0.0 {
                             *voxel = None;
+                            self.mass -= VOXEL_WEIGHT;
                             destroyed_coords.push(coords);
                         }
                     }
