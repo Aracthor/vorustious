@@ -142,13 +142,7 @@ impl Body {
 
     pub fn update_dead_voxels(&mut self) -> Vec<Body> {
         let mut new_bodies: Vec<Body> = vec![];
-        let mut destroyed_coords = vec![];
-        self.structure.for_each_voxel_mut(|coords, voxel: &mut Option<Voxel>| {
-            if voxel.unwrap().life <= 0.0 {
-                *voxel = None;
-                destroyed_coords.push(coords);
-            }
-        });
+        let destroyed_coords = self.structure.erase_dead_voxels();
 
         let coords_to_check = {
             let mut result = vec![];

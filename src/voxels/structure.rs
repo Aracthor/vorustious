@@ -213,7 +213,8 @@ impl Structure {
         }
     }
 
-    pub fn for_each_voxel_mut<F: FnMut(Vect3i, &mut Option<Voxel>)>(&mut self, mut f: F) {
+    pub fn erase_dead_voxels(&mut self) -> Vec<Vect3i> {
+        let mut destroyed_coords = vec![];
         for z in self.voxel_box.min()[2]..self.voxel_box.max()[2] + 1 {
             for y in self.voxel_box.min()[1]..self.voxel_box.max()[1] + 1 {
                 for x in self.voxel_box.min()[0]..self.voxel_box.max()[0] + 1 {
@@ -221,11 +222,15 @@ impl Structure {
                     if self.has_voxel(coords) {
                         let index = self.voxel_index(coords);
                         let voxel = &mut self.data[index];
-                        f(coords, voxel);
+                        if voxel.unwrap().life <= 0.0 {
+                            *voxel = None;
+                            destroyed_coords.push(coords);
+                        }
                     }
                 }
             }
         }
+        destroyed_coords
     }
 
     // TODO this function should not mut self, but it calls apply_on_voxels and... Read its comment.
