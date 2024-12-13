@@ -103,7 +103,7 @@ impl Body {
         self.rotation[0]
     }
 
-    pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
+    pub fn for_first_voxel_in_segment<F: FnMut(&mut Voxel, &Vect3i)>(&mut self, segment: Segm3f, f: F) -> bool {
         let segment_in_repere = segment.transform(&self.repere.inverse());
         self.structure.for_first_voxel_in_segment(segment_in_repere, f)
     }

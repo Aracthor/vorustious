@@ -231,11 +231,11 @@ impl Structure {
     // TODO this function should not mut self, but it calls apply_on_voxels and... Read its comment.
     pub fn outside_voxel_coords(&mut self, segment: Segm3f) -> Option<Vect3i> {
         let mut result: Option<Vect3i> = None;
-        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, coords: &Vect3i, face: &Vect3i| {
-            if voxel.is_some() && *face != Vect3i::zero() {
+        self.apply_on_voxels(segment, |_voxel: &mut Voxel, coords: &Vect3i, face: &Vect3i| {
+            if *face != Vect3i::zero() {
                 result = Some(*coords + *face);
             }
-            voxel.is_some()
+            true
         });
         result
     }
@@ -243,29 +243,23 @@ impl Structure {
     #[cfg(test)]
     pub fn get_face(&mut self, segment: Segm3f) -> Vect3i {
         let mut result = Vect3i::zero();
-        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, face: &Vect3i| {
-            let has_voxel = voxel.is_some();
-            if has_voxel {
-                result = *face;
-            }
-            has_voxel
+        self.apply_on_voxels(segment, |_voxel: &mut Voxel, _coords, face: &Vect3i| {
+            result = *face;
+            true
         });
         result
     }
 
-    pub fn for_first_voxel_in_segment<F: FnMut(&mut Option<Voxel>, &Vect3i)>(&mut self, segment: Segm3f, mut f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, coords, _face| {
-            let has_voxel = voxel.is_some();
-            if has_voxel {
-                f(voxel, coords);
-            }
-            has_voxel
+    pub fn for_first_voxel_in_segment<F: FnMut(&mut Voxel, &Vect3i)>(&mut self, segment: Segm3f, mut f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut Voxel, coords, _face| {
+            f(voxel, coords);
+            true
         })
     }
 
     #[allow(dead_code)]
-    pub fn for_voxels_in_segment<F: Fn(&mut Option<Voxel>)>(&mut self, segment: Segm3f, f: F) -> bool {
-        self.apply_on_voxels(segment, |voxel: &mut Option<Voxel>, _coords, _face| {
+    pub fn for_voxels_in_segment<F: Fn(&mut Voxel)>(&mut self, segment: Segm3f, f: F) -> bool {
+        self.apply_on_voxels(segment, |voxel: &mut Voxel, _coords, _face| {
             f(voxel);
             false
         })
@@ -279,7 +273,7 @@ impl Structure {
     // This function should exists in two versions : &mut self with Fn closure, and &self with FnMut closure.
     // But it seems impossible to do such a thing without making a complete duplicate of this already long function...
     // So let's just put a version that is &mut self AND use a FnMut for now.
-    fn apply_on_voxels<F: FnMut(&mut Option<Voxel>, &Vect3i, &Vect3i) -> bool>(&mut self, segment: Segm3f, mut f: F) -> bool {
+    fn apply_on_voxels<F: FnMut(&mut Voxel, &Vect3i, &Vect3i) -> bool>(&mut self, segment: Segm3f, mut f: F) -> bool {
         fn sign(n: f32) -> i32 {
             if n > 0.0 {
                 return 1;
@@ -346,8 +340,9 @@ impl Structure {
             let coords = Vect3i::new([x, y, z]);
             if self.voxel_box.contains(coords) {
                 let index = self.voxel_index(coords);
-                hit |= self.data[index].is_some();
-                if f(&mut self.data[index], &coords, &face) {
+                let local_hit = self.data[index].is_some();
+                hit |= local_hit;
+                if local_hit && f(&mut self.data[index].as_mut().unwrap(), &coords, &face) {
                     break;
                 }
             }
