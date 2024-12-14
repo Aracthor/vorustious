@@ -7,7 +7,7 @@ mod warfare;
 mod editor;
 mod profiler;
 
-use graphic::renderer::renderer::Renderer;
+use graphic::renderer::main_renderer::BattleRenderer;
 use graphic::windowing::event_handler::EventHandler;
 use graphic::windowing::window::Window;
 use graphic::windowing::event_handler::Key;
@@ -56,7 +56,7 @@ fn run_battle() {
     const WINDOW_HEIGHT:u32 = 600;
 
     let mut window = Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious");
-    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32, 85.0_f32.to_radians(), 3.0, 1000.0);
+    let mut renderer = BattleRenderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32, 85.0_f32.to_radians(), 3.0, 1000.0);
 
     let mut battle = Battle::new();
 
@@ -116,7 +116,7 @@ fn run_battle() {
             let up = player_body.repere().up();
             Mat4f::look_at(position, position + forward.normalize(), up)
         };
-        renderer.render_frame(view_matrix, battle.bodies(), &battle.projectiles(), None);
+        renderer.render_frame(view_matrix, battle.bodies(), &battle.projectiles());
         window.update();
     }
 

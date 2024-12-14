@@ -2,7 +2,7 @@ use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3i;
 use crate::maths::matrix::Mat4f;
 use crate::graphic::camera::Camera;
-use crate::graphic::renderer::renderer::Renderer;
+use crate::graphic::renderer::main_renderer::EditorMainRenderer;
 use crate::graphic::windowing::event_handler::EventHandler;
 use crate::graphic::windowing::event_handler::Key;
 use crate::graphic::windowing::event_handler::MouseButton;
@@ -142,7 +142,7 @@ pub fn run_editor() {
     const WINDOW_HEIGHT:u32 = 600;
 
     let mut window = Window::create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "Vorustious - Editor");
-    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32, 80.0_f32.to_radians(), 0.1, 1000.0);
+    let mut renderer = EditorMainRenderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32, 80.0_f32.to_radians(), 0.1, 1000.0);
 
     let mut camera = Camera::new();
     let mut editor = Editor::new();
@@ -153,8 +153,8 @@ pub fn run_editor() {
 
         window.clear();
 
-        let bodies = vec![Body::new(editor.structure.clone(), Mat4f::identity())];
-        renderer.render_frame(camera.view_matrix(), bodies.iter().collect(), &vec![], Some(&editor));
+        let body = Body::new(editor.structure.clone(), Mat4f::identity());
+        renderer.render_frame(camera.view_matrix(), &body, &editor);
 
         window.update();
     }

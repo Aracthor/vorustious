@@ -1,4 +1,4 @@
-pub mod renderer;
+pub mod main_renderer;
 
 mod body_renderer;
 mod cube;
