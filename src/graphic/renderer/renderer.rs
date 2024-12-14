@@ -10,6 +10,7 @@ use crate::voxels::voxel::TextureType;
 use crate::warfare::projectile::Projectile;
 use super::super::core::color::Color;
 use super::cube;
+use super::projectile_renderer::ProjectileRenderer;
 use super::editor_renderer::EditorRenderer;
 use super::frame_limiter::FrameLimiter;
 use super::super::meshes::material::Material;
@@ -24,10 +25,10 @@ pub struct Renderer {
     ui_projection_matrix: Mat4f,
     frame_limiter: FrameLimiter,
     cube_mesh: Mesh,
-    projectile_mesh: Mesh,
     interface_mesh: Mesh,
     text_drawer: TextDrawer,
     voxel_catalog: VoxelCatalog,
+    projectile_renderer: ProjectileRenderer,
     editor_renderer: EditorRenderer,
 
     debug_cube_mesh: Mesh,
@@ -116,50 +117,6 @@ impl Renderer {
             cube::cube_mesh(material)
         };
 
-        let projectile_mesh = {
-            let mut material = Material::create("shaders/position.vert", "shaders/hello_color.frag");
-            material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
-            material.add_uniform_vect4("uni_color", Color::new(0xB0, 0x30, 0x30, 0xFF).into());
-
-            let positions = [
-                0.2, 0.0, 0.0,
-                0.0, 0.2, 0.0,
-                0.0, 0.0, 0.2,
-
-                0.2, 0.0, 0.0,
-                0.0, 0.0, 0.2,
-                0.0, -0.2, 0.0,
-
-                0.2, 0.0, 0.0,
-                0.0, -0.2, 0.0,
-                0.0, 0.0, -0.2,
-
-                0.2, 0.0, 0.0,
-                0.0, 0.0, -0.2,
-                0.0, 0.2, 0.0,
-
-                -0.5, 0.0, 0.0,
-                0.0, 0.2, 0.0,
-                0.0, 0.0, 0.2,
-
-                -0.5, 0.0, 0.0,
-                0.0, 0.0, 0.2,
-                0.0, -0.2, 0.0,
-
-                -0.5, 0.0, 0.0,
-                0.0, -0.2, 0.0,
-                0.0, 0.0, -0.2,
-
-                -0.5, 0.0, 0.0,
-                0.0, 0.0, -0.2,
-                0.0, 0.2, 0.0,
-            ].to_vec();
-
-            let mut mesh = Mesh::create(Primitive::Triangles, false, material);
-            mesh.set_positions_3d(&positions);
-            mesh
-        };
-
         let interface_mesh = {
             let mut material = Material::create("shaders/hello_vertex.vert", "shaders/hello_color.frag");
             material.add_uniform_vect4("uni_color", Color::new(0xFF, 0xFF, 0xFF, 0x80).into());
@@ -226,10 +183,10 @@ impl Renderer {
             ui_projection_matrix: ui_projection_matrix,
             frame_limiter: FrameLimiter::new(60.0),
             cube_mesh: cube_mesh,
-            projectile_mesh: projectile_mesh,
             interface_mesh: interface_mesh,
             text_drawer: TextDrawer::create(),
             voxel_catalog: VoxelCatalog::create(),
+            projectile_renderer: ProjectileRenderer::new(),
             editor_renderer: EditorRenderer::new(),
 
             debug_cube_mesh: debug_cube,
@@ -330,14 +287,7 @@ impl Renderer {
             }
         }
 
-        for projectile in projectiles {
-            let direction = projectile.velocity().normalize();
-            let yaw = f32::atan2(direction[1], direction[0]);
-            let pitch = -f32::asin(direction[2]);
-            let model_matrix = Mat4f::translation(projectile.position()) * Mat4f::rotation_around_z(yaw) * Mat4f::rotation_around_y(pitch);
-            self.projectile_mesh.set_uniform_matrix("uni_model_matrix", &model_matrix);
-            self.projectile_mesh.draw(&projection_view_matrix);
-        }
+        self.projectile_renderer.render(&projection_view_matrix, projectiles);
 
         if editor.is_some() {
             self.editor_renderer.render(&projection_view_matrix, &mut self.cube_mesh, editor.unwrap());
