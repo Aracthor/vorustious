@@ -5,9 +5,11 @@ use super::super::core::color::Color;
 use super::super::meshes::material::Material;
 use super::super::meshes::mesh::Mesh;
 use super::super::opengl::vertex_objects::Primitive;
+use super::cube;
 
 pub struct EditorRenderer {
     voxel_catalog: VoxelCatalog,
+    cube_mesh: Mesh,
     plane_x: Mesh,
     plane_y: Mesh,
     plane_z: Mesh,
@@ -65,24 +67,25 @@ impl EditorRenderer {
 
         Self {
             voxel_catalog: VoxelCatalog::create(),
+            cube_mesh: cube::cube_mesh(),
             plane_x: plane_x,
             plane_y: plane_y,
             plane_z: plane_z,
         }
     }
 
-    pub fn render(&self, projection_view_matrix: &Mat4f, cube_mesh: &mut Mesh, editor: &Editor) {
+    pub fn render(&mut self, projection_view_matrix: &Mat4f, editor: &Editor) {
         if editor.voxel_position.is_some() {
             let position = editor.voxel_position.unwrap();
             let instance_position = vec![position[0] as f32, position[1] as f32, position[2] as f32];
             let instance_texture_index = vec![self.voxel_catalog.get_descriptor(editor.voxel_id).texture_type as i32];
             let instance_damage = vec![0.0];
-            cube_mesh.set_instanced_data(0, &instance_position);
-            cube_mesh.set_instanced_data(1, &instance_texture_index);
-            cube_mesh.set_instanced_data(2, &instance_damage);
-            cube_mesh.set_uniform_f32("uni_alpha", 0.5);
-            cube_mesh.draw_instanced(1, &projection_view_matrix);
-            cube_mesh.set_uniform_f32("uni_alpha", 1.0);
+            self.cube_mesh.set_instanced_data(0, &instance_position);
+            self.cube_mesh.set_instanced_data(1, &instance_texture_index);
+            self.cube_mesh.set_instanced_data(2, &instance_damage);
+            self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
+            self.cube_mesh.draw_instanced(1, &projection_view_matrix);
+            self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);
         }
         if editor.symetry_x {
             self.plane_x.draw(&projection_view_matrix);
