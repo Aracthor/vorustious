@@ -150,7 +150,7 @@ fn body_cube_intersection() {
     // |       |
     // |       |
     // +-------+
-    let body_a = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 0.0])));
+    let body_a = Body::new(structure_square.clone(), Mat4f::identity());
     let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 4.0])) * Mat4f::rotation_around_y(PI / 5.0) * Mat4f::rotation_around_x(PI / 4.0));
     let result = collision::intersection(&body_a, &body_b);
     assert!(result.len() == 1);
