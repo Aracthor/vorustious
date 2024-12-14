@@ -1,8 +1,8 @@
-use super::core::color::Color;
-use super::meshes::material::Material;
-use super::meshes::mesh::Mesh;
-use super::opengl::texture::Texture;
-use super::opengl::vertex_objects::Primitive;
+use super::super::core::color::Color;
+use super::super::meshes::material::Material;
+use super::super::meshes::mesh::Mesh;
+use super::super::opengl::texture::Texture;
+use super::super::opengl::vertex_objects::Primitive;
 
 pub fn cube_texture(border_color: Color, fill_color: Color) -> Texture {
     let b = border_color;

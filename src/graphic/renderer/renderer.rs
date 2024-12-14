@@ -8,14 +8,14 @@ use crate::physics::body::Body;
 use crate::voxels::catalog::VoxelCatalog;
 use crate::voxels::voxel::TextureType;
 use crate::warfare::projectile::Projectile;
-use super::core::color::Color;
+use super::super::core::color::Color;
 use super::cube;
 use super::editor_renderer::EditorRenderer;
 use super::frame_limiter::FrameLimiter;
-use super::meshes::material::Material;
-use super::meshes::mesh::Mesh;
-use super::opengl::vertex_objects::Primitive;
-use super::opengl::texture::Texture;
+use super::super::meshes::material::Material;
+use super::super::meshes::mesh::Mesh;
+use super::super::opengl::vertex_objects::Primitive;
+use super::super::opengl::texture::Texture;
 use super::text_drawer::TextDrawer;
 
 pub struct Renderer {

@@ -1,8 +1,8 @@
-use super::core::color::Color;
-use super::meshes::material::Material;
-use super::meshes::mesh::Mesh;
-use super::opengl::vertex_objects::Primitive;
-use super::opengl::texture::Texture;
+use super::super::core::color::Color;
+use super::super::meshes::material::Material;
+use super::super::meshes::mesh::Mesh;
+use super::super::opengl::vertex_objects::Primitive;
+use super::super::opengl::texture::Texture;
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect2f;
 

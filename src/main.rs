@@ -7,7 +7,7 @@ mod warfare;
 mod editor;
 mod profiler;
 
-use graphic::renderer::Renderer;
+use graphic::renderer::renderer::Renderer;
 use graphic::windowing::event_handler::EventHandler;
 use graphic::windowing::window::Window;
 use graphic::windowing::event_handler::Key;

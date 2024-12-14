@@ -2,7 +2,7 @@ use crate::maths::segment::Segm3f;
 use crate::maths::vector::Vect3i;
 use crate::maths::matrix::Mat4f;
 use crate::graphic::camera::Camera;
-use crate::graphic::renderer::Renderer;
+use crate::graphic::renderer::renderer::Renderer;
 use crate::graphic::windowing::event_handler::EventHandler;
 use crate::graphic::windowing::event_handler::Key;
 use crate::graphic::windowing::event_handler::MouseButton;

@@ -1,10 +1,10 @@
 use crate::editor::Editor;
 use crate::maths::matrix::Mat4f;
 use crate::voxels::catalog::VoxelCatalog;
-use super::core::color::Color;
-use super::meshes::material::Material;
-use super::meshes::mesh::Mesh;
-use super::opengl::vertex_objects::Primitive;
+use super::super::core::color::Color;
+use super::super::meshes::material::Material;
+use super::super::meshes::mesh::Mesh;
+use super::super::opengl::vertex_objects::Primitive;
 
 pub struct EditorRenderer {
     voxel_catalog: VoxelCatalog,
