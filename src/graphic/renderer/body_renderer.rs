@@ -56,7 +56,7 @@ fn positions_from_box(min: Vect3f, max: Vect3f) -> Vec<f32> {
 
 impl BodyRenderer {
     pub fn new() -> Self {
-        let cube_mesh = cube::cube_mesh();
+        let cube_mesh = cube::cube_mesh(1.0);
 
         let debug_cube = {
             let mut material = Material::create("shaders/position.vert", "shaders/hello_color.frag");

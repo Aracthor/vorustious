@@ -67,7 +67,7 @@ impl EditorRenderer {
 
         Self {
             voxel_catalog: VoxelCatalog::create(),
-            cube_mesh: cube::cube_mesh(),
+            cube_mesh: cube::cube_mesh(0.5),
             plane_x: plane_x,
             plane_y: plane_y,
             plane_z: plane_z,
@@ -83,9 +83,7 @@ impl EditorRenderer {
             self.cube_mesh.set_instanced_data(0, &instance_position);
             self.cube_mesh.set_instanced_data(1, &instance_texture_index);
             self.cube_mesh.set_instanced_data(2, &instance_damage);
-            self.cube_mesh.set_uniform_f32("uni_alpha", 0.5);
             self.cube_mesh.draw_instanced(1, &projection_view_matrix);
-            self.cube_mesh.set_uniform_f32("uni_alpha", 1.0);
         }
         if editor.symetry_x {
             self.plane_x.draw(&projection_view_matrix);

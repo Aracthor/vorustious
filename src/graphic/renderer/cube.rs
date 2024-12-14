@@ -38,7 +38,7 @@ pub fn circle_texture(border_color: Color, fill_color: Color) -> Texture {
     Texture::create(8, 8, texture_pixels)
 }
 
-pub fn cube_mesh() -> Mesh {
+pub fn cube_mesh(alpha: f32) -> Mesh {
 
     let positions: Vec<f32> = [
         -0.5, -0.5, -0.5,
@@ -162,7 +162,7 @@ pub fn cube_mesh() -> Mesh {
         };
         material.add_texture("damage_texture", damage_texture);
 
-        material.add_uniform_f32("uni_alpha", 1.0);
+        material.add_uniform_f32("uni_alpha", alpha);
         material
     };
 

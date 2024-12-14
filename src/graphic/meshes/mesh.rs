@@ -40,10 +40,6 @@ impl Mesh {
         self.vao.set_texture_coords(texture_coords);
     }
 
-    pub fn set_uniform_f32(&mut self, uniform_name: &str, value: f32) {
-        self.material.set_uniform_f32(uniform_name, value);
-    }
-
     pub fn set_uniform_vector(&mut self, uniform_name: &str, value: Vect4f) {
         self.material.set_uniform_vec4(uniform_name, value);
     }
