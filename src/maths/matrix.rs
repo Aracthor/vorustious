@@ -76,8 +76,8 @@ impl<T: MathsUsable> Mat<4, T> {
 
     #[allow(dead_code)]
     pub fn inverse(&self) -> Self {
-        let oo_det: T = T::from(1) / self.determinant();
-        let mut sign: T = T::from(1);
+        let oo_det = T::from(1) / self.determinant();
+        let mut sign = T::from(1);
         let mut result = Self::zero();
         for x in 0..4 {
             for y in 0..4 {
@@ -136,7 +136,7 @@ impl<T: MathsUsable> Mat<4, T> {
     #[allow(dead_code)]
     pub fn orthographic(left: T, right: T, bottom: T, top: T) -> Self {
         let mut result = Self::identity();
-        let two_as_t: T = T::from(2);
+        let two_as_t = T::from(2);
         result[0][0] = two_as_t / (right - left);
         result[1][1] = two_as_t / (top - bottom);
         result[2][2] = T::from(-1);
@@ -148,7 +148,7 @@ impl<T: MathsUsable> Mat<4, T> {
     #[allow(dead_code)]
     pub fn orthographic_with_z(left: T, right: T, bottom: T, top: T, z_near: T, z_far: T) -> Self {
         let mut result = Self::identity();
-        let two_as_t: T = T::from(2);
+        let two_as_t = T::from(2);
         result[0][0] = two_as_t / (right - left);
         result[1][1] = two_as_t / (top - bottom);
         result[2][2] = -two_as_t / (z_far - z_near);
@@ -262,7 +262,7 @@ impl<const N: usize, T: MathsUsable> std::ops::Mul<Self> for Mat<N, T> {
         let mut product = Self::identity();
         for y in 0..4 {
             for x in 0..4 {
-                let mut result: T = T::from(0);
+                let mut result = T::from(0);
                 for i in 0..4 {
                     result += self[i][y] * rhs[x][i];
                 }
