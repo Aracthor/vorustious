@@ -324,7 +324,7 @@ impl Renderer {
                     };
                     self.debug_cube_mesh.set_positions_3d(&positions);
                     self.debug_cube_mesh.set_uniform_vector("uni_color", color);
-                    self.debug_cube_mesh.set_uniform_matrix("uni_model_matrix", &Mat4f::identity());
+                    self.debug_cube_mesh.set_uniform_matrix("uni_model_matrix", body.repere());
                     self.debug_cube_mesh.draw(&projection_view_matrix);
                 });
             }
