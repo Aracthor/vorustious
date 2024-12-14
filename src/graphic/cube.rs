@@ -1,6 +1,6 @@
 use super::core::color::Color;
-use super::material::Material;
-use super::mesh::Mesh;
+use super::meshes::material::Material;
+use super::meshes::mesh::Mesh;
 use super::opengl::texture::Texture;
 use super::opengl::vertex_objects::Primitive;
 

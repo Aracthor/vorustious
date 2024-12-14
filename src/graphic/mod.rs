@@ -6,7 +6,6 @@ mod core;
 mod cube;
 mod editor_renderer;
 mod frame_limiter;
-mod material;
-mod mesh;
+mod meshes;
 mod opengl;
 mod text_drawer;

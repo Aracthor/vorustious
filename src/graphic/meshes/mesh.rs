@@ -1,6 +1,6 @@
 use super::material::Material;
-use super::opengl::vertex_objects::Primitive;
-use super::opengl::vertex_objects::VertexArrayObject;
+use super::super::opengl::vertex_objects::Primitive;
+use super::super::opengl::vertex_objects::VertexArrayObject;
 
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect4f;

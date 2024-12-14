@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use super::opengl::shader::Shader;
-use super::opengl::texture::Texture;
+use super::super::opengl::shader::Shader;
+use super::super::opengl::texture::Texture;
 
 use crate::maths::matrix::Mat4f;
 use crate::maths::vector::Vect4f;
