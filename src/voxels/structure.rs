@@ -121,6 +121,11 @@ impl Structure {
         result
     }
 
+    pub fn read_from_file(catalog: &VoxelCatalog, file_name: &str) -> Self {
+        let structure_file_content = std::fs::read_to_string(file_name).expect(&format!("Unable to read '{}'", file_name));
+        Structure::deserialize(catalog, &structure_file_content)
+    }
+
     pub fn is_empty(&self) -> bool {
         self.every_voxel_is(|voxel| voxel.is_none())
     }

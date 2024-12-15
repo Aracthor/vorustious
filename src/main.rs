@@ -61,8 +61,7 @@ fn run_battle() {
     let mut battle = Battle::new();
 
     let voxel_catalog = VoxelCatalog::create();
-    let structure_file_content = std::fs::read_to_string("structures/tie.vors").expect(&format!("Unable to read structures/tie.vors"));
-    let tie_fighter_structure = Structure::deserialize(&voxel_catalog, &structure_file_content);
+    let tie_fighter_structure = Structure::read_from_file(&voxel_catalog, "structures/tie.vors");
     battle.add_inert_body(Body::new(tie_fighter_structure.clone(), Mat4f::identity()));
 
     let player_ship = {

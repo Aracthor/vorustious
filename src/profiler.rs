@@ -24,8 +24,7 @@ fn profile<F: Fn()>(f: F, name: &str) -> Duration {
 
 pub fn run_profiler() {
     let voxel_catalog = VoxelCatalog::create();
-    let structure_file_content = std::fs::read_to_string("structures/tie.vors").expect(&format!("Unable to read structures/tie.vors"));
-    let tie_fighter_structure = Structure::deserialize(&voxel_catalog, &structure_file_content);
+    let tie_fighter_structure = Structure::read_from_file(&voxel_catalog, "structures/tie.vors");
 
     assert!(tie_fighter_structure.get_box() == Box3f::from_min_max(Vect3f::new([-6.5, -8.5, -9.5]), Vect3f::new([6.5, 8.5, 9.5])));
     let fighter_a = Body::new(tie_fighter_structure.clone(), Mat4f::identity());

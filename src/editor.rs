@@ -58,8 +58,7 @@ impl Editor {
             println!("Saved file '{SAVE_FILENAME}'");
         }
         if event_handler.is_key_just_pressed(Key::F9) {
-            let str = std::fs::read_to_string(SAVE_FILENAME).expect(&format!("Unable to read {SAVE_FILENAME}"));
-            self.structure = Structure::deserialize(&self.voxel_catalog, &str);
+            self.structure = Structure::read_from_file(&self.voxel_catalog, SAVE_FILENAME);
             println!("Loaded file '{SAVE_FILENAME}'");
         }
         if event_handler.scroll_status() < 0.0 {
