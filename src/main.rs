@@ -62,14 +62,17 @@ fn run_battle() {
 
     let voxel_catalog = VoxelCatalog::create();
     let tie_fighter_structure = Structure::read_from_file(&voxel_catalog, "structures/tie.vors");
-    battle.add_inert_body(Body::new(tie_fighter_structure.clone(), Mat4f::identity()));
+    battle.add_inert_body(Body::new(tie_fighter_structure, Mat4f::identity()));
 
     let player_ship = {
         let player_repere = Mat4f::translation(Vect3f::new([-20.0, 0.0, 0.0]));
-        let player_body = Body::new(tie_fighter_structure.clone(), player_repere);
+        let player_structure = Structure::read_from_file(&voxel_catalog, "structures/x_wing.vors");
+        let player_body = Body::new(player_structure, player_repere);
         let mut ship = Ship::new(player_body);
-        ship.add_weapon(Vect3f::new([2.0, 2.0, 0.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
-        ship.add_weapon(Vect3f::new([2.0, -2.0, 0.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
+        ship.add_weapon(Vect3f::new([4.0, -4.0, -3.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
+        ship.add_weapon(Vect3f::new([4.0, 4.0, -3.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
+        ship.add_weapon(Vect3f::new([4.0, -4.0, 3.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
+        ship.add_weapon(Vect3f::new([4.0, 4.0, 3.0]), Weapon::new(0.5, 1.0, 100.0, 1000.0));
         ship
     };
     battle.set_player_ship(player_ship);
