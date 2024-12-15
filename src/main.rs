@@ -113,7 +113,8 @@ fn run_battle() {
         window.clear();
         let view_matrix = {
             let player_body = battle.player_ship().unwrap();
-            let position = player_body.repere().position();
+            let body_repere_without_translation = Mat4f::translation(-player_body.repere().position()) * player_body.repere().clone();
+            let position = player_body.repere().position() + body_repere_without_translation * Vect3f::new([-10.0, 0.0, 5.0]);
             let forward = player_body.repere().forward();
             let up = player_body.repere().up();
             Mat4f::look_at(position, position + forward.normalize(), up)
