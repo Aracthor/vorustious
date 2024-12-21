@@ -82,7 +82,7 @@ impl ReticleRenderer {
                 positions
             };
 
-            let mut mesh = Mesh::create(Primitive::Lines, false, material);
+            let mut mesh = Mesh::create(Primitive::Lines, material, false);
             mesh.set_positions_3d(&positions);
             mesh
         };

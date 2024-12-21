@@ -12,7 +12,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn create(primitive: Primitive, dynamic: bool, material: Material) -> Mesh {
+    pub fn create(primitive: Primitive, material: Material, dynamic: bool) -> Mesh {
         let mut vao = VertexArrayObject::create(dynamic);
         for instanced_buffer in material.get_instanced_buffer_locations() {
             vao.add_instanced_buffer(instanced_buffer.0, instanced_buffer.1);

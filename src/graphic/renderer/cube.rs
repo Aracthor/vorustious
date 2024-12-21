@@ -166,7 +166,7 @@ pub fn cube_mesh(alpha: f32) -> Mesh {
         material
     };
 
-    let mut mesh = Mesh::create(Primitive::Triangles, false, material);
+    let mut mesh = Mesh::create(Primitive::Triangles, material, false);
     mesh.set_positions_3d(&positions);
     mesh.set_texture_coords(&tex_coords);
     mesh

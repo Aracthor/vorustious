@@ -181,7 +181,7 @@ impl TextDrawer {
         };
 
         Self {
-            mesh: Mesh::create(Primitive::Triangles, true, material),
+            mesh: Mesh::create(Primitive::Triangles, material, true),
             position_buffer: Default::default(),
             texture_coords_buffer: Default::default(),
         }

@@ -51,7 +51,7 @@ impl ProjectileRenderer {
                 0.0, 0.2, 0.0,
             ].to_vec();
 
-            let mut mesh = Mesh::create(Primitive::Triangles, false, material);
+            let mut mesh = Mesh::create(Primitive::Triangles, material, false);
             mesh.set_positions_3d(&positions);
             mesh
         };

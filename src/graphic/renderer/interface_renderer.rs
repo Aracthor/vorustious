@@ -29,7 +29,7 @@ impl InterfaceRenderer {
                 half_width, half_height + reticle_center_size,
             ].to_vec();
 
-            let mut mesh = Mesh::create(Primitive::Lines, false, material);
+            let mut mesh = Mesh::create(Primitive::Lines, material, false);
             mesh.set_positions_2d(&positions);
             mesh
         };

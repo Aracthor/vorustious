@@ -63,7 +63,7 @@ impl BodyRenderer {
             material.add_uniform_mat4("uni_model_matrix", Mat4f::identity());
             material.add_uniform_vect4("uni_color", Vect4f::zero());
 
-            Mesh::create(Primitive::Lines, true, material)
+            Mesh::create(Primitive::Lines, material, true)
         };
 
         let gizmo_mesh = {
@@ -88,7 +88,7 @@ impl BodyRenderer {
                 0.0, 0.0, 1.0, 1.0,
             ].to_vec();
 
-            let mut mesh = Mesh::create(Primitive::Lines, false, material);
+            let mut mesh = Mesh::create(Primitive::Lines, material, false);
             mesh.set_positions_3d(&positions);
             mesh.set_colors(&colors);
             mesh
