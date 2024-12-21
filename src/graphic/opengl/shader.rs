@@ -71,7 +71,9 @@ impl Shader {
     pub fn get_attrib_location(&self, attrib_name: &str) -> u32 {
         unsafe {
             let name = Self::location_name_from_string(attrib_name);
-            gl::GetAttribLocation(self.program, name.as_ptr()).try_into().unwrap()
+            let location = gl::GetAttribLocation(self.program, name.as_ptr());
+            assert!(location >= 0, "invalid attrib {attrib_name}");
+            location.try_into().unwrap()
         }
     }
 
