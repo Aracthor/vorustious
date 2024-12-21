@@ -62,10 +62,17 @@ impl Editor {
             println!("Loaded file '{SAVE_FILENAME}'");
         }
         if event_handler.scroll_status() < 0.0 {
-            self.voxel_id = (if self.voxel_id as i32 == 0 { VoxelID::COUNT as i32 - 1 } else { self.voxel_id as i32 - 1}).into();
+            self.voxel_id = match self.voxel_id as i32 {
+                0 => VoxelID::COUNT as i32 - 1,
+                other => other - 1,
+            }.into();
         }
         else if event_handler.scroll_status() > 0.0 {
-            self.voxel_id = (if self.voxel_id as i32 == VoxelID::COUNT as i32 - 1 { 0 } else { self.voxel_id as i32 + 1}).into();
+            const LAST_VOXEL_ID: i32 = VoxelID::COUNT as i32 - 1;
+            self.voxel_id = match self.voxel_id as i32 {
+                LAST_VOXEL_ID => 0,
+                other => other + 1,
+            }.into();
         }
 
         if event_handler.is_mouse_button_just_released(MouseButton::Left) {
