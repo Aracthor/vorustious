@@ -100,7 +100,9 @@ impl VertexArrayObject {
         assert!(data.len() % component_size as usize == 0);
         unsafe {
             gl::BindVertexArray(self.id);
-            *buffer_object = Some(VertexBufferObject::new(attrib_location, component_size));
+            if buffer_object.is_none() {
+                *buffer_object = Some(VertexBufferObject::new(attrib_location, component_size));
+            }
             buffer_object.as_mut().unwrap().set_data(&data, usage);
             gl::BindVertexArray(0);
         }
