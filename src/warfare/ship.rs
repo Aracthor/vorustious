@@ -29,6 +29,10 @@ impl Ship {
         self.body.repere()
     }
 
+    pub fn weapons(&self) -> &Vec<(Vect3f, Weapon)> {
+        &self.weapons
+    }
+
     pub fn add_weapon(&mut self, position: Vect3f, weapon: Weapon) {
         self.weapons.push((position, weapon));
     }

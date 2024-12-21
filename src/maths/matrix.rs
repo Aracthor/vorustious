@@ -124,7 +124,6 @@ impl<T: MathsUsable> Mat<4, T> {
         copy
     }
 
-    #[allow(dead_code)]
     pub fn translation(translate: Vect<3, T>) -> Self {
         let mut result = Self::identity();
         result[3][0] = translate[0];
@@ -132,6 +131,15 @@ impl<T: MathsUsable> Mat<4, T> {
         result[3][2] = translate[2];
         result
     }
+
+    pub fn scale(scale_factor: Vect<3, T>) -> Self {
+        let mut result = Self::identity();
+        result[0][0] = scale_factor[0];
+        result[1][1] = scale_factor[1];
+        result[2][2] = scale_factor[2];
+        result
+    }
+
 
     #[allow(dead_code)]
     pub fn orthographic(left: T, right: T, bottom: T, top: T) -> Self {

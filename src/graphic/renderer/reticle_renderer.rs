@@ -6,9 +6,29 @@ use super::super::meshes::mesh::Mesh;
 use super::super::meshes::material::Material;
 use super::super::opengl::vertex_objects::Primitive;
 use crate::maths::matrix::Mat4f;
+use crate::maths::vector::Vect3f;
+use crate::warfare::ship::Ship;
+
+enum ReticleMode {
+    None,
+    Ship,
+    Weapons,
+}
+
+impl ReticleMode {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Self::None => Self::Ship,
+            Self::Ship => Self::Weapons,
+            Self::Weapons => Self::None,
+        }
+    }
+}
+
 
 pub struct ReticleRenderer {
     mesh: Mesh,
+    mode: ReticleMode,
 }
 
 fn cross_vertex_positions(distance: f32, radius: f32) -> Vec<f32> {
@@ -36,8 +56,8 @@ fn cross_vertex_positions(distance: f32, radius: f32) -> Vec<f32> {
         positions.push(radius * f32::cos(angle));
         positions.push(radius * f32::sin(angle));
         positions.push(distance);
-        positions.push(radius * f32::cos(angle) * 3.0 / 4.0);
-        positions.push(radius * f32::sin(angle) * 3.0 / 4.0);
+        positions.push(radius * f32::cos(angle) * 2.0 / 3.0);
+        positions.push(radius * f32::sin(angle) * 2.0 / 3.0);
     }
 
     positions
@@ -51,10 +71,10 @@ impl ReticleRenderer {
             material.add_uniform_vect4("uni_color", Color::new(0xFF, 0xFF, 0xFF, 0x80).into());
 
             let positions = {
-                let first_circle_distance = 10.0;
-                let first_circle_radius = 4.0;
-                let second_circle_distance = 20.0;
-                let second_circle_radius = 2.0;
+                let first_circle_distance = 1.0;
+                let first_circle_radius = 0.5;
+                let second_circle_distance = 2.0;
+                let second_circle_radius = 0.2;
 
                 let mut positions = Vec::<f32>::default();
                 positions.extend(cross_vertex_positions(first_circle_distance, first_circle_radius));
@@ -69,11 +89,33 @@ impl ReticleRenderer {
 
         Self {
             mesh: reticle_mesh,
+            mode: ReticleMode::Ship,
         }
     }
 
-    pub fn render(&mut self, projection_view_matrix: &Mat4f, player_repere: &Mat4f) {
-        self.mesh.set_uniform_matrix("uni_model_matrix", &player_repere);
-        self.mesh.draw(projection_view_matrix);
+    pub fn toggle_reticle_mode(&mut self) {
+        self.mode.toggle();
+    }
+
+    pub fn render(&mut self, projection_view_matrix: &Mat4f, ship: &Ship) {
+        let ship_repere = ship.body().repere();
+        match self.mode {
+            ReticleMode::None => {},
+            ReticleMode::Ship => {
+                let scale_transformation = Mat4f::scale(Vect3f::new([10.0, 5.0, 5.0]));
+                let reticle_matrix = ship_repere.clone() * scale_transformation;
+                self.mesh.set_uniform_matrix("uni_model_matrix", &reticle_matrix);
+                self.mesh.draw(projection_view_matrix);
+            },
+            ReticleMode::Weapons => {
+                let scale_transformation = Mat4f::scale(Vect3f::new([10.0, 2.0, 2.0]));
+                for weapon in ship.weapons() {
+                    let weapon_transformation = Mat4f::translation(weapon.0) * scale_transformation.clone();
+                    let reticle_matrix = ship_repere.clone() * weapon_transformation;
+                    self.mesh.set_uniform_matrix("uni_model_matrix", &reticle_matrix);
+                    self.mesh.draw(projection_view_matrix);
+                }
+            },
+        }
     }
 }

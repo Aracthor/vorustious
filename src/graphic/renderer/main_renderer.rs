@@ -3,6 +3,7 @@ use crate::maths::vector::Vect2f;
 use crate::editor::Editor;
 use crate::physics::body::Body;
 use crate::warfare::projectile::Projectile;
+use crate::warfare::ship::Ship;
 use super::projectile_renderer::ProjectileRenderer;
 use super::body_renderer::BodyRenderer;
 use super::editor_renderer::EditorRenderer;
@@ -50,6 +51,10 @@ impl BattleRenderer {
         self.body_renderer.toggle_debug_boxes();
     }
 
+    pub fn toggle_reticle_mode(&mut self) {
+        self.reticle_renderer.toggle_reticle_mode();
+    }
+
     pub fn toggle_gizmo(&mut self) {
         self.body_renderer.toggle_gizmo();
     }
@@ -58,12 +63,12 @@ impl BattleRenderer {
         self.body_renderer.toggle_octtree();
     }
 
-    pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: Vec<&Body>, projectiles: &Vec<Projectile>, player_repere: &Mat4f) {
+    pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: Vec<&Body>, projectiles: &Vec<Projectile>, player_ship: &Ship) {
         let projection_view_matrix = self.projection_matrix.clone() * view_matrix;
 
         self.body_renderer.render(&projection_view_matrix, bodies);
         self.projectile_renderer.render(&projection_view_matrix, projectiles);
-        self.reticle_renderer.render(&projection_view_matrix, player_repere);
+        self.reticle_renderer.render(&projection_view_matrix, player_ship);
 
         let frame_time_info = self.frame_limiter.frame_time();
         let min_time_ms = frame_time_info.min * 1000.0;

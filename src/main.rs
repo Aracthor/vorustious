@@ -92,8 +92,11 @@ fn run_battle() {
         if window.event_handler().is_key_just_pressed(Key::F1) {
             renderer.toggle_debug_bodies();
         }
-        if window.event_handler().is_key_just_pressed(Key::F3) {
+        if window.event_handler().is_key_just_pressed(Key::F2) {
             renderer.toggle_debug_boxes();
+        }
+        if window.event_handler().is_key_just_pressed(Key::F3) {
+            renderer.toggle_reticle_mode();
         }
         if window.event_handler().is_key_just_pressed(Key::F4) {
             renderer.toggle_gizmo();
@@ -119,7 +122,7 @@ fn run_battle() {
             let up = player_body.repere().up();
             Mat4f::look_at(position, position + forward.normalize(), up)
         };
-        renderer.render_frame(view_matrix, battle.bodies(), &battle.projectiles(), battle.player_ship().unwrap().repere());
+        renderer.render_frame(view_matrix, battle.bodies(), &battle.projectiles(), battle.player_ship().unwrap());
         window.update();
     }
 
