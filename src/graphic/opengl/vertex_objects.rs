@@ -62,6 +62,7 @@ impl Drop for VertexBufferObject {
 enum VertexObjectID {
     Position,
     Color,
+    Normal,
     TextureCoord,
     COUNT,
 }
@@ -124,6 +125,10 @@ impl VertexArrayObject {
 
     pub fn set_colors(&mut self, colors: &Vec<f32>, attrib_location: u32) {
         self.set_vertex_bufer(VertexObjectID::Color, colors, attrib_location, 4);
+    }
+
+    pub fn set_normals(&mut self, normals: &Vec<f32>, attrib_location: u32) {
+        self.set_vertex_bufer(VertexObjectID::Normal, normals, attrib_location, 3);
     }
 
     pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>, attrib_location: u32) {

@@ -39,6 +39,11 @@ impl Mesh {
         self.vao.set_colors(colors, attrib_location);
     }
 
+    pub fn set_normals(&mut self, normals: &Vec<f32>) {
+        let attrib_location = self.material.get_attrib_location("vert_normal");
+        self.vao.set_normals(normals, attrib_location);
+    }
+
     pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>) {
         let attrib_location = self.material.get_attrib_location("vert_texture_coord");
         self.vao.set_texture_coords(texture_coords, attrib_location);
