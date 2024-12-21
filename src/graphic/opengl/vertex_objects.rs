@@ -58,12 +58,18 @@ impl Drop for VertexBufferObject {
     }
 }
 
+
+enum VertexObjectID {
+    Position,
+    Color,
+    TextureCoord,
+    COUNT,
+}
+
 pub struct VertexArrayObject {
     id: gl::types::GLuint,
     dynamic: bool,
-    position_buffer: Option<VertexBufferObject>,
-    color_buffer: Option<VertexBufferObject>,
-    texture_coords_buffer: Option<VertexBufferObject>,
+    vertex_buffers: [Option<VertexBufferObject>; VertexObjectID::COUNT as usize],
     instance_buffer_objects: Vec<VertexBufferObject>,
     element_count: i32,
 }
@@ -77,9 +83,7 @@ impl VertexArrayObject {
         VertexArrayObject {
             id: vao,
             dynamic: dynamic,
-            position_buffer: None,
-            color_buffer: None,
-            texture_coords_buffer: None,
+            vertex_buffers: [const { None }; VertexObjectID::COUNT as usize],
             instance_buffer_objects: Default::default(),
             element_count: 0,
         }
@@ -89,16 +93,22 @@ impl VertexArrayObject {
         if self.dynamic { gl::DYNAMIC_DRAW } else { gl::STATIC_DRAW }
     }
 
-    fn set_positions(&mut self, positions: &Vec<f32>, attrib_location: u32, component_size: i32) {
-        assert!(self.dynamic || self.position_buffer.is_none());
-        assert!(positions.len() % component_size as usize == 0);
+    fn set_vertex_bufer(&mut self, buffer_id: VertexObjectID, data: &Vec<f32>, attrib_location: u32, component_size: i32) {
         let usage = self.buffer_usage();
+        let buffer_object = &mut self.vertex_buffers[buffer_id as usize];
+        assert!(self.dynamic || buffer_object.is_none());
+        assert!(data.len() % component_size as usize == 0);
         unsafe {
             gl::BindVertexArray(self.id);
-            self.position_buffer = Some(VertexBufferObject::new(attrib_location, component_size));
-            self.position_buffer.as_mut().unwrap().set_data(&positions, usage);
+            *buffer_object = Some(VertexBufferObject::new(attrib_location, component_size));
+            buffer_object.as_mut().unwrap().set_data(&data, usage);
             gl::BindVertexArray(0);
         }
+
+    }
+
+    fn set_positions(&mut self, positions: &Vec<f32>, attrib_location: u32, component_size: i32) {
+        self.set_vertex_bufer(VertexObjectID::Position, positions, attrib_location, component_size);
         self.element_count = (positions.len() / component_size as usize).try_into().unwrap();
     }
 
@@ -111,27 +121,11 @@ impl VertexArrayObject {
     }
 
     pub fn set_colors(&mut self, colors: &Vec<f32>, attrib_location: u32) {
-        let usage = self.buffer_usage();
-        assert!(self.dynamic || self.color_buffer.is_none());
-        assert!(colors.len() % 4 == 0);
-        unsafe {
-            gl::BindVertexArray(self.id);
-            self.color_buffer = Some(VertexBufferObject::new(attrib_location, 4));
-            self.color_buffer.as_mut().unwrap().set_data(&colors, usage);
-            gl::BindVertexArray(0);
-        }
+        self.set_vertex_bufer(VertexObjectID::Color, colors, attrib_location, 4);
     }
 
     pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>, attrib_location: u32) {
-        let usage = self.buffer_usage();
-        assert!(self.dynamic || self.texture_coords_buffer.is_none());
-        assert!(texture_coords.len() % 2 == 0);
-        unsafe {
-            gl::BindVertexArray(self.id);
-            self.texture_coords_buffer = Some(VertexBufferObject::new(attrib_location, 2));
-            self.texture_coords_buffer.as_mut().unwrap().set_data(&texture_coords, usage);
-            gl::BindVertexArray(0);
-        }
+        self.set_vertex_bufer(VertexObjectID::TextureCoord, texture_coords, attrib_location, 2);
     }
 
     pub fn add_instanced_buffer(&mut self, attrib_index: u32, component_size: i32) {
