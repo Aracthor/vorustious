@@ -65,8 +65,12 @@ impl Material {
         self.shader.set_matrix_uniform("uni_projection_matrix", projection_matrix);
     }
 
+    pub fn get_attrib_location(&self, attrib_name: &str) -> u32 {
+        self.shader.get_attrib_location(attrib_name)
+    }
+
     pub fn get_instanced_buffer_locations(&self) -> Vec<(u32, i32)> {
-        self.instance_data_buffers.iter().map(|buffer| (self.shader.get_attrib_location(&buffer.0), buffer.1)).collect()
+        self.instance_data_buffers.iter().map(|buffer| (self.get_attrib_location(&buffer.0), buffer.1)).collect()
     }
 
     pub fn bind(&self) {

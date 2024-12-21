@@ -1,7 +1,7 @@
 #version 320 es
 
 in vec3 vert_position;
-in vec2 vert_texture_coords;
+in vec2 vert_texture_coord;
 in vec3 instance_position;
 in int instance_texture_index;
 in float instance_damage;
@@ -16,7 +16,7 @@ out flat float damage;
 void main()
 {
     gl_Position = uni_projection_view_matrix * uni_model_matrix * vec4(vert_position + instance_position, 1.0);
-    texture_coord = vert_texture_coords;
+    texture_coord = vert_texture_coord;
     texture_index = instance_texture_index;
     damage = instance_damage;
 }

@@ -25,19 +25,23 @@ impl Mesh {
     }
 
     pub fn set_positions_2d(&mut self, positions: &Vec<f32>) {
-        self.vao.set_positions_2d(positions);
+        let attrib_location = self.material.get_attrib_location("vert_position");
+        self.vao.set_positions_2d(positions, attrib_location);
     }
 
     pub fn set_positions_3d(&mut self, positions: &Vec<f32>) {
-        self.vao.set_positions_3d(positions);
+        let attrib_location = self.material.get_attrib_location("vert_position");
+        self.vao.set_positions_3d(positions, attrib_location);
     }
 
     pub fn set_colors(&mut self, colors: &Vec<f32>) {
-        self.vao.set_colors(colors);
+        let attrib_location = self.material.get_attrib_location("vert_color");
+        self.vao.set_colors(colors, attrib_location);
     }
 
     pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>) {
-        self.vao.set_texture_coords(texture_coords);
+        let attrib_location = self.material.get_attrib_location("vert_texture_coord");
+        self.vao.set_texture_coords(texture_coords, attrib_location);
     }
 
     pub fn set_uniform_vector(&mut self, uniform_name: &str, value: Vect4f) {

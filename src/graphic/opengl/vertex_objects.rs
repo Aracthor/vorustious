@@ -89,47 +89,46 @@ impl VertexArrayObject {
         if self.dynamic { gl::DYNAMIC_DRAW } else { gl::STATIC_DRAW }
     }
 
-    fn set_positions(&mut self, positions: &Vec<f32>, component_size: i32) {
+    fn set_positions(&mut self, positions: &Vec<f32>, attrib_location: u32, component_size: i32) {
         assert!(self.dynamic || self.position_buffer.is_none());
         assert!(positions.len() % component_size as usize == 0);
         let usage = self.buffer_usage();
         unsafe {
             gl::BindVertexArray(self.id);
-            self.position_buffer = Some(VertexBufferObject::new(0, component_size));
+            self.position_buffer = Some(VertexBufferObject::new(attrib_location, component_size));
             self.position_buffer.as_mut().unwrap().set_data(&positions, usage);
             gl::BindVertexArray(0);
         }
         self.element_count = (positions.len() / component_size as usize).try_into().unwrap();
     }
 
-    pub fn set_positions_2d(&mut self, positions: &Vec<f32>) {
-        self.set_positions(positions, 2);
+    pub fn set_positions_2d(&mut self, positions: &Vec<f32>, attrib_location: u32) {
+        self.set_positions(positions, attrib_location, 2);
     }
 
-    pub fn set_positions_3d(&mut self, positions: &Vec<f32>) {
-        self.set_positions(positions, 3);
+    pub fn set_positions_3d(&mut self, positions: &Vec<f32>, attrib_location: u32) {
+        self.set_positions(positions, attrib_location, 3);
     }
 
-    pub fn set_colors(&mut self, colors: &Vec<f32>) {
+    pub fn set_colors(&mut self, colors: &Vec<f32>, attrib_location: u32) {
         let usage = self.buffer_usage();
         assert!(self.dynamic || self.color_buffer.is_none());
         assert!(colors.len() % 4 == 0);
         unsafe {
             gl::BindVertexArray(self.id);
-            self.color_buffer = Some(VertexBufferObject::new(1, 4));
+            self.color_buffer = Some(VertexBufferObject::new(attrib_location, 4));
             self.color_buffer.as_mut().unwrap().set_data(&colors, usage);
             gl::BindVertexArray(0);
         }
     }
 
-    pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>) {
+    pub fn set_texture_coords(&mut self, texture_coords: &Vec<f32>, attrib_location: u32) {
         let usage = self.buffer_usage();
         assert!(self.dynamic || self.texture_coords_buffer.is_none());
         assert!(texture_coords.len() % 2 == 0);
         unsafe {
             gl::BindVertexArray(self.id);
-            // TODO get attrib_index from name rather than this 1 that forbid using colors AND texture coords.
-            self.texture_coords_buffer = Some(VertexBufferObject::new(1, 2));
+            self.texture_coords_buffer = Some(VertexBufferObject::new(attrib_location, 2));
             self.texture_coords_buffer.as_mut().unwrap().set_data(&texture_coords, usage);
             gl::BindVertexArray(0);
         }
