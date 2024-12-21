@@ -119,7 +119,7 @@ fn run_battle() {
             let up = player_body.repere().up();
             Mat4f::look_at(position, position + forward.normalize(), up)
         };
-        renderer.render_frame(view_matrix, battle.bodies(), &battle.projectiles());
+        renderer.render_frame(view_matrix, battle.bodies(), &battle.projectiles(), battle.player_ship().unwrap().repere());
         window.update();
     }
 

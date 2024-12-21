@@ -8,6 +8,7 @@ use super::body_renderer::BodyRenderer;
 use super::editor_renderer::EditorRenderer;
 use super::interface_renderer::InterfaceRenderer;
 use super::frame_limiter::FrameLimiter;
+use super::reticle_renderer::ReticleRenderer;
 use super::text_drawer::TextDrawer;
 
 pub struct BattleRenderer {
@@ -18,7 +19,7 @@ pub struct BattleRenderer {
     text_drawer: TextDrawer,
     body_renderer: BodyRenderer,
     projectile_renderer: ProjectileRenderer,
-    interface_renderer: InterfaceRenderer,
+    reticle_renderer: ReticleRenderer,
 }
 
 impl BattleRenderer {
@@ -37,7 +38,7 @@ impl BattleRenderer {
             text_drawer: TextDrawer::create(),
             body_renderer: BodyRenderer::new(),
             projectile_renderer: ProjectileRenderer::new(),
-            interface_renderer: InterfaceRenderer::new(window_width, window_height),
+            reticle_renderer: ReticleRenderer::new(),
         }
     }
 
@@ -57,13 +58,12 @@ impl BattleRenderer {
         self.body_renderer.toggle_octtree();
     }
 
-    pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: Vec<&Body>, projectiles: &Vec<Projectile>) {
+    pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: Vec<&Body>, projectiles: &Vec<Projectile>, player_repere: &Mat4f) {
         let projection_view_matrix = self.projection_matrix.clone() * view_matrix;
 
         self.body_renderer.render(&projection_view_matrix, bodies);
         self.projectile_renderer.render(&projection_view_matrix, projectiles);
-
-        self.interface_renderer.draw(&self.ui_projection_matrix);
+        self.reticle_renderer.render(&projection_view_matrix, player_repere);
 
         let frame_time_info = self.frame_limiter.frame_time();
         let min_time_ms = frame_time_info.min * 1000.0;

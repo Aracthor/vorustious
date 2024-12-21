@@ -6,4 +6,5 @@ mod editor_renderer;
 mod frame_limiter;
 mod interface_renderer;
 mod projectile_renderer;
+mod reticle_renderer;
 mod text_drawer;
