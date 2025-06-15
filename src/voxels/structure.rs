@@ -63,10 +63,10 @@ impl Structure {
         }
     }
 
-    const SEPARATOR_EXTENT: &str = ";";
-    const SEPARATOR_X: &str = " ";
-    const SEPARATOR_Y: &str = "|";
-    const SEPARATOR_Z: &str = "\n";
+    const SEPARATOR_EXTENT: &'static str = ";";
+    const SEPARATOR_X: &'static str = " ";
+    const SEPARATOR_Y: &'static str = "|";
+    const SEPARATOR_Z: &'static str = "\n";
 
     pub fn serialize(&self) -> String {
         let mut result =

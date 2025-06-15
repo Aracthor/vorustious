@@ -84,7 +84,7 @@ impl VertexArrayObject {
         VertexArrayObject {
             id: vao,
             dynamic: dynamic,
-            vertex_buffers: [const { None }; VertexObjectID::COUNT as usize],
+            vertex_buffers: [None, None, None, None],
             instance_buffer_objects: Default::default(),
             element_count: 0,
         }
