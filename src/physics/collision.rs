@@ -129,7 +129,7 @@ pub fn intersection_low_precision(body_a: &Body, body_b: &Body) -> Vec<(Vect3i, 
     let body_a_coords = body_structure_as_coords(body_a);
     let body_b_coords = body_structure_as_coords(body_b);
 
-    // TODO there must be some STL-way to do have intersection between vectors from a specific compare...
+    // TODO there must be some STL-way to have intersection between vectors from a specific compare...
     let mut result = vec![];
     let mut idx_a = 0;
     let mut idx_b = 0;
