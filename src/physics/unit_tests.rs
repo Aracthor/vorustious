@@ -113,7 +113,7 @@ fn body_cut_in_half_with_father_body_becoming_empty() {
 }
 
 #[test]
-fn body_cube_intersection() {
+fn body_cube_intersection_high_precision() {
     // Cubes with same axis, with a corner voxel half-mingled.
     //        +-------+
     //        |       |
@@ -127,14 +127,14 @@ fn body_cube_intersection() {
     let structure_square = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
     let body_a = Body::new(structure_square.clone(), Mat4f::identity());
     let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([2.5, 2.5, 2.5])));
-    let result = collision::intersection(&body_a, &body_b);
+    let result = collision::intersection_high_precision(&body_a, &body_b);
     assert!(result.len() == 1);
     assert!(result[0] == (Vect3i::new([1, 1, 1]), Vect3i::new([-1, -1, -1])));
 
     // Same, in the other side.
     let body_a = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([-2.0, 3.0, -2.0])));
     let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([-4.5, 0.5, -4.5])));
-    let result = collision::intersection(&body_a, &body_b);
+    let result = collision::intersection_high_precision(&body_a, &body_b);
     assert!(result.len() == 1);
     assert!(result[0] == (Vect3i::new([-1, -1, -1]), Vect3i::new([1, 1, 1])));
 
@@ -152,7 +152,52 @@ fn body_cube_intersection() {
     // +-------+
     let body_a = Body::new(structure_square.clone(), Mat4f::identity());
     let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 4.0])) * Mat4f::rotation_around_y(PI / 5.0) * Mat4f::rotation_around_x(PI / 4.0));
-    let result = collision::intersection(&body_a, &body_b);
+    let result = collision::intersection_high_precision(&body_a, &body_b);
+    assert!(result.len() == 1);
+    assert!(result[0] == (Vect3i::new([0, 0, 1]), Vect3i::new([1, -1, -1])));
+}
+
+#[test]
+fn body_cube_intersection_low_precision() {
+    // Cubes with same axis, with a corner voxel half-mingled.
+    //        +-------+
+    //        |       |
+    //        |       |
+    //        |       |
+    // +------++------+
+    // |      ++
+    // |       |
+    // |       |
+    // +-------+
+    let structure_square = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
+    let body_a = Body::new(structure_square.clone(), Mat4f::identity());
+    let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([2.4, 2.4, 2.4])));
+    let result = collision::intersection_low_precision(&body_a, &body_b);
+    assert!(result.len() == 1);
+    assert!(result[0] == (Vect3i::new([1, 1, 1]), Vect3i::new([-1, -1, -1])));
+
+    // Same, in the other side.
+    let body_a = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([-2.0, 3.0, -2.0])));
+    let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([-4.4, 0.6, -4.4])));
+    let result = collision::intersection_low_precision(&body_a, &body_b);
+    assert!(result.len() == 1);
+    assert!(result[0] == (Vect3i::new([-1, -1, -1]), Vect3i::new([1, 1, 1])));
+
+    // A cube rotated with a corner on the top of another.
+    //     +
+    //    / \
+    //  /     \
+    // +       +
+    //  \     /
+    //    \ /
+    // +---+---+
+    // |       |
+    // |       |
+    // |       |
+    // +-------+
+    let body_a = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 0.0])));
+    let body_b = Body::new(structure_square.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 3.2])) * Mat4f::rotation_around_y(PI / 5.0) * Mat4f::rotation_around_x(PI / 4.0));
+    let result = collision::intersection_low_precision(&body_a, &body_b);
     assert!(result.len() == 1);
     assert!(result[0] == (Vect3i::new([0, 0, 1]), Vect3i::new([1, -1, -1])));
 }
@@ -194,7 +239,8 @@ fn body_heavy_intersection() {
     //  |     |
     let body_a = Body::new(structure_h.clone(), Mat4f::identity());
     let body_b = Body::new(structure_h.clone(), Mat4f::translation(Vect3f::new([1.5, 0.0, 4.5])));
-    assert!(collision::intersection(&body_a, &body_b).is_empty());
+    assert!(collision::intersection_high_precision(&body_a, &body_b).is_empty());
+    assert!(collision::intersection_low_precision(&body_a, &body_b).is_empty());
 
     // Two structure with two intersections.
     //  |     |
@@ -207,11 +253,16 @@ fn body_heavy_intersection() {
     //  |     |
     //  |     |
     let body_a = Body::new(structure_h.clone(), Mat4f::identity());
-    let body_b = Body::new(structure_h.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 6.5])));
-    let result = collision::intersection(&body_a, &body_b);
-    assert!(result.len() == 2);
+    let body_b = Body::new(structure_h.clone(), Mat4f::translation(Vect3f::new([0.0, 0.0, 6.4])));
     let expected_result_1 = (Vect3i::new([-3, 0, 3]), Vect3i::new([-3, 0, -3]));
     let expected_result_2 = (Vect3i::new([3, 0, 3]), Vect3i::new([3, 0, -3]));
+    let result = collision::intersection_high_precision(&body_a, &body_b);
+    assert!(result.len() == 2);
+    assert!(
+        (result[0] == expected_result_1 && result[1] == expected_result_2) ||
+        (result[0] == expected_result_2 && result[1] == expected_result_1));
+    let result = collision::intersection_low_precision(&body_a, &body_b);
+    assert!(result.len() == 2);
     assert!(
         (result[0] == expected_result_1 && result[1] == expected_result_2) ||
         (result[0] == expected_result_2 && result[1] == expected_result_1));

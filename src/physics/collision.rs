@@ -1,6 +1,8 @@
+use std::cmp::Ordering;
+
 use super::body::Body;
-use crate::maths::boxes::Box3f;
 use crate::maths::boxes::Box3i;
+use crate::maths::boxes::Box3f;
 use crate::maths::vector::Vect3f;
 use crate::maths::vector::Vect3i;
 use crate::maths::intersection;
@@ -62,7 +64,7 @@ fn voxels_intersection(body_a: &Body, box_a: Box3f, body_b: &Body, box_b: Box3f,
     result
 }
 
-pub fn intersection(body_a: &Body, body_b: &Body) -> Vec<(Vect3i, Vect3i)> {
+pub fn intersection_high_precision(body_a: &Body, body_b: &Body) -> Vec<(Vect3i, Vect3i)> {
     let axis = intersection::boxes_projection_axis(body_a.repere(), body_b.repere());
     let box_a = body_a.get_box();
     let box_b = body_b.get_box();
@@ -75,7 +77,7 @@ pub fn intersection(body_a: &Body, body_b: &Body) -> Vec<(Vect3i, Vect3i)> {
 }
 
 pub fn apply_collision_if_any(body_a: &mut Body, body_b: &mut Body, restitution: f32) {
-    let intersections = intersection(body_a, body_b);
+    let intersections = intersection_low_precision(body_a, body_b);
     if !intersections.is_empty() {
         let momentum_a = body_a.momentum();
         let momentum_b = body_b.momentum();
@@ -91,4 +93,62 @@ pub fn apply_collision_if_any(body_a: &mut Body, body_b: &mut Body, restitution:
         body_a.set_velocity(new_velocity_a);
         body_b.set_velocity(new_velocity_b);
     }
+}
+
+fn compare_coords(a: Vect3i, b: Vect3i) -> Ordering {
+    if a[0] != b[0] {
+        return a[0].cmp(&b[0]);
+    }
+    if a[1] != b[1] {
+        return a[1].cmp(&b[1]);
+    }
+    if a[2] != b[2] {
+        return a[2].cmp(&b[2]);
+    }
+    Ordering::Equal
+}
+
+fn body_structure_as_coords(body: &Body) -> Vec<(Vect3i, Vect3i)> {
+    let mut result = vec![];
+    body.structure().for_each_voxel(|coords, _voxel|{
+        let coord_f = Vect3f::new([coords[0] as f32, coords[1] as f32, coords[2] as f32]);
+        let transformed_coord = body.repere().clone() * coord_f;
+        result.push((coords, Vect3i::new([transformed_coord[0].round() as i32, transformed_coord[1].round() as i32, transformed_coord[2].round() as i32])));
+    });
+    result.sort_by(|a, b| compare_coords(a.1, b.1));
+    result
+}
+
+pub fn intersection_low_precision(body_a: &Body, body_b: &Body) -> Vec<(Vect3i, Vect3i)> {
+    let box_a = body_a.get_box();
+    let box_b = body_b.get_box();
+    if !box_a.intersects(&box_b) {
+        return Default::default();
+    }
+
+    let body_a_coords = body_structure_as_coords(body_a);
+    let body_b_coords = body_structure_as_coords(body_b);
+
+    // TODO there must be some STL-way to do have intersection between vectors from a specific compare...
+    let mut result = vec![];
+    let mut idx_a = 0;
+    let mut idx_b = 0;
+    while idx_a < body_a_coords.len() && idx_b < body_b_coords.len() {
+        let coord_a = body_a_coords[idx_a];
+        let coord_b = body_b_coords[idx_b];
+        let compare = compare_coords(coord_a.1, coord_b.1);
+        match compare {
+            Ordering::Less => {
+                idx_a += 1;
+            }
+            Ordering::Equal => {
+                result.push((coord_a.0, coord_b.0));
+                idx_a += 1;
+            }
+            Ordering::Greater => {
+                idx_b += 1;
+            }
+        }
+    }
+    result
 }

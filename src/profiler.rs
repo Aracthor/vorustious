@@ -33,10 +33,20 @@ pub fn run_profiler() {
     let repere_d = Mat4f::translation(Vect3f::new([5.5, 8.5, 18.5])) * Mat4f::rotation_around_z(PI / 2.0);
     let fighter_d = Body::new(tie_fighter_structure.clone(), repere_d);
 
+    println!("High precision collision:");
     let mut total_time = Duration::ZERO;
-    total_time += profile(|| { collision::intersection(&fighter_a, &fighter_b); }, "fighters crossing without intersection");
-    total_time += profile(|| { collision::intersection(&fighter_a, &fighter_c); }, "fighters side-by-side with a lot of intersections");
-    total_time += profile(|| { collision::intersection(&fighter_a, &fighter_a); }, "fighters exactly at the same position");
-    total_time += profile(|| { collision::intersection(&fighter_a, &fighter_d); }, "fighters slightly colliding");
+    total_time += profile(|| { collision::intersection_high_precision(&fighter_a, &fighter_b); }, "fighters crossing without intersection");
+    total_time += profile(|| { collision::intersection_high_precision(&fighter_a, &fighter_c); }, "fighters side-by-side with a lot of intersections");
+    total_time += profile(|| { collision::intersection_high_precision(&fighter_a, &fighter_a); }, "fighters exactly at the same position");
+    total_time += profile(|| { collision::intersection_high_precision(&fighter_a, &fighter_d); }, "fighters slightly colliding");
+    println!("Total time: {} us.", total_time.as_micros());
+
+    println!("");
+    println!("Low precision collision:");
+    let mut total_time = Duration::ZERO;
+    total_time += profile(|| { collision::intersection_low_precision(&fighter_a, &fighter_b); }, "fighters crossing without intersection");
+    total_time += profile(|| { collision::intersection_low_precision(&fighter_a, &fighter_c); }, "fighters side-by-side with a lot of intersections");
+    total_time += profile(|| { collision::intersection_low_precision(&fighter_a, &fighter_a); }, "fighters exactly at the same position");
+    total_time += profile(|| { collision::intersection_low_precision(&fighter_a, &fighter_d); }, "fighters slightly colliding");
     println!("Total time: {} us.", total_time.as_micros());
 }
