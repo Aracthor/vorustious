@@ -124,3 +124,34 @@ impl EditorMainRenderer {
     }
 
 }
+
+pub struct DemoMainRenderer {
+    projection_matrix: Mat4f,
+    frame_limiter: FrameLimiter,
+    body_renderer: BodyRenderer,
+}
+
+impl DemoMainRenderer {
+    pub fn new(window_width: f32, window_height: f32, fov: f32, z_near: f32, z_far: f32) -> Self {
+        let projection_matrix = {
+            let aspect = window_width / window_height;
+            Mat4f::perspective(fov, aspect, z_near, z_far)
+        };
+
+        Self {
+            projection_matrix: projection_matrix,
+            frame_limiter: FrameLimiter::new(60.0),
+            body_renderer: BodyRenderer::new(),
+        }
+    }
+
+
+    pub fn render_frame(&mut self, view_matrix: Mat4f, bodies: Vec<&Body>) {
+        let projection_view_matrix = self.projection_matrix.clone() * view_matrix;
+
+        self.body_renderer.render(&projection_view_matrix, bodies);
+
+        self.frame_limiter.limit();
+    }
+
+}

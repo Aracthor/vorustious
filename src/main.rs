@@ -4,6 +4,7 @@ mod physics;
 mod voxels;
 mod warfare;
 
+mod demo;
 mod editor;
 mod profiler;
 
@@ -130,7 +131,9 @@ fn run_battle() {
 
 fn main() {
     let first_arg = std::env::args().nth(1);
-    if first_arg.is_some() && first_arg.as_ref().unwrap() == "editor" {
+    if first_arg.is_some() && first_arg.as_ref().unwrap() == "demo" {
+        demo::run_demo();
+    } else if first_arg.is_some() && first_arg.as_ref().unwrap() == "editor" {
         editor::run_editor();
     } else if first_arg.is_some() && first_arg.as_ref().unwrap() == "profile" {
         profiler::run_profiler();
