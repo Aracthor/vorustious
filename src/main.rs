@@ -134,8 +134,7 @@ fn main() {
         editor::run_editor();
     } else if first_arg.is_some() && first_arg.as_ref().unwrap() == "profile" {
         profiler::run_profiler();
-    }
-    else {
+    } else {
         run_battle();
     }
 }
