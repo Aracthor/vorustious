@@ -7,4 +7,6 @@ pub mod vector;
 mod traits;
 
 #[cfg(test)]
-pub mod unit_tests;
+pub mod testing;
+#[cfg(test)]
+mod unit_tests;
