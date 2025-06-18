@@ -114,7 +114,7 @@ fn body_cut_in_half_with_father_body_becoming_empty() {
 }
 
 #[test]
-fn identity_body_momentum() {
+fn body_momentum_identity() {
     let structure_square = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
 
     let mut body = Body::new(structure_square.clone(), Mat4f::identity());
@@ -134,7 +134,7 @@ fn identity_body_momentum() {
 }
 
 #[test]
-fn rotated_body_momentum() {
+fn body_momentum_rotated() {
     let structure_square = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
 
     let repere = Mat4f::rotation_around_z(PI / 2.0);
@@ -154,6 +154,24 @@ fn rotated_body_momentum() {
     body.add_roll_rotation(PI / 2.0);
     let momentum = body.momentum(Vect3i::new([1, 1, 1])) / body.structure().mass();
     assert!(unit_tests::vec_equals_with_delta(momentum, Vect3f::new([0.0, PI / 2.0, PI / 2.0]), 0.0001));
+}
+
+#[test]
+fn body_momentum_multiple_rotation() {
+    let structure_square = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
+
+    let mut body = Body::new(structure_square.clone(), Mat4f::identity());
+    body.add_yaw_rotation(PI / 2.0);
+    body.add_roll_rotation(PI / 2.0);
+    let momentum = body.momentum(Vect3i::new([1, 1, 1])) / body.structure().mass();
+    assert!(unit_tests::vec_equals_with_delta(momentum, Vect3f::new([-PI / 2.0, 0.0, PI / 2.0]), 0.0001));
+
+    let repere = Mat4f::rotation_around_z(PI / 2.0);
+    let mut body = Body::new(structure_square.clone(), repere);
+    body.add_yaw_rotation(PI / 2.0);
+    body.add_roll_rotation(PI / 2.0);
+    let momentum = body.momentum(Vect3i::new([1, 1, 1])) / body.structure().mass();
+    assert!(unit_tests::vec_equals_with_delta(momentum, Vect3f::new([0.0, -PI / 2.0, PI / 2.0]), 0.0001));
 }
 
 #[test]
