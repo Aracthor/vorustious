@@ -8,6 +8,7 @@ use crate::maths::vector::Vect3i;
 use crate::voxels::structure::Structure;
 use crate::voxels::voxel::Voxel;
 use crate::voxels::voxel::VoxelID;
+use crate::maths::unit_tests;
 
 const TEST_VOXEL: Voxel = Voxel{
     life: 2.0,
@@ -110,6 +111,26 @@ fn body_cut_in_half_with_father_body_becoming_empty() {
 
     assert!(body.structure().clone() == expected_structure);
     assert!(new_bodies.len() == 2);
+}
+
+#[test]
+fn body_momentum() {
+    let structure_square = Structure::new(-1, 1, -1, 1, -1, 1, TEST_VOXEL);
+
+    let mut body = Body::new(structure_square.clone(), Mat4f::identity());
+    body.add_yaw_rotation(PI / 2.0);
+    let momentum = body.momentum(Vect3i::new([1, 1, 1])) / body.structure().mass();
+    assert!(unit_tests::vec_equals_with_delta(momentum, Vect3f::new([-PI / 2.0, PI / 2.0, 0.0]), 0.0001));
+
+    let mut body = Body::new(structure_square.clone(), Mat4f::identity());
+    body.add_pitch_rotation(PI / 2.0);
+    let momentum = body.momentum(Vect3i::new([1, 1, 1])) / body.structure().mass();
+    assert!(unit_tests::vec_equals_with_delta(momentum, Vect3f::new([PI / 2.0, 0.0, -PI / 2.0]), 0.0001));
+
+    let mut body = Body::new(structure_square.clone(), Mat4f::identity());
+    body.add_roll_rotation(PI / 2.0);
+    let momentum = body.momentum(Vect3i::new([1, 1, 1])) / body.structure().mass();
+    assert!(unit_tests::vec_equals_with_delta(momentum, Vect3f::new([0.0, -PI / 2.0, PI / 2.0]), 0.0001));
 }
 
 #[test]
