@@ -85,10 +85,10 @@ impl Body {
 
     pub fn momentum(&self, coords: Vect3i) -> Vect3f {
         let rotation = self.repere.without_translation();
-        let coords_f = rotation * Vect3f::new([coords[0] as f32, coords[1] as f32, coords[2] as f32]);
-        let velocity_from_yaw = Vect3f::cross(Vect3f::new([0.0, 0.0, 1.0]), coords_f) * self.yaw();
-        let velocity_from_pitch = Vect3f::cross(Vect3f::new([0.0, 1.0, 0.0]), coords_f) * self.pitch();
-        let velocity_from_roll = Vect3f::cross(Vect3f::new([1.0, 0.0, 0.0]), coords_f) * self.roll();
+        let coords_f = rotation.clone() * Vect3f::new([coords[0] as f32, coords[1] as f32, coords[2] as f32]);
+        let velocity_from_yaw = Vect3f::cross(rotation.clone() * Vect3f::new([0.0, 0.0, 1.0]), coords_f) * self.yaw();
+        let velocity_from_pitch = Vect3f::cross(rotation.clone() * Vect3f::new([0.0, 1.0, 0.0]), coords_f) * self.pitch();
+        let velocity_from_roll = Vect3f::cross(rotation.clone() * Vect3f::new([1.0, 0.0, 0.0]), coords_f) * self.roll();
         (self.velocity + velocity_from_yaw + velocity_from_pitch + velocity_from_roll) * self.structure.mass()
     }
 
