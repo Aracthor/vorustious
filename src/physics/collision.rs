@@ -78,9 +78,12 @@ pub fn intersection_high_precision(body_a: &Body, body_b: &Body) -> Vec<(Vect3i,
 
 pub fn apply_collision_if_any(body_a: &mut Body, body_b: &mut Body, restitution: f32) {
     let intersections = intersection_low_precision(body_a, body_b);
-    for intersection in intersections {
-        let momentum_a = body_a.momentum(intersection.0);
-        let momentum_b = body_b.momentum(intersection.1);
+    if !intersections.is_empty() {
+        let (intersections_a, intersections_b): (Vec<Vect3i>, Vec<Vect3i>) = intersections.into_iter().unzip();
+        let average_intersection_a = intersections_a.iter().sum::<Vect3i>() / intersections_a.len() as i32;
+        let average_intersection_b = intersections_b.iter().sum::<Vect3i>() / intersections_b.len() as i32;
+        let momentum_a = body_a.momentum(average_intersection_a);
+        let momentum_b = body_b.momentum(average_intersection_b);
         let mass_a = body_a.structure().mass();
         let mass_b = body_b.structure().mass();
         let velocity_a = body_a.velocity();

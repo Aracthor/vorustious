@@ -1,5 +1,6 @@
 use core::ops::Index;
 use core::ops::IndexMut;
+use std::iter::Sum;
 
 use super::traits::MathsUsable;
 
@@ -85,6 +86,18 @@ impl<const N: usize, T: MathsUsable> Index<usize> for Vect<N, T> {
 impl<const N: usize, T: MathsUsable> IndexMut<usize> for Vect<N, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.data[index]
+    }
+}
+
+impl<const N: usize, T: MathsUsable> Sum for Vect<N, T> {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::zero(), |a, b| a + b)
+    }
+}
+
+impl<'a, const N: usize, T: MathsUsable> Sum<&'a Vect<N, T>> for Vect<N, T> {
+    fn sum<I: Iterator<Item = &'a Self>>(iter: I) -> Self {
+        iter.fold(Self::zero(), |a, b| a + *b)
     }
 }
 

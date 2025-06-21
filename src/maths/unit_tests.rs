@@ -36,6 +36,18 @@ fn vector_op() {
 }
 
 #[test]
+fn vector_sum() {
+    let list = [
+        Vect3f::new([3.0, -3.0, 1.0]),
+        Vect3f::new([4.0, 9.0, 2.0]),
+        Vect3f::new([3.0, -4.2, -2.4]),
+    ];
+
+    let sum = list.iter().sum::<Vect3f>();
+    assert!(testing::vec_equals_with_delta(sum, Vect3f::new([10.0, 1.8, 0.6]), 0.0001));
+}
+
+#[test]
 fn vector_funcs() {
     let u = Vect3f::new([3.0, -3.0, 1.0]);
     let v = Vect3f::new([4.0, 9.0, 2.0]);
