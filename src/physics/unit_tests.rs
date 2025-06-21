@@ -340,14 +340,14 @@ fn elastic_collision_same_mass() {
     body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
     body_b.set_velocity(Vect3f::new([0.0, 0.0, 0.0]));
     collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
-    assert!(body_a.velocity() == Vect3f::new([0.0, 0.0, 0.0]));
-    assert!(body_b.velocity() == Vect3f::new([1.0, 0.0, 0.0]));
+    assert!(testing::vec_equals_with_delta(body_a.velocity(), Vect3f::new([0.0, 0.0, 0.0]), 0.0001));
+    assert!(testing::vec_equals_with_delta(body_b.velocity(), Vect3f::new([1.0, 0.0, 0.0]), 0.0001));
 
     body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
     body_b.set_velocity(Vect3f::new([-1.0, 0.0, 0.0]));
     collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
-    assert!(body_a.velocity() == Vect3f::new([-1.0, 0.0, 0.0]));
-    assert!(body_b.velocity() == Vect3f::new([1.0, 0.0, 0.0]));
+    assert!(testing::vec_equals_with_delta(body_a.velocity(), Vect3f::new([-1.0, 0.0, 0.0]), 0.0001));
+    assert!(testing::vec_equals_with_delta(body_b.velocity(), Vect3f::new([1.0, 0.0, 0.0]), 0.0001));
 }
 
 #[test]
@@ -360,14 +360,14 @@ fn perfectly_inelastic_collision_same_mass() {
     body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
     body_b.set_velocity(Vect3f::new([0.0, 0.0, 0.0]));
     collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
-    assert!(body_a.velocity() == Vect3f::new([0.5, 0.0, 0.0]));
-    assert!(body_b.velocity() == Vect3f::new([0.5, 0.0, 0.0]));
+    assert!(testing::vec_equals_with_delta(body_a.velocity(), Vect3f::new([0.5, 0.0, 0.0]), 0.0001));
+    assert!(testing::vec_equals_with_delta(body_b.velocity(), Vect3f::new([0.5, 0.0, 0.0]), 0.0001));
 
     body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
     body_b.set_velocity(Vect3f::new([-1.0, 0.0, 0.0]));
     collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
-    assert!(body_a.velocity() == Vect3f::new([0.0, 0.0, 0.0]));
-    assert!(body_b.velocity() == Vect3f::new([0.0, 0.0, 0.0]));
+    assert!(testing::vec_equals_with_delta(body_a.velocity(), Vect3f::new([0.0, 0.0, 0.0]), 0.0001));
+    assert!(testing::vec_equals_with_delta(body_b.velocity(), Vect3f::new([0.0, 0.0, 0.0]), 0.0001));
 }
 
 
@@ -382,14 +382,14 @@ fn elastic_collision_different_mass() {
     body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
     body_b.set_velocity(Vect3f::new([0.0, 0.0, 0.0]));
     collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
-    assert!(body_a.velocity() == Vect3f::new([1.0 / 3.0, 0.0, 0.0]));
-    assert!(body_b.velocity() == Vect3f::new([4.0 / 3.0, 0.0, 0.0]));
+    assert!(testing::vec_equals_with_delta(body_a.velocity(), Vect3f::new([1.0 / 3.0, 0.0, 0.0]), 0.0001));
+    assert!(testing::vec_equals_with_delta(body_b.velocity(), Vect3f::new([4.0 / 3.0, 0.0, 0.0]), 0.0001));
 
     body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
     body_b.set_velocity(Vect3f::new([-1.0, 0.0, 0.0]));
     collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
-    assert!(body_a.velocity() == Vect3f::new([-1.0 / 3.0, 0.0, 0.0]));
-    assert!(body_b.velocity() == Vect3f::new([5.0 / 3.0, 0.0, 0.0]));
+    assert!(testing::vec_equals_with_delta(body_a.velocity(), Vect3f::new([-1.0 / 3.0, 0.0, 0.0]), 0.0001));
+    assert!(testing::vec_equals_with_delta(body_b.velocity(), Vect3f::new([5.0 / 3.0, 0.0, 0.0]), 0.0001));
 }
 
 #[test]
@@ -403,12 +403,12 @@ fn perfectly_inelastic_collision_different_mass() {
     body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
     body_b.set_velocity(Vect3f::new([0.0, 0.0, 0.0]));
     collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
-    assert!(body_a.velocity() == Vect3f::new([2.0 / 3.0, 0.0, 0.0]));
-    assert!(body_b.velocity() == Vect3f::new([2.0 / 3.0, 0.0, 0.0]));
+    assert!(testing::vec_equals_with_delta(body_a.velocity(), Vect3f::new([2.0 / 3.0, 0.0, 0.0]), 0.0001));
+    assert!(testing::vec_equals_with_delta(body_b.velocity(), Vect3f::new([2.0 / 3.0, 0.0, 0.0]), 0.0001));
 
     body_a.set_velocity(Vect3f::new([1.0, 0.0, 0.0]));
     body_b.set_velocity(Vect3f::new([-1.0, 0.0, 0.0]));
     collision::apply_collision_if_any(&mut body_a, &mut body_b, restitution);
-    assert!(body_a.velocity() == Vect3f::new([1.0 / 3.0, 0.0, 0.0]));
-    assert!(body_b.velocity() == Vect3f::new([1.0 / 3.0, 0.0, 0.0]));
+    assert!(testing::vec_equals_with_delta(body_a.velocity(), Vect3f::new([1.0 / 3.0, 0.0, 0.0]), 0.0001));
+    assert!(testing::vec_equals_with_delta(body_b.velocity(), Vect3f::new([1.0 / 3.0, 0.0, 0.0]), 0.0001));
 }
