@@ -11,8 +11,8 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
     #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
-            min: Vect::<N, T>::from_slice(vec![T::max_value(); N].as_slice()),
-            max: Vect::<N, T>::from_slice(vec![T::min_value(); N].as_slice()),
+            min: Vect::<N, T>::from_slice(vec![T::max(); N].as_slice()),
+            max: Vect::<N, T>::from_slice(vec![T::min(); N].as_slice()),
         }
     }
 
@@ -104,8 +104,8 @@ impl<const N: usize, T: MathsUsable> Box<N, T> {
 
     pub fn add(&mut self, point: Vect<N, T>) {
         for i in 0..N {
-            self.min[i] = num_traits::clamp_max(self.min[i], point[i]);
-            self.max[i] = num_traits::clamp_min(self.max[i], point[i]);
+            self.min[i] = if self.min[i] < point[i] { self.min[i] } else { point[i] };
+            self.max[i] = if self.max[i] > point[i] { self.max[i] } else { point[i] };
         }
     }
 }

@@ -1,7 +1,24 @@
+pub trait Limited {
+    fn min() -> Self;
+    fn max() -> Self;
+}
+
+macro_rules! limited_impl {
+    ($type:ty, $min:expr, $max:expr) => {
+        impl Limited for $type {
+            fn min() -> Self { $min }
+            fn max() -> Self { $max }
+        }
+    };
+}
+
+limited_impl!(f32, f32::MIN, f32::MAX);
+limited_impl!(i32, i32::MIN, i32::MAX);
+
 pub trait MathsUsable:
     Copy +
     From<i8> +
-    num_traits::Bounded +
+    Limited +
     std::cmp::PartialEq<Self> +
     std::cmp::PartialOrd<Self> +
     std::ops::Neg<Output = Self> +
@@ -19,7 +36,7 @@ pub trait MathsUsable:
 impl<T:
     Copy +
     From<i8> +
-    num_traits::Bounded +
+    Limited +
     std::cmp::PartialEq<Self> +
     std::cmp::PartialOrd<Self> +
     std::ops::Neg<Output = Self> +
