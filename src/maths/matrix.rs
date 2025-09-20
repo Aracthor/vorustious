@@ -74,7 +74,6 @@ impl<T: MathsUsable> Mat<4, T> {
         det1 - det2 + det3 - det4
     }
 
-    #[allow(dead_code)]
     pub fn inverse(&self) -> Self {
         let oo_det = T::from(1) / self.determinant();
         let mut sign = T::from(1);
