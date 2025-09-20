@@ -105,7 +105,7 @@ impl Battle {
         });
 
         {
-            const RESTITUTION: f32 = 0.8;
+            const RESTITUTION: f32 = 1.0;
             let mut bodies = self.body_list.bodies_mut();
             // TODO better than this O(n^2)...
             for i1 in 0..bodies.len() -1 {
