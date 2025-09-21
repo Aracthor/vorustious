@@ -58,8 +58,14 @@ impl Editor {
             println!("Saved file '{SAVE_FILENAME}'");
         }
         if event_handler.is_key_just_pressed(Key::F9) {
-            self.structure = Structure::read_from_file(&self.voxel_catalog, SAVE_FILENAME);
-            println!("Loaded file '{SAVE_FILENAME}'");
+            let metadata = std::fs::metadata(SAVE_FILENAME);
+            if metadata.is_ok() {
+                self.structure = Structure::read_from_file(&self.voxel_catalog, SAVE_FILENAME);
+                println!("Loaded file '{SAVE_FILENAME}'");
+            } else {
+                let error = metadata.unwrap_err().to_string();
+                eprintln!("Cannot load file '{SAVE_FILENAME}': {error}");
+            }
         }
         if event_handler.scroll_status() < 0.0 {
             self.voxel_id = match self.voxel_id as i32 {
