@@ -126,17 +126,33 @@ fn run_battle() {
         renderer.render_frame(view_matrix, battle.bodies(), &battle.projectiles(), battle.player_ship().unwrap());
         window.update();
     }
+}
 
+fn display_help() {
+    print!(
+        "Usage: cargo run -r -- 'command'.\n\
+         Command list :\n\
+         * battle: spawn a player ship and an ennemy.\n\
+         * demo: run a collision demo.\n\
+         * editor: start the ship editor.\n\
+         * profile: run profiling measurement.\n\
+         ");
 }
 
 fn main() {
     let first_arg = std::env::args().nth(1);
-    if first_arg.is_some() && first_arg.as_ref().unwrap() == "demo" {
-        demo::run_demo();
-    } else if first_arg.is_some() && first_arg.as_ref().unwrap() == "editor" {
-        editor::run_editor();
-    } else if first_arg.is_some() && first_arg.as_ref().unwrap() == "profile" {
-        profiler::run_profiler();
+    if first_arg.is_some() {
+        let command = first_arg.as_ref().unwrap().as_str();
+        match command {
+            "battle" => run_battle(),
+            "demo" => demo::run_demo(),
+            "editor" => editor::run_editor(),
+            "profile" => profiler::run_profiler(),
+            _ => {
+                eprintln!("Unknown command '{command}'.");
+                display_help();
+            }
+        }
     } else {
         run_battle();
     }
