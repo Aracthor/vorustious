@@ -34,6 +34,33 @@ pub enum MouseButton {
     Middle,
 }
 
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum GamepadButton {
+    A,
+    B,
+    L1,
+    L3,
+    R1,
+    R3,
+    X,
+    Y,
+}
+
+impl GamepadButton {
+    pub fn to_glfw_button(&self) -> glfw::GamepadButton {
+        match self {
+            Self::A => glfw::GamepadButton::ButtonA,
+            Self::B => glfw::GamepadButton::ButtonB,
+            Self::L1 => glfw::GamepadButton::ButtonLeftBumper,
+            Self::L3 => glfw::GamepadButton::ButtonLeftThumb,
+            Self::R1 => glfw::GamepadButton::ButtonRightBumper,
+            Self::R3 => glfw::GamepadButton::ButtonRightThumb,
+            Self::X => glfw::GamepadButton::ButtonX,
+            Self::Y => glfw::GamepadButton::ButtonY,
+        }
+    }
+}
+
 #[derive(PartialEq, Eq)]
 pub enum Status {
     JustPressed,
@@ -65,20 +92,38 @@ pub struct EventHandler {
 
     key_status: HashMap<Key, Status>,
     mouse_button_status: HashMap<MouseButton, Status>,
+    gamepad_button_status: HashMap<GamepadButton, Status>,
     scroll_status: f32,
     cursor_movement: (f64, f64),
+    left_stick_movement: (f32, f32),
+    right_stick_movement: (f32, f32),
 }
 
 impl EventHandler {
     pub fn new(core: glfw::Glfw, event_receiver: EventReceiver) -> Self {
+        let mut gamepad_button_status = HashMap::<GamepadButton, Status>::default();
+        [
+            GamepadButton::A,
+            GamepadButton::B,
+            GamepadButton::L1,
+            GamepadButton::L3,
+            GamepadButton::R1,
+            GamepadButton::R3,
+            GamepadButton::X,
+            GamepadButton::Y,
+        ].iter().for_each(|button| { gamepad_button_status.insert(*button, Status::Unpressed); });
+
         Self {
             core: core,
             event_receiver: event_receiver,
 
             key_status: Default::default(),
             mouse_button_status: Default::default(),
+            gamepad_button_status: gamepad_button_status,
             scroll_status: 0.0,
             cursor_movement: (0.0, 0.0),
+            left_stick_movement: (0.0, 0.0),
+            right_stick_movement: (0.0, 0.0),
         }
     }
 
@@ -110,22 +155,17 @@ impl EventHandler {
     }
 
     pub fn update(&mut self) {
-        for key in &mut self.key_status.values_mut() {
-            if *key == Status::JustPressed {
-                *key = Status::Pressed;
+        let update_status = |status: &mut Status| {
+            if *status == Status::JustPressed {
+                *status = Status::Pressed;
             }
-            if *key == Status::JustReleased {
-                *key = Status::Unpressed;
+            if *status == Status::JustReleased {
+                *status = Status::Unpressed;
             }
-        }
-        for button in &mut self.mouse_button_status.values_mut() {
-            if *button == Status::JustPressed {
-                *button = Status::Pressed;
-            }
-            if *button == Status::JustReleased {
-                *button = Status::Unpressed;
-            }
-        }
+        };
+        self.key_status.values_mut().for_each(update_status);
+        self.mouse_button_status.values_mut().for_each(update_status);
+        self.gamepad_button_status.values_mut().for_each(update_status);
         self.scroll_status = 0.0;
 
         self.core.poll_events();
@@ -152,6 +192,43 @@ impl EventHandler {
                 },
 
                 _ => {},
+            }
+        }
+
+        self.left_stick_movement = (0.0, 0.0);
+        self.right_stick_movement = (0.0, 0.0);
+        let gamepad = self.core.get_joystick(glfw::JoystickId::Joystick1);
+        if gamepad.is_present() && gamepad.is_gamepad() {
+            if gamepad.get_gamepad_state().is_some() {
+                let state = gamepad.get_gamepad_state().unwrap();
+
+                for (button, status) in self.gamepad_button_status.iter_mut() {
+                    match state.get_button_state(button.to_glfw_button()) {
+                        glfw::Action::Release => {
+                            if *status == Status::Pressed {
+                                *status = Status::JustReleased;
+                            }
+                        },
+                        glfw::Action::Press => {
+                            if *status == Status::Unpressed {
+                                *status = Status::JustPressed;
+                            }
+                        },
+                        glfw::Action::Repeat => {}
+                    }
+                }
+
+                let get_smoothed_stick_axis = |axis| {
+                    let axis_value = state.get_axis(axis);
+                    if axis_value.abs() < 0.1 {
+                        return 0.0;
+                    }
+                    axis_value
+                };
+                self.left_stick_movement.0 = get_smoothed_stick_axis(glfw::GamepadAxis::AxisLeftX);
+                self.left_stick_movement.1 = get_smoothed_stick_axis(glfw::GamepadAxis::AxisLeftY);
+                self.right_stick_movement.0 = get_smoothed_stick_axis(glfw::GamepadAxis::AxisRightX);
+                self.right_stick_movement.1 = get_smoothed_stick_axis(glfw::GamepadAxis::AxisRightY);
             }
         }
     }
@@ -185,12 +262,16 @@ impl EventHandler {
 
     pub fn is_mouse_button_pressed(&self, button: MouseButton) -> bool {
         let button_status = self.mouse_button_status.get(&button);
-        button_status.is_some() && [Status::JustPressed, Status::Pressed].contains(button_status.unwrap())
+        button_status.is_some_and(|button| [Status::JustPressed, Status::Pressed].contains(button))
     }
 
-    pub fn scroll_status(&self) -> f32 {
-        self.scroll_status
+    pub fn is_gamepad_button_pressed(&self, button: GamepadButton) -> bool {
+        let button_status = self.gamepad_button_status.get(&button);
+        button_status.is_some_and(|button| [Status::JustPressed, Status::Pressed].contains(button))
     }
 
+    pub fn scroll_status(&self) -> f32 { self.scroll_status }
     pub fn cursor_movement(&self) -> (f64, f64) { self.cursor_movement }
+    pub fn left_stick_movement(&self) -> (f32, f32) { self.left_stick_movement }
+    pub fn right_stick_movement(&self) -> (f32, f32) { self.right_stick_movement }
 }

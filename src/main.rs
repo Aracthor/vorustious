@@ -13,6 +13,7 @@ mod profiler;
 use graphic::renderer::main_renderer::BattleRenderer;
 use graphic::windowing::event_handler::EventHandler;
 use graphic::windowing::window::Window;
+use graphic::windowing::event_handler::GamepadButton;
 use graphic::windowing::event_handler::Key;
 use graphic::windowing::event_handler::MouseButton;
 use maths::matrix::Mat4f;
@@ -39,6 +40,8 @@ fn update_player_body_from_events(player_body: &mut Body, event_handler: &EventH
     if event_handler.is_key_pressed(Key::A) {
         player_body.add_to_velocity(-right);
     }
+    player_body.add_to_velocity(forward * -event_handler.left_stick_movement().1);
+    player_body.add_to_velocity(right * event_handler.left_stick_movement().0);
 
     if event_handler.is_key_pressed(Key::E) {
         player_body.add_roll_rotation(0.1);
@@ -49,6 +52,10 @@ fn update_player_body_from_events(player_body: &mut Body, event_handler: &EventH
     let cursor_movement = event_handler.cursor_movement();
     player_body.add_yaw_rotation(-cursor_movement.0 as f32 / 100.0);
     player_body.add_pitch_rotation(cursor_movement.1 as f32 / 100.0);
+
+    let right_stick_movement = event_handler.right_stick_movement();
+    player_body.add_yaw_rotation(-right_stick_movement.0 as f32 / 2.0);
+    player_body.add_pitch_rotation(right_stick_movement.1 as f32 / 2.0);
 
     player_body.scale_rotation(0.9);
     player_body.scale_velocity(0.95);
@@ -85,30 +92,31 @@ fn run_battle() {
     let tick_elapsed_time = 1.0 / 60.0; // Rather than real elapsed time in order to keep determinism.
     while !window.should_close() {
 
-        update_player_body_from_events(battle.player_ship_mut().unwrap().body_mut(), window.event_handler());
+        let event_handler = window.event_handler();
+        update_player_body_from_events(battle.player_ship_mut().unwrap().body_mut(), event_handler);
 
-        if window.event_handler().is_mouse_button_pressed(MouseButton::Left) {
+        if event_handler.is_mouse_button_pressed(MouseButton::Left) || event_handler.is_gamepad_button_pressed(GamepadButton::R1) {
             let projectiles = battle.player_ship_mut().unwrap().shoot();
             battle.add_projectiles(projectiles);
         }
 
-        if window.event_handler().is_key_just_pressed(Key::F1) {
+        if event_handler.is_key_just_pressed(Key::F1) {
             renderer.toggle_debug_bodies();
         }
-        if window.event_handler().is_key_just_pressed(Key::F2) {
+        if event_handler.is_key_just_pressed(Key::F2) {
             renderer.toggle_debug_boxes();
         }
-        if window.event_handler().is_key_just_pressed(Key::F3) {
+        if event_handler.is_key_just_pressed(Key::F3) {
             renderer.toggle_reticle_mode();
         }
-        if window.event_handler().is_key_just_pressed(Key::F4) {
+        if event_handler.is_key_just_pressed(Key::F4) {
             renderer.toggle_gizmo();
         }
-        if window.event_handler().is_key_just_pressed(Key::F8) {
+        if event_handler.is_key_just_pressed(Key::F8) {
             renderer.toggle_octtree();
         }
 
-        if window.event_handler().is_key_just_pressed(Key::P) {
+        if event_handler.is_key_just_pressed(Key::P) {
             pause = !pause;
         }
 
