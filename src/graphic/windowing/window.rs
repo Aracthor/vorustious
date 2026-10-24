@@ -4,7 +4,7 @@ use super::event_handler::EventHandler;
 use crate::graphic::opengl::context;
 
 pub struct Window {
-    window: glfw::Window,
+    window: glfw::PWindow,
     event_handler: EventHandler,
 
     width: u32,
@@ -13,7 +13,7 @@ pub struct Window {
 
 impl Window {
     pub fn create_window(width: u32, height: u32, title: &str) -> Window {
-        let mut core = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+        let mut core = glfw::init_no_callbacks().expect("Failed to init GLFW.");
         core.window_hint(glfw::WindowHint::ContextVersion(3, 0));
         core.window_hint(glfw::WindowHint::ClientApi(glfw::ClientApiHint::OpenGlEs));
         core.window_hint(glfw::WindowHint::Resizable(false));
@@ -28,7 +28,7 @@ impl Window {
         let middle_pos = (width as f64 / 2.0, height as f64 / 2.0);
         window.set_cursor_pos(middle_pos.0, middle_pos.1);
         window.set_cursor_mode(glfw::CursorMode::Hidden);
-        gl::load_with(|ptr| window.get_proc_address(ptr) as *const _);
+        gl::load_with(|ptr| window.get_proc_address(ptr).expect("Failed to get proc address") as *const _);
 
         unsafe { context::start_gl_context(width.try_into().unwrap(), height.try_into().unwrap()) };
 

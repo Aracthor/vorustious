@@ -17,22 +17,24 @@ fn read_file_content(file_name: &str) -> String {
 }
 
 unsafe fn compile_shader(shader_file: &str, shader_code: &str, shader_type: gl::types::GLenum) -> gl::types::GLuint {
-    let shader = gl::CreateShader(shader_type);
-    gl::ShaderSource(shader, 1, &shader_code.as_bytes().as_ptr().cast(), &shader_code.len().try_into().unwrap());
-    gl::CompileShader(shader);
-    gl_check();
+    unsafe {
+        let shader = gl::CreateShader(shader_type);
+        gl::ShaderSource(shader, 1, &shader_code.as_bytes().as_ptr().cast(), &shader_code.len().try_into().unwrap());
+        gl::CompileShader(shader);
+        gl_check();
 
-    let mut success = 0;
-    gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
-    if success == 0 {
-        const CAPACITY: i32 = 0x1000;
-        let mut log_len:i32 = 0;
-        let mut error_data: Vec<u8> = Vec::with_capacity(CAPACITY.try_into().unwrap());
-        gl::GetShaderInfoLog(shader, CAPACITY, &mut log_len, error_data.as_mut_ptr().cast());
-        error_data.set_len(log_len.try_into().unwrap());
-        panic!("Error compiling shader '{shader_file}': {}", String::from_utf8_lossy(&error_data));
+        let mut success = 0;
+        gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
+        if success == 0 {
+            const CAPACITY: i32 = 0x1000;
+            let mut log_len:i32 = 0;
+            let mut error_data: Vec<u8> = Vec::with_capacity(CAPACITY.try_into().unwrap());
+            gl::GetShaderInfoLog(shader, CAPACITY, &mut log_len, error_data.as_mut_ptr().cast());
+            error_data.set_len(log_len.try_into().unwrap());
+            panic!("Error compiling shader '{shader_file}': {}", String::from_utf8_lossy(&error_data));
+        }
+        shader
     }
-    shader
 }
 
 impl Shader {

@@ -1,3 +1,5 @@
+#![warn(deprecated_safe_2024)]
+
 mod graphic;
 mod maths;
 mod physics;

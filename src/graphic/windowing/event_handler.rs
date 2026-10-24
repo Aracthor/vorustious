@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-type EventReceiver = std::sync::mpsc::Receiver<(f64, glfw::WindowEvent)>;
+type EventReceiver = glfw::GlfwReceiver<(f64, glfw::WindowEvent)>;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Key {
